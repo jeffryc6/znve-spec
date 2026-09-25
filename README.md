@@ -7,28 +7,28 @@
 > **Axioma 1:** *"Inteligencia pesada en el diseño; huella casi nula en la ejecución."*  
 > **Axioma 2:** *"La IA no inventa arquitectura; ejecuta contratos deterministas."*
 
-**Zero-Noise Vibe Engineering (ZNVE)** es una especificación técnica de arquitectura y desarrollo asistido por IA (Contract-First Agentic Architecture)[cite: 7]. Transforma la velocidad conversacional del *vibe coding* en un estándar de ingeniería riguroso, asimétrico y libre de deuda técnica[cite: 7, 8].
+**Zero-Noise Vibe Engineering (ZNVE)** es una especificación técnica de arquitectura y desarrollo asistido por IA (Contract-First Agentic Architecture). Transforma la velocidad conversacional del *vibe coding* en un estándar de ingeniería riguroso, asimétrico y libre de deuda técnica.
 
 ---
 
 ## 🎯 ¿Por qué ZNVE?
 
 El *vibe coding* convencional delega decisiones de arquitectura en modelos de lenguaje probabilísticos, generando:
-- Acumulación masiva de paquetes y dependencias parásitas[cite: 7].
-- Bloques `try/catch` vacíos que enmascaran fallos críticos de fondo[cite: 2, 7].
-- Fugas de memoria, bloqueos de hilos de interfaz y saturación de bases de datos con consultas sin proyecciones[cite: 7].
+- Acumulación masiva de paquetes y dependencias parásitas.
+- Bloques `try/catch` vacíos que enmascaran fallos críticos de fondo.
+- Fugas de memoria, bloqueos de hilos de interfaz y saturación de bases de datos con consultas sin proyecciones.
 
-Bajo **ZNVE**, el desarrollador asume el rol de **Director de Arquitectura**, definiendo perímetros cerrados y contratos inmutables (DTOs, esquemas tipados, interfaces)[cite: 7]. Los agentes de IA (Claude, Cursor, Copilot, Windsurf) operan como compiladores sintácticos de precisión quirúrgica[cite: 7, 8].
+Bajo **ZNVE**, el desarrollador asume el rol de **Director de Arquitectura**, definiendo perímetros cerrados y contratos inmutables (DTOs, esquemas tipados, interfaces)[cite: 7]. Los agentes de IA (Claude, Cursor, Copilot, Windsurf) operan como compiladores sintácticos de precisión quirúrgica.
 
 ---
 
 ## 🏛️ Los 5 Pilares Inmutables
 
-1. **Cero Ruido Operativo (Zero-Noise Operations & UX):** Prohibido el código muerto y las dependencias parásitas. Telemetría por excepción: nunca emitir confirmaciones rutinarias de estado saludable en rutas calientes; solo alertar ante anomalías confirmadas[cite: 7, 8].
-2. **Contratos Deterministas (Contract-First AI):** Ninguna IA genera código de producción sin un contrato previo tipado (DTO, interfaces, esquemas de validación)[cite: 7].
-3. **Eficiencia Asimétrica y Minimalismo:** *"Cerebro en el diseño, reflejo en el dispositivo"*[cite: 7, 8]. El hilo principal de UI nunca se bloquea; la persistencia y la memoria se liberan deterministamente[cite: 7].
-4. **Dominio de Estado y Persistencia Agnóstica:** Aplicable a motores relacionales (SQL), documentales (NoSQL), clave-valor, series temporales o almacenamiento local[cite: 7]. Cero escaneos globales no indexados; proyecciones explícitas obligatorias[cite: 7].
-5. **Seguridad Defensiva y Diagnóstico Forense:** Postura Zero-Trust[cite: 7, 8]. Validación estricta en frontera, cero secretos en repositorio y erradicación de fallos hasta la causa raíz[cite: 7, 8].
+1. **Cero Ruido Operativo (Zero-Noise Operations & UX):** Prohibido el código muerto y las dependencias parásitas. Telemetría por excepción: nunca emitir confirmaciones rutinarias de estado saludable en rutas calientes; solo alertar ante anomalías confirmadas.
+2. **Contratos Deterministas (Contract-First AI):** Ninguna IA genera código de producción sin un contrato previo tipado (DTO, interfaces, esquemas de validación).
+3. **Eficiencia Asimétrica y Minimalismo:** *"Cerebro en el diseño, reflejo en el dispositivo"*. El hilo principal de UI nunca se bloquea; la persistencia y la memoria se liberan deterministamente.
+4. **Dominio de Estado y Persistencia Agnóstica:** Aplicable a motores relacionales (SQL), documentales (NoSQL), clave-valor, series temporales o almacenamiento local. Cero escaneos globales no indexados; proyecciones explícitas obligatorias.
+5. **Seguridad Defensiva y Diagnóstico Forense:** Postura Zero-Trust. Validación estricta en frontera, cero secretos en repositorio y erradicación de fallos hasta la causa raíz.
 
 ---
 
