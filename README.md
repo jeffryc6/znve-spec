@@ -55,20 +55,34 @@ Antes de interactuar con el agente de IA, se declara el **MODO ACTIVO** de la in
 
 ```text
 znve-spec/
-├── LICENSE                          # Esquema dual: CC BY 4.0 (Textos) & MIT (Código/Protocolos)
-├── README.md                         # Manifiesto, axiomas, pilares y catálogo de modos
-├── SPECIFICATION.md                 # Norma técnica formal v1.1.0 (Cláusulas y gobernanza)
-├── CONTRIBUTING.md                  # Reglas del proceso RFC para evolución comunitaria
-├── rfcs/                            # Propuestas formales de mejora (RFCs)
+├── .github/
+│   └── copilot-instructions.md               <-- [4] GITHUB COPILOT (Ubicación oficial del motor)
+├── case-studies/
+│   ├── 01-anti-bot-detection-lab/
+│   └── 02-legacy-monolith-rescue/
+├── protocols/
+│   ├── ZNVE_PROTOCOL.md                      <-- Protocolo universal maestro (6 Modos)
+│   ├── ZNVE_ModernApps_Protocol.MD           <-- Protocolo de apps modernas (Hotfix/Upgrades)
+│   ├── ZNVE_LEGACY_PROTOCOL.md               <-- Protocolo de rescate legacy (Golden Master)
+│   ├── agents/                               <-- DIRECTIVAS Y SKILLS POR AGENTE
+│   │   ├── claude-system-skills.md           <-- [Claude] Skills y comandos (/znve-*)
+│   │   ├── deepseek-directive.md             <-- [1] DEEPSEEK (Modo Reasoner R1 / V3)
+│   │   ├── copilot-instructions.md           <-- [4] COPILOT (Copia espejo referencial)
+│   │   ├── ollama/
+│   │   │   └── Modelfile                     <-- [2] OLLAMA (Modelfile determinista)
+│   │   └── openrouter/
+│   │       ├── system-prompt.md              <-- [3] OPENROUTER (Directiva de sistema unificada)
+│   │       ├── response-schema.json          <-- [3] OPENROUTER (Structured Output JSON Schema)
+│   │       └── znve-openrouter-client.ts     <-- [3] OPENROUTER (Cliente nativo Node/TS)
+│   └── mcp/                                  <-- [5] SERVIDOR MCP PARA ANTIGRAVITY & IDEs
+│       ├── package.json
+│       ├── znve-mcp-server.ts                <-- Código fuente del servidor MCP stdio
+│       ├── tsconfig.json
+│       └── antigravity-config.example.json   <-- Configuración JSON para Antigravity/Cursor
+├── rfcs/
 │   ├── 0000-template.md
 │   └── 0001-ios-swift-chameleon.md
-├── protocols/                       # Protocolos operativos listos para producción
-│   ├── ZNVE_PROTOCOL.md             # Protocolo universal y Capa Camaleónica (6 Modos)
-│   ├── ZNVE_ModernApps_Protocol.MD  # Triage, Hotfix y Upgrades en apps modernas
-│   ├── ZNVE_LEGACY_PROTOCOL.md      # Rescate de sistemas legacy en 5 fases (Golden Master)
-│   └── agents/                      # Directivas de contexto e instrucciones de sistema
-│       ├── claude-system-skills.md  # Skills ejecutables (/znve-*) para Claude Projects y CLI
-│       └── cursor-rules.md          # Reglas de contención (.cursorrules) para IDEs
-└── case-studies/                    # Casos de estudio empíricos
-    ├── 01-anti-bot-detection-lab/
-    └── 02-legacy-monolith-rescue/
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+└── SPECIFICATION.md
