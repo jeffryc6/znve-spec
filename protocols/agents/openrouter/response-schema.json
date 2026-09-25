@@ -1,0 +1,59 @@
+{
+  "type": "json_schema",
+  "json_schema": {
+    "name": "znve_execution_envelope",
+    "strict": true,
+    "schema": {
+      "type": "object",
+      "properties": {
+        "system_blueprint": {
+          "type": "object",
+          "properties": {
+            "scope": { "type": "string" },
+            "anti_bloat_fence": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "contracts": { "type": "string" }
+          },
+          "required": ["scope", "anti_bloat_fence", "contracts"],
+          "additionalProperties": false
+        },
+        "engineering_rationale": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "atomic_implementation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "target_file": { "type": "string" },
+              "action": { "type": "string" },
+              "code": { "type": "string" },
+              "disposal_pattern": { "type": "string" }
+            },
+            "required": ["target_file", "action", "code", "disposal_pattern"],
+            "additionalProperties": false
+          }
+        },
+        "atomic_verification": {
+          "type": "object",
+          "properties": {
+            "command": { "type": "string" },
+            "expected_outcome": { "type": "string" }
+          },
+          "required": ["command", "expected_outcome"],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "system_blueprint",
+        "engineering_rationale",
+        "atomic_implementation",
+        "atomic_verification"
+      ],
+      "additionalProperties": false
+    }
+  }
+}
