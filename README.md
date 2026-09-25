@@ -53,7 +53,6 @@ Antes de interactuar con el agente de IA, se declara el **MODO ACTIVO** de la in
 
 ## 📂 Estructura del Repositorio
 
-```text
 znve-spec/
 ├── .github/
 │   └── copilot-instructions.md               <-- [4] GITHUB COPILOT (Ubicación oficial del motor)
