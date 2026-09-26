@@ -17,6 +17,34 @@ import {
 } from "@modelcontextprotocol/sdk/types.js";
 import * as fs from "node:fs/promises";
 import * as path from "node:path";
+import { fileURLToPath } from "node:url";
+
+// Fuente única de verdad del manual: junto al servidor (protocols/COMMANDS.md) o en el cwd como respaldo.
+const MANUAL_CANDIDATES = [
+  fileURLToPath(new URL("../COMMANDS.md", import.meta.url)),
+  path.resolve(process.cwd(), "protocols/COMMANDS.md"),
+];
+
+// Encabezados "## " de COMMANDS.md que corresponden a cada tema de znve_help.
+const HELP_TOPIC_HEADINGS: Record<string, string> = {
+  commands: "SECCIÓN 1",
+  mcp_tools: "SECCIÓN 2",
+  modes: "SECCIÓN 4",
+};
+
+const HELP_FALLBACK =
+  "[ZNVE_HELP_FALLBACK] protocols/COMMANDS.md no disponible. Usa: /znve-forensic, /znve-contract, /znve-harness, /znve-execute, /znve-triage, /znve-hotfix, /znve-upgrade, /znve-audit o /znve-legacy-rescue.";
+
+async function readManual(): Promise<string | null> {
+  for (const candidate of MANUAL_CANDIDATES) {
+    try {
+      return await fs.readFile(candidate, "utf-8");
+    } catch (err: any) {
+      if (err.code !== "ENOENT") throw err;
+    }
+  }
+  return null;
+}
 
 const server = new Server(
   {
@@ -32,6 +60,21 @@ const server = new Server(
 
 // Definición de herramientas operativas ZNVE
 const TOOLS: Tool[] = [
+  {
+    name: "znve_help",
+    description:
+      "Devuelve el catálogo maestro de comandos /znve-*, herramientas MCP y sintaxis de uso del estándar ZNVE.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        topic: {
+          type: "string",
+          enum: ["all", "commands", "mcp_tools", "modes"],
+          description: "Sección específica del manual que se desea consultar. Por defecto 'all'.",
+        },
+      },
+    },
+  },
   {
     name: "znve_forensic_scan",
     description:
@@ -142,6 +185,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
+      case "znve_help": {
+        const topic = String(args?.topic ?? "all");
+        const manual = await readManual();
+        if (manual === null) {
+          return { content: [{ type: "text", text: HELP_FALLBACK }] };
+        }
+
+        let text = manual;
+        const heading = HELP_TOPIC_HEADINGS[topic];
+        if (heading) {
+          const section = manual.split(/^(?=## )/m).find((s) => s.startsWith("## ") && s.includes(heading));
+          text = section ?? manual;
+        }
+
+        return { content: [{ type: "text", text }] };
+      }
+
       case "znve_forensic_scan": {
         const filePath = String(args?.file_path);
         const resolvedPath = path.resolve(process.cwd(), filePath);
