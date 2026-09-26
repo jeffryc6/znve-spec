@@ -2,8 +2,9 @@
 
 [![Specification Version](https://img.shields.io/badge/spec-v1.1.0-00f2fe.svg)](SPECIFICATION.md)
 [![Protocol Version](https://img.shields.io/badge/protocols-v2.2.0-10b981.svg)](protocols/ZNVE_PROTOCOL.md)
-[![License: CC BY 4.0 & MIT](https://img.shields.io/badge/License-CC_BY_4.0_%2F_MIT-10b981.svg)](LICENSE)
+[![Glossary](https://img.shields.io/badge/glossary-ES_%2F_EN-8b5cf6.svg)](GLOSSARY.md)
 [![Architecture: Contract--First](https://img.shields.io/badge/Architecture-Contract--First-111827.svg)](SPECIFICATION.md)
+[![License: CC BY 4.0 & MIT](https://img.shields.io/badge/License-CC_BY_4.0_%2F_MIT-10b981.svg)](LICENSE)
 
 > 🌐 **Idioma / Language:** Haz clic para desplegar tu idioma preferido | Click to expand your preferred language.
 
