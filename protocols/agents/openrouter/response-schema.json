@@ -6,17 +6,32 @@
     "schema": {
       "type": "object",
       "properties": {
+        "scenario": {
+          "type": "string",
+          "enum": [
+            "help",
+            "greenfield_mode_1",
+            "in_flight_mode_2",
+            "hotfix_mode_3",
+            "upgrade_mode_4",
+            "legacy_rescue_mode_5",
+            "audit_hardening_mode_6",
+            "unspecified"
+          ],
+          "description": "Escenario ZNVE activo bajo el cual se procesó la respuesta."
+        },
         "system_blueprint": {
           "type": "object",
           "properties": {
             "scope": { "type": "string" },
+            "target_platform": { "type": "string" },
             "anti_bloat_fence": {
               "type": "array",
               "items": { "type": "string" }
             },
             "contracts": { "type": "string" }
           },
-          "required": ["scope", "anti_bloat_fence", "contracts"],
+          "required": ["scope", "target_platform", "anti_bloat_fence", "contracts"],
           "additionalProperties": false
         },
         "engineering_rationale": {
@@ -31,7 +46,10 @@
               "target_file": { "type": "string" },
               "action": { "type": "string" },
               "code": { "type": "string" },
-              "disposal_pattern": { "type": "string" }
+              "disposal_pattern": {
+                "type": "string",
+                "enum": ["dispose", "close", "finally", "autocloseable", "not_applicable"]
+              }
             },
             "required": ["target_file", "action", "code", "disposal_pattern"],
             "additionalProperties": false
@@ -48,6 +66,7 @@
         }
       },
       "required": [
+        "scenario",
         "system_blueprint",
         "engineering_rationale",
         "atomic_implementation",
