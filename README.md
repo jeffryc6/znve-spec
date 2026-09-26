@@ -58,7 +58,7 @@ Antes de interactuar con el agente de IA, se declara el **MODO ACTIVO** de la in
 
 | Modo | Escenario de Aplicación | Protocolo / Recurso Rector |
 |---|---|---|
-| 🟢 **Modo 1: Greenfield** | Creación de proyectos, módulos o servicios desde cero con base limpia[cite: 2]. | `ZNVE_PROTOCOL.md`[cite: 2] / [`GREENFIELD_STARTER.md`](GREENFIELD_STARTER.md)[cite: 1] |
+| 🟢 **Modo 1: Greenfield** | Creación de proyectos, módulos o servicios desde cero con base limpia. | `ZNVE_PROTOCOL.md` / [`GREENFIELD_STARTER.md`](GREENFIELD_STARTER.md) |
 | 🔵 **Modo 2: In-Flight** | Proyectos activos: adición de funciones sin mutar contratos existentes. | `ZNVE_PROTOCOL.md` |
 | 🟠 **Modo 3: Hotfix & Recovery** | Crisis en producción: contención de impacto, diagnóstico de causa raíz y parche atómico acotado. | `ZNVE_ModernApps_Protocol.MD` |
 | 🟣 **Modo 4: Modern Maintenance** | Actualizaciones mayores de SDKs/APIs con *breaking changes* mediante adaptadores anti-corrupción. | `ZNVE_ModernApps_Protocol.MD` |
