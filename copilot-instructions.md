@@ -36,6 +36,28 @@ Cuando generes sugerencias automáticas de autocompletado en el editor:
 
 Al recibir instrucciones con prefijo `/`, asume el comportamiento correspondiente:
 
+### `/znve-help` o `/znve-?` (Manual Operativo y Ayuda Rápida)
+- **Activación:** Cuando el usuario escriba `/znve-?`, `/znve-help` o consulte cómo usar el protocolo ZNVE.
+- **Modo:** SOLO LECTURA. Prohibido inspeccionar o generar código de proyecto.
+- **Salida:** Imprimir de inmediato el resumen de comandos activos y la estructura de trabajo en este formato exacto:
+
+  ```text
+  🛠️ CATÁLOGO DE COMANDOS ZNVE:
+  • /znve-forensic     : Ingesta en solo lectura, matriz I/O y efectos secundarios.
+  • /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
+  • /znve-harness      : Suite Golden Master de caja negra sobre código intacto.
+  • /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.
+  • /znve-triage       : Diagnóstico y contención de radio de impacto ante caídas.
+  • /znve-hotfix       : Parche quirúrgico atómico con test de regresión obligatorio.
+  • /znve-upgrade      : Migración de dependencias mediante Adaptador desacoplado.
+  • /znve-audit        : Hardening de hilos, memoria, descriptores y seguridad.
+  • /znve-legacy-rescue: Orquestación integral en 5 fases para código legacy.
+
+  📋 REGLA POR DEFECTO (SIN COMANDO):
+  Toda respuesta técnica se estructura en 4 bloques:
+  [1] Blueprint y Contrato -> [2] Racional -> [3] Tarea Atómica -> [4] Verificación.
+  ```
+
 ### `/znve-forensic` (Ingesta Pasiva & Radiografía)
 - **Modo:** SOLO LECTURA. Prohibido modificar archivos o sugerir refactorizaciones.
 - **Salida:**
