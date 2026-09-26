@@ -7,7 +7,7 @@
 # Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
 # ==============================================================================
 
-Este documento recopila el catálogo maestro de comandos agénticos (`/znve-*`), herramientas de contexto de modelo (MCP Tools) y directivas de ejecución utilizadas durante el ciclo de vida del software bajo el estándar Zero-Noise Vibe Engineering (ZNVE)[cite: 1].
+Este documento recopila el catálogo maestro de comandos agénticos (`/znve-*`), herramientas de contexto de modelo (MCP Tools) y directivas de ejecución utilizadas durante el ciclo de vida del software bajo el estándar Zero-Noise Vibe Engineering (ZNVE).
 
 ---
 
@@ -15,41 +15,41 @@ Este documento recopila el catálogo maestro de comandos agénticos (`/znve-*`),
 
 | Comando / Herramienta | Tipo | Modos Aplicables | Entornos e IAs Compatibles |
 |---|---|---|---|
-| `/znve-forensic` | Slash Command | Modo 2, 5, 6 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama[cite: 1] |
-| `/znve-contract` | Slash Command | Modo 1, 2, 4 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama[cite: 1] |
-| `/znve-harness` | Slash Command | Modo 5 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama[cite: 1] |
-| `/znve-execute` | Slash Command | Modo 1, 2, 4, 5 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama[cite: 1] |
-| `/znve-triage` | Slash Command | Modo 3 (Hotfix) | Claude, Cursor, Copilot, DeepSeek, OpenRouter[cite: 1] |
-| `/znve-hotfix` | Slash Command | Modo 3 (Hotfix) | Claude, Cursor, Copilot, DeepSeek, OpenRouter[cite: 1] |
-| `/znve-upgrade` | Slash Command | Modo 4 (Upgrade) | Claude, Cursor, Copilot, DeepSeek, OpenRouter[cite: 1] |
-| `/znve-audit` | Slash Command | Modo 6 (Hardening) | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama[cite: 1] |
-| `/znve-legacy-rescue` | Slash Command | Modo 5 (Legacy) | Claude, Cursor, Copilot, DeepSeek, OpenRouter[cite: 1] |
-| `znve_forensic_scan` | MCP Tool (JSON-RPC) | Fases de Ingesta | Antigravity, Cursor MCP, Claude Desktop, Windsurf[cite: 1] |
-| `znve_validate_contract` | MCP Tool (JSON-RPC) | Fase Contractual | Antigravity, Cursor MCP, Claude Desktop, Windsurf[cite: 1] |
-| `znve_scaffold_harness` | MCP Tool (JSON-RPC) | Fase de Aislamiento | Antigravity, Cursor MCP, Claude Desktop, Windsurf[cite: 1] |
-| `znve_surgical_write` | MCP Tool (JSON-RPC) | Fase de Escritura | Antigravity, Cursor MCP, Claude Desktop, Windsurf[cite: 1] |
-| `znve_audit_resources` | MCP Tool (JSON-RPC) | Fase de Hardening | Antigravity, Cursor MCP, Claude Desktop, Windsurf[cite: 1] |
+| `/znve-forensic` | Slash Command | Modo 2, 5, 6 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama |
+| `/znve-contract` | Slash Command | Modo 1, 2, 4 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama |
+| `/znve-harness` | Slash Command | Modo 5 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama |
+| `/znve-execute` | Slash Command | Modo 1, 2, 4, 5 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama |
+| `/znve-triage` | Slash Command | Modo 3 (Hotfix) | Claude, Cursor, Copilot, DeepSeek, OpenRouter |
+| `/znve-hotfix` | Slash Command | Modo 3 (Hotfix) | Claude, Cursor, Copilot, DeepSeek, OpenRouter |
+| `/znve-upgrade` | Slash Command | Modo 4 (Upgrade) | Claude, Cursor, Copilot, DeepSeek, OpenRouter |
+| `/znve-audit` | Slash Command | Modo 6 (Hardening) | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama |
+| `/znve-legacy-rescue` | Slash Command | Modo 5 (Legacy) | Claude, Cursor, Copilot, DeepSeek, OpenRouter |
+| `znve_forensic_scan` | MCP Tool (JSON-RPC) | Fases de Ingesta | Antigravity, Cursor MCP, Claude Desktop, Windsurf |
+| `znve_validate_contract` | MCP Tool (JSON-RPC) | Fase Contractual | Antigravity, Cursor MCP, Claude Desktop, Windsurf |
+| `znve_scaffold_harness` | MCP Tool (JSON-RPC) | Fase de Aislamiento | Antigravity, Cursor MCP, Claude Desktop, Windsurf |
+| `znve_surgical_write` | MCP Tool (JSON-RPC) | Fase de Escritura | Antigravity, Cursor MCP, Claude Desktop, Windsurf |
+| `znve_audit_resources` | MCP Tool (JSON-RPC) | Fase de Hardening | Antigravity, Cursor MCP, Claude Desktop, Windsurf |
 
 ---
 
 ## 🎛️ SECCIÓN 1: COMANDOS DE BARRA (`/znve-*`) PARA ASISTENTES Y AGENTES
 
-Los comandos de barra son palabras clave de activación que instruyen al modelo de lenguaje a adoptar un rol técnico cerrado, restringir sus capacidades generativas e imponer un formato de salida estandarizado[cite: 1].
+Los comandos de barra son palabras clave de activación que instruyen al modelo de lenguaje a adoptar un rol técnico cerrado, restringir sus capacidades generativas e imponer un formato de salida estandarizado.
 
 ### 1. `/znve-forensic` (Ingesta Pasiva & Radiografía)
-* **Propósito:** Analizar un archivo o repositorio desconocido extrayendo su grafo de ejecución y efectos secundarios sin modificar el disco[cite: 1].
+* **Propósito:** Analizar un archivo o repositorio desconocido extrayendo su grafo de ejecución y efectos secundarios sin modificar el disco.
 * **Entornos recomendados:**
-  * **Claude:** Modo Projects o Claude Code CLI[cite: 1].
-  * **DeepSeek (R1):** Aprovecha la cadena de razonamiento `<think>` para trazar flujos sin emitir código[cite: 1].
-  * **GitHub Copilot:** `@workspace /znve-forensic` en la ventana de chat[cite: 1].
-  * **Cursor / Windsurf:** En el Composer o Chat en modo lectura[cite: 1].
-* **Restricción estricta:** MODO SOLO LECTURA. Prohibido proponer código de reemplazo, refactorizaciones o parches[cite: 1].
+  * **Claude:** Modo Projects o Claude Code CLI.
+  * **DeepSeek (R1):** Aprovecha la cadena de razonamiento `<think>` para trazar flujos sin emitir código.
+  * **GitHub Copilot:** `@workspace /znve-forensic` en la ventana de chat.
+  * **Cursor / Windsurf:** En el Composer o Chat en modo lectura.
+* **Restricción estricta:** MODO SOLO LECTURA. Prohibido proponer código de reemplazo, refactorizaciones o parches.
 * **Formato de entrega:**
-  1. `RESUMEN DE DOMINIO`: Propósito operativo del archivo[cite: 1].
-  2. `MATRIZ IO`: Parámetros de entrada, variables globales y estado mutado[cite: 1].
-  3. `SIDE EFFECTS`: Operaciones en almacenamiento, red, disco e IPC[cite: 1].
-  4. `EQUILIBRIOS ACCIDENTALES`: Funciones duplicadas o código contradictorio con coexistencia funcional por orden de evaluación[cite: 1].
-  5. `ZONAS ROJAS`: Riesgos de fuga, condiciones de carrera, bloqueos o excepciones no gestionadas[cite: 1].
+  1. `RESUMEN DE DOMINIO`: Propósito operativo del archivo.
+  2. `MATRIZ IO`: Parámetros de entrada, variables globales y estado mutado.
+  3. `SIDE EFFECTS`: Operaciones en almacenamiento, red, disco e IPC.
+  4. `EQUILIBRIOS ACCIDENTALES`: Funciones duplicadas o código contradictorio con coexistencia funcional por orden de evaluación.
+  5. `ZONAS ROJAS`: Riesgos de fuga, condiciones de carrera, bloqueos o excepciones no gestionadas.
 * **Ejemplo de uso:**
   ```text
   /znve-forensic Analiza el archivo server/transfers/processor.ts y entrega la radiografía forense sin alterar nada.
