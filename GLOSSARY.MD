@@ -1,3 +1,4 @@
+"docs: add formal ZNVE technical glossary (ES/EN)"
 ### 1. Axiomas y Filosofía Base
 
 * **Zero-Noise Vibe Engineering (ZNVE) / Ingeniería Vibe de Cero Ruido:** Metamodelo de arquitectura y gobernanza para el desarrollo de software asistido por agentes de IA (*Contract-First Agentic Architecture*), diseñado para transformar la intuición y velocidad conversacional del *vibe coding* en un estándar de ingeniería riguroso, minimalista y libre de deuda técnica.
