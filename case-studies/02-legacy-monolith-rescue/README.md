@@ -1,3 +1,9 @@
+<p align="right">
+  <a href="https://translate.google.com/translate?sl=es&tl=en&u=https://github.com/jeffryc6/znve-spec/blob/main/case-studies/02-legacy-monolith-rescue/README.md">
+    <img src="https://img.shields.io/badge/Translate_to-English-blue?style=flat-square&logo=googletranslate" alt="Translate to English">
+  </a>
+</p>
+
 # Caso de Estudio 02: Rescate de Monolito Crítico sin Pruebas Unitarias
 
 ## Contexto y Dominio

@@ -1,3 +1,9 @@
+<p align="right">
+  <a href="https://translate.google.com/translate?sl=es&tl=en&u=https://github.com/jeffryc6/znve-spec/blob/main/rfcs/0001-ios-swift-chameleon.md">
+    <img src="https://img.shields.io/badge/Translate_to-English-blue?style=flat-square&logo=googletranslate" alt="Translate to English">
+  </a>
+</p>
+
 # RFC 0001: Adaptación de la Capa Camaleónica para iOS / Swift Nativo
 - **Autor:** Jeffry Carmona (@jeffryc6)
 - **Fecha:** 2026-09-24

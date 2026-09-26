@@ -1,3 +1,9 @@
+<p align="right">
+  <a href="https://translate.google.com/translate?sl=es&tl=en&u=https://github.com/jeffryc6/znve-spec/blob/main/rfcs/0000-template.md">
+    <img src="https://img.shields.io/badge/Translate_to-English-blue?style=flat-square&logo=googletranslate" alt="Translate to English">
+  </a>
+</p>
+
 # RFC 0000: [Título de la Propuesta]
 - **Autor:** [Nombre / GitHub User]
 - **Fecha:** AAAA-MM-DD

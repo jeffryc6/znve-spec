@@ -5,6 +5,12 @@
 [![License: CC BY 4.0 & MIT](https://img.shields.io/badge/License-CC_BY_4.0_%2F_MIT-10b981.svg)](LICENSE)
 [![Architecture: Contract--First](https://img.shields.io/badge/Architecture-Contract--First-111827.svg)](SPECIFICATION.md)
 
+> 🌐 **Idioma / Language:** Haz clic para desplegar tu idioma preferido | Click to expand your preferred language.
+
+<details open>
+<summary><b>🇪🇸 Versión en Español (Click para colapsar)</b></summary>
+<br>
+
 > **Axioma 1:** *"Inteligencia pesada en el diseño; huella casi nula en la ejecución."*
 > **Axioma 2:** *"La IA no inventa arquitectura; ejecuta contratos deterministas."*
 
@@ -53,6 +59,7 @@ Antes de interactuar con el agente de IA, se declara el **MODO ACTIVO** de la in
 
 ## 📂 Estructura del Repositorio
 
+```text
 znve-spec/
 ├── .github/
 │   └── copilot-instructions.md               <-- [4] GITHUB COPILOT (Ubicación oficial del motor)
@@ -84,4 +91,98 @@ znve-spec/
 ├── CONTRIBUTING.md
 ├── LICENSE
 ├── README.md
-└── SPECIFICATION.md
+├── SPECIFICATION.md
+└── index.html                                <-- Landing page bilingüe (GitHub Pages)
+```
+
+</details>
+
+<details open>
+<summary><b>🇬🇧 English Version (Click to collapse)</b></summary>
+<br>
+
+> **Axiom 1:** *"Heavy intelligence in the design; near-zero footprint in execution."*
+> **Axiom 2:** *"AI does not invent architecture; it executes deterministic contracts."*
+
+**Zero-Noise Vibe Engineering (ZNVE)** is a technical architecture and governance specification for AI-agent-assisted software development (Contract-First Agentic Architecture). It turns the conversational speed of *vibe coding* into a rigorous, asymmetric engineering standard free of technical debt.
+
+It covers the full software lifecycle: from clean-slate conception (*Greenfield*) to production crisis containment (*Hotfix*), monolith rescue (*Legacy Rescue*) and migration of modern dependencies with *breaking changes*.
+
+---
+
+## 🎯 Why ZNVE?
+
+Conventional *vibe coding* delegates critical design decisions to probabilistic language models, producing:
+- Massive accumulation of packages and parasitic dependencies.
+- Empty `try/catch` blocks or arbitrary delays that mask production failures.
+- Operational noise in logs, memory leaks and saturation of the UI main thread.
+- Uncontrolled mutations in modern codebases while trying to fix a single bug.
+
+Under **ZNVE**, the developer takes on the role of **Architecture Director**, defining closed perimeters and immutable contracts (DTOs, typed schemas, interfaces). AI agents (Claude, Cursor, Copilot, Windsurf, Antigravity) operate as surgically precise, contract-governed syntactic compilers.
+
+---
+
+## 🏛️ The 5 Immutable Pillars
+
+1. **Zero-Noise Operations & UX:** Dead code and parasitic dependencies are forbidden. Telemetry by exception: never emit routine healthy-state confirmations on hot paths; alert only on confirmed anomalies.
+2. **Deterministic Contracts (Contract-First AI):** No AI generates production code without a prior typed contract (DTO, interfaces, validation schemas).
+3. **Asymmetric Efficiency & Minimalism:** *"Brain in the design, reflex on the device."* The UI main thread never blocks; memory, sockets and handles are released deterministically.
+4. **State Mastery & Agnostic Persistence:** Applies to relational (SQL), document (NoSQL), key-value, time-series or local storage engines. Explicit field projections and indexed paths are mandatory.
+5. **Defensive Security & Forensic Diagnosis:** Zero-Trust posture. Strict validation at the boundary, eradication of failures down to the root cause, and an explicit ban on silencing exceptions.
+
+---
+
+## 🎛️ The 6 Operating Modes Matrix
+
+Before interacting with the AI agent, the **ACTIVE MODE** of the intervention is declared:
+
+| Mode | Application Scenario | Governing Protocol |
+|---|---|---|
+| 🟢 **Mode 1: Greenfield** | Creating projects, modules or services from scratch on a clean base. | `ZNVE_PROTOCOL.md` |
+| 🔵 **Mode 2: In-Flight** | Active projects: adding features without mutating existing contracts. | `ZNVE_PROTOCOL.md` |
+| 🟠 **Mode 3: Hotfix & Recovery** | Production crisis: impact containment, root-cause diagnosis and a scoped atomic patch. | `ZNVE_ModernApps_Protocol.MD` |
+| 🟣 **Mode 4: Modern Maintenance** | Major SDK/API upgrades with *breaking changes* through anti-corruption adapters. | `ZNVE_ModernApps_Protocol.MD` |
+| 🟡 **Mode 5: Legacy Rescue** | Refactoring critical untested monoliths via Golden Master and dual shadow execution. | `ZNVE_LEGACY_PROTOCOL.md` |
+| 🔴 **Mode 6: Audit & Hardening** | Mitigating memory leaks, containing sockets and threads, and auditing the attack surface. | `ZNVE_PROTOCOL.md` |
+
+---
+
+## 📂 Repository Structure
+
+```text
+znve-spec/
+├── .github/
+│   └── copilot-instructions.md               <-- [4] GITHUB COPILOT (Official engine location)
+├── case-studies/
+│   ├── 01-anti-bot-detection-lab/
+│   └── 02-legacy-monolith-rescue/
+├── protocols/
+│   ├── ZNVE_PROTOCOL.md                      <-- Master universal protocol (6 Modes)
+│   ├── ZNVE_ModernApps_Protocol.MD           <-- Modern apps protocol (Hotfix/Upgrades)
+│   ├── ZNVE_LEGACY_PROTOCOL.md               <-- Legacy rescue protocol (Golden Master)
+│   ├── agents/                               <-- PER-AGENT DIRECTIVES AND SKILLS
+│   │   ├── claude-system-skills.md           <-- [Claude] Skills and commands (/znve-*)
+│   │   ├── deepseek-directive.md             <-- [1] DEEPSEEK (Reasoner mode R1 / V3)
+│   │   ├── copilot-instructions.md           <-- [4] COPILOT (Reference mirror copy)
+│   │   ├── ollama/
+│   │   │   └── Modelfile                     <-- [2] OLLAMA (Deterministic Modelfile)
+│   │   └── openrouter/
+│   │       ├── system-prompt.md              <-- [3] OPENROUTER (Unified system directive)
+│   │       ├── response-schema.json          <-- [3] OPENROUTER (Structured Output JSON Schema)
+│   │       └── znve-openrouter-client.ts     <-- [3] OPENROUTER (Native Node/TS client)
+│   └── mcp/                                  <-- [5] MCP SERVER FOR ANTIGRAVITY & IDEs
+│       ├── package.json
+│       ├── znve-mcp-server.ts                <-- stdio MCP server source code
+│       ├── tsconfig.json
+│       └── antigravity-config.example.json   <-- JSON config for Antigravity/Cursor
+├── rfcs/
+│   ├── 0000-template.md
+│   └── 0001-ios-swift-chameleon.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── SPECIFICATION.md
+└── index.html                                <-- Bilingual landing page (GitHub Pages)
+```
+
+</details>
