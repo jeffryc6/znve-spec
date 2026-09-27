@@ -1,8 +1,16 @@
-# ==============================================================================
-# CLAUDE AGENT SKILLS: ZERO-NOISE VIBE ENGINEERING (ZNVE v2.2.0)
-# Uso: pegar en Project Instructions (Claude Projects) o en CLAUDE.md
-# Skill instalable: protocols/agents/claude/skills/znve.zip (claude.ai) · carpeta znve/ (Claude Code)
-# ==============================================================================
+---
+name: znve
+description: Metodología Zero-Noise Vibe Engineering (ZNVE v2.2.0) para desarrollo asistido por IA gobernado por contratos inmutables, cero dependencias parásitas y mínima huella de ejecución. Define los comandos help, contract, execute, triage, hotfix, upgrade, forensic, harness, legacy-rescue y audit, invocables como /znve help, /znve -help o /znve-help, en 6 escenarios (Greenfield, In-Flight, Hotfix, Upgrade, Legacy Rescue, Hardening). Usa esta skill siempre que el usuario escriba /znve o cualquier comando /znve-*, mencione ZNVE o Zero-Noise, o pida diseñar un contrato o DTO antes de programar, diagnosticar una caída en producción con un parche acotado, migrar un SDK con breaking changes mediante un adaptador, rescatar código legacy sin tests (Golden Master, Strangler Fig) o auditar fugas de memoria, hilos, sockets y seguridad, aunque no nombre ZNVE explícitamente.
+license: CC-BY-4.0 (textos) / MIT (protocolos)
+metadata:
+  version: 2.2.0
+  author: jeffryc6
+  framework: ZNVE Universal Specification
+  architecture: Contract-First Agentic Architecture
+  source: https://github.com/jeffryc6/znve-spec
+---
+
+# Zero-Noise Vibe Engineering (ZNVE v2.2.0)
 
 > **Axioma 1:** "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
 > **Axioma 2:** "La IA no inventa arquitectura; ejecuta contratos deterministas."
@@ -41,12 +49,20 @@ Aplican a todos los comandos y a las respuestas sin comando. Cada uno existe por
 
 Cuando el usuario invoque un comando, adopta de inmediato su protocolo y respeta el formato de salida con los encabezados indicados: son los que el usuario y sus herramientas esperan encontrar.
 
+### Formas de invocación
+Al elegir la skill en el menú `/`, la interfaz inserta `/znve` y el resto del mensaje queda separado. Por eso estas formas son equivalentes y debes tratarlas igual:
+
+- `/znve-contract …` (forma canónica)
+- `/znve contract …` o `/znve -contract …` (skill elegida en el menú y comando a continuación)
+
+Si el mensaje contiene solo `/znve`, `/znve ?` o `/znve help`, responde como `/znve-help`. Si el comando no existe, muestra el catálogo de ayuda.
+
 ---
 
 ## Escenario 0 · Ayuda
 
 ### `/znve-help` o `/znve-?`
-- **Activación:** el usuario escribe `/znve-?`, `/znve-help` o pregunta cómo usar ZNVE.
+- **Activación:** el usuario escribe `/znve-?`, `/znve-help`, `/znve help`, solo `/znve`, o pregunta cómo usar ZNVE.
 - **Directiva:** solo lectura. No inspecciones ni generes código del proyecto.
 - **Salida:** imprime exactamente este bloque, sin texto adicional:
 
@@ -66,6 +82,8 @@ Cuando el usuario invoque un comando, adopta de inmediato su protocolo y respeta
 📋 REGLA POR DEFECTO (SIN COMANDO):
 Toda respuesta técnica se estructura en 4 bloques:
 [1] Blueprint y Contrato -> [2] Racional -> [3] Tarea Atómica -> [4] Verificación.
+
+💡 USO: /znve <comando> <petición>   (ej.: /znve contract Diseña el DTO de usuario)
 ```
 
 ---
@@ -170,24 +188,9 @@ Orquesta el rescate de punta a punta y no avances de fase sin que la anterior es
 
 ---
 
-## 🦎 Capa Camaleónica de Plataforma (Chameleon Layer)
+## 🦎 Capa Camaleónica (adaptación por plataforma)
 
-Restricciones adicionales por stack. Se suman a los guardrails globales de ZNVE; no los reemplazan.
-
-| Plataforma | Prioridades ZNVE | Antipatrones prohibidos |
-|---|---|---|
-| **Android** | `WorkManager`, `LifecycleOwner`, `StateFlow` nativo. | `WakeLock` innecesarios, retener contextos de Activity, bloquear el hilo de UI. |
-| **iOS / macOS (Swift)** | SwiftUI sobre `@MainActor` solo para vistas; trabajo pesado en `Actors` de fondo; tareas diferidas con `BGTaskScheduler`; persistencia ligera con SwiftData o SQLite. | Bloquear el hilo principal; capturas fuertes de `self` en closures (usa `[weak self]`); tareas de fondo infinitas que provoquen la terminación por el Watchdog. |
-| **Windows Desktop (C# / WinUI / WPF / C++)** | `IDisposable` en recursos no administrados; `async/await` puro; mutex de instancia única. | `.Result` o `.Wait()` bloqueantes; procesos zombis en segundo plano. |
-| **Híbrido (Tauri / Flutter / React Native)** | Payloads mínimos por el puente nativo/IPC. | Serializaciones JSON masivas por el puente; re-renders innecesarios. |
-| **Web & Backend** | APIs nativas (`fetch`, `crypto`, streams); proyecciones de campos; timeouts estrictos; límites de memoria por worker; apagado elegante (*graceful shutdown*). | Clientes HTTP sin timeout; consultas sin proyección; dependencias para lo que resuelve la plataforma. |
-
-### Verificación sugerida por plataforma
-
-- **Android:** Android Studio Profiler (memoria/CPU), StrictMode activado en debug.
-- **iOS / macOS:** `leaks` e Instruments; cero advertencias con `-strict-concurrency=complete`.
-- **Windows Desktop:** analizadores de `IDisposable` (CA2000) y Visual Studio Diagnostic Tools.
-- **Web & Backend:** heap snapshots, `--inspect` en Node, pruebas de carga con límites de memoria.
+Cuando el usuario declare o se detecte un stack concreto (Android, iOS/macOS, Windows Desktop, híbrido o Web/Backend), lee [references/chameleon-layer.md](references/chameleon-layer.md) y aplica sus prioridades y antipatrones además de los guardrails globales.
 
 ---
 
