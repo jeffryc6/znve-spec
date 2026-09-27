@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Zero-Noise Vibe Engineering (ZNVE) | Spec-Driven Agentic Architecture</title>
+  <style>
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --accent-cyan: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-purple: #bc8cff;
+      --text-main: #c9d1d9;
+      --text-bright: #ffffff;
+      --border-color: #30363d;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+    }
+    canvas#node-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.25;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.5rem;
+    }
+    header {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    h1 {
+      font-size: 2.8rem;
+      color: var(--text-bright);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--accent-cyan);
+      margin-top: 0;
+    }
+    .badges {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--accent-green);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin: 2.5rem 0;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-cyan);
+    }
+    .card h3 {
+      color: var(--text-bright);
+      margin-top: 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    pre {
+      background: #090d12;
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9rem;
+      color: var(--accent-cyan);
+    }
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.9rem;
+      color: #8b949e;
+    }
+    a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="node-canvas"></canvas>
+
+  <div class="container">
+    <header>
+      <h1>Zero-Noise Vibe Engineering (ZNVE)</h1>
+      <p class="subtitle">Norma Técnica Universal & Arquitectura Agéntica Basada en Especificación</p>
+      <div class="badges">
+        <span class="badge">v2.3.0 Standard</span>
+        <span class="badge">CC BY 4.0 & MIT Dual License</span>
+        <span class="badge">MCP Server Enabled</span>
+        <span class="badge">Zero Agentic Drift</span>
+      </div>
+    </header>
+
+    <main>
+      <section>
+        <h2>🏛️ Axiomas Fundamentales</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>1. Diseño Pesado, Ejecución Silenciosa</h3>
+            <p>Inteligencia concentrada en la fase de arquitectura y definición de contrato DTO. Huella computacional y física mínima durante la ejecución en producción.</p>
+          </div>
+          <div class="card">
+            <h3>2. Ejecución Basada en Contratos</h3>
+            <p>La IA no inventa arquitectura ni improvisa dependencias. Opera exclusivamente bajo contratos inmutables (TypeScript, Pydantic v2, JSON Schema).</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>🛠️ Comandos Agénticos (/znve-*)</h2>
+        <pre>
+/znve-contract      --> Analiza plataforma, sugiere stack y genera DTOs + Lista de Chequeo.
+/znve-contract --delta --> Auditoría incremental de contratos en proyectos iniciados.
+/znve-execute       --> Escritura quirúrgica de código en TARGET_FILE exclusivo.
+/znve-forensic      --> Diagnóstico estático de solo lectura (Zero-Touch).
+/znve-harness       --> Generación de arnés Golden Master para código legacy/frágil.
+/znve-hotfix        --> Triaje de incidentes críticos aislando el radio de impacto.
+/znve-upgrade       --> Migración de SDKs con breaking changes vía Adapter Pattern.
+/znve-audit         --> Purga de memoria, bloqueos de hilos UI y logs rutinarios.</pre>
+      </section>
+
+      <section>
+        <h2>📦 Estructura del Repositorio</h2>
+        <div class="card">
+          <p>Para ver la especificación completa, guías de prompts, servidor MCP y ejemplos de implementación, consulta la documentación oficial en el repositorio:</p>
+          <ul>
+            <li><a href="SPECIFICATION.md"><strong>SPECIFICATION.md:</strong> Norma Técnica Formal v2.3.0</a></li>
+            <li><a href="protocols/GREENFIELD_STARTER.md"><strong>GREENFIELD_STARTER.md:</strong> Guía de Inicio Día 0</a></li>
+            <li><a href="protocols/PROMPT_GUIDE.md"><strong>PROMPT_GUIDE.md:</strong> Catálogo de Prompts Genéricos</a></li>
+            <li><a href="protocols/COMMANDS.md"><strong>COMMANDS.md:</strong> Referencia Completa de Comandos</a></li>
+          </ul>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p>Zero-Noise Vibe Engineering (ZNVE) &copy; 2026 | Licenciado bajo CC BY 4.0 (Especificación) y MIT (Código/MCP)</p>
+    </footer>
+  </div>
+
+  <script>
+    // Live Heuristic Node Canvas Simulation
+    const canvas = document.getElementById('node-canvas');
+    const ctx = canvas.getContext('2d');
+    let width = canvas.width = window.innerWidth;
+    let height = canvas.height = window.innerHeight;
+
+    window.addEventListener('resize', () => {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    });
+
+    const nodes = Array.from({ length: 45 }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.8,
+      vy: (Math.random() - 0.5) * 0.8,
+      radius: Math.random() * 2 + 1
+    }));
+
+    function animate() {
+      ctx.clearRect(0, 0, width, height);
+      ctx.fillStyle = '#58a6ff';
+      ctx.strokeStyle = '#30363d';
+
+      nodes.forEach((node, i) => {
+        node.x += node.vx;
+        node.y += node.vy;
+
+        if (node.x < 0 || node.x > width) node.vx *= -1;
+        if (node.y < 0 || node.y > height) node.vy *= -1;
+
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+        ctx.fill();
+
+        for (let j = i + 1; j < nodes.length; j++) {
+          const other = nodes[j];
+          const dist = Math.hypot(node.x - other.x, node.y - other.y);
+          if (dist < 130) {
+            ctx.beginPath();
+            ctx.moveTo(node.x, node.y);
+            ctx.lineTo(other.x, other.y);
+            ctx.stroke();
+          }
+        }
+      });
+      requestAnimationFrame(animate);
+    }
+    animate();
+  </script>
+</body>
+</html>
+```
