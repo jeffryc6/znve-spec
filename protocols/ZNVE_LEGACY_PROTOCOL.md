@@ -1,14 +1,15 @@
 # ==============================================================================
 # ZERO-NOISE VIBE ENGINEERING (ZNVE) — PROTOCOLO DE RESCATE LEGACY
 # Archivo: protocols/ZNVE_LEGACY_PROTOCOL.md
-# Versión: 2.0.0
+# Versión: 2.3.0
 # Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
 # Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
 # ==============================================================================
 
 Este protocolo establece el estándar técnico obligatorio para auditar, caracterizar
-y modernizar sistemas heredados (legacy), archivos "Dios" (God Objects), código 
-espagueti o módulos monolíticos en producción sin pruebas automatizadas.
+y modernizar sistemas heredados (legacy), archivos "Dios" (God Objects), código
+espagueti o módulos monolíticos en producción sin pruebas automatizadas. Desarrolla
+el modo 5 de [ZNVE_PROTOCOL.md](ZNVE_PROTOCOL.md).
 
 Aplica a cualquier entorno y lenguaje (Mobile, Desktop, Backend, Web, Scripts o CLI)
 y cualquier motor de datos (SQL, NoSQL, Key-Value, archivos locales o memoria).
@@ -21,21 +22,33 @@ y cualquier motor de datos (SQL, NoSQL, Key-Value, archivos locales o memoria).
 2. **Cero Dependencias Nuevas en el Código Base:** No se instalarán paquetes o bibliotecas en el runtime de producción para facilitar la inspección.
 3. **Respeto a los "Equilibrios Accidentales":** Comportamientos aparentemente contradictorios, código redundante o errores silenciados no se consideran bugs por defecto; se asumen como comportamientos emergentes requeridos por la operación activa hasta demostrar lo contrario.
 4. **Pruebas Siempre en Aislamiento:** Toda prueba unitaria, script de caracterización o mock se construye en un directorio aislado (`tests/characterization/` o `sandbox/`), nunca dentro de las fuentes originales.
+5. **Sin Saltos de Fase:** No se avanza a una fase sin que la anterior esté verificada. En particular, no hay Shadow Run ni Strangler Fig sin un Golden Master al 100% en verde.
 
 ---
 
 ## 2. EL PIPELINE DE RESCATE EN 5 FASES
 
-[ FASE 1: Ingesta Pasiva ]       --> Lectura forense sin mutaciones (Zero-Touch)
-↓
-[ FASE 2: Reporte Forense ]      --> Mapeo de contratos implícitos y dependencias
-↓
-[ FASE 3: Golden Master ]        --> Arnés de caracterización sobre código intacto
-↓
-[ FASE 4: Shadow Run ]           --> Ejecución dual paralela y paridad bit a bit
-↓
-[ FASE 5: Strangler Fig ]        --> Conmutación gradual y desmantelamiento seguro
+| Fase | Nombre | Comando | Entregable |
+|---|---|---|---|
+| 1 | Ingesta Pasiva | `/znve-forensic` | Mapa de dependencias (sin código) |
+| 2 | Reporte Forense | `/znve-forensic` | Artefacto A |
+| 3 | Golden Master | `/znve-harness` | Suite en `tests/characterization/` al 100% |
+| 4 | Shadow Run | `/znve-contract` + `/znve-execute` | Artefacto B |
+| 5 | Strangler Fig | — | Plan de conmutación y commit de limpieza |
 
+`/znve-legacy-rescue` orquesta las 5 fases. En su primera respuesta entrega solo el Reporte Forense (fases 1 y 2) y el diseño del arnés (fase 3).
+
+```text
+[ FASE 1: Ingesta Pasiva ]       --> Lectura forense sin mutaciones (Zero-Touch)
+          ↓
+[ FASE 2: Reporte Forense ]      --> Mapeo de contratos implícitos y dependencias
+          ↓
+[ FASE 3: Golden Master ]        --> Arnés de caracterización sobre código intacto
+          ↓
+[ FASE 4: Shadow Run ]           --> Ejecución dual paralela y paridad bit a bit
+          ↓
+[ FASE 5: Strangler Fig ]        --> Conmutación gradual y desmantelamiento seguro
+```
 
 ---
 
@@ -56,7 +69,7 @@ y cualquier motor de datos (SQL, NoSQL, Key-Value, archivos locales o memoria).
   1. Extraer los contratos implícitos: tipos de datos reales esperados en entradas y salidas.
   2. Documentar la matriz de efectos secundarios (*side effects*).
   3. Identificar zonas rojas: fragmentos con riesgo de condiciones de carrera, bloqueos de UI, fugas de memoria o punteros nulos.
-* **Entregable Obligatorio:** `ARTEFACTO A: Reporte Forense` (ver plantilla en Sección 3).
+* **Entregable Obligatorio:** `ARTEFACTO A: Reporte Forense` (ver plantilla en la sección 3).
 
 ---
 
@@ -78,16 +91,14 @@ y cualquier motor de datos (SQL, NoSQL, Key-Value, archivos locales o memoria).
      - Tipado estricto e inmutable basado en el contrato aprobado.
      - Cero bloqueos en el hilo principal y desecho explícito de recursos (`dispose`, `close`, `finally`).
   2. Implementar una prueba comparativa dual (*Dual Execution Harness*): alimentar con idénticos inputs al módulo Legacy y al módulo Nuevo.
-  3. Comparar salidas y mutaciones de estado:
-     $$\text{Salida}(\text{Nuevo}) == \text{Salida}(\text{Legacy})$$
-     Cualquier discrepancia debe justificarse como corrección deliberada aprobada por el Director de Arquitectura o resolverse hasta alcanzar paridad total.
+  3. Comparar salidas y mutaciones de estado hasta confirmar `Salida(Nuevo) == Salida(Legacy)`. Cualquier discrepancia debe justificarse como corrección deliberada aprobada por el Director de Arquitectura o resolverse hasta alcanzar paridad total.
 
 ---
 
 ### FASE 5: CONMUTACIÓN GRADUAL (STRANGLER FIG)
 * **Objetivo:** Reemplazar el monolito en producción de forma atómica y sin riesgo de inactividad operativa.
 * **Estrategia de Despliegue:**
-  1. **Enrutamiento en Frontera:** Desviar una fracción controlada del tráfico (1% -> 10% -> 100%) hacia el nuevo módulo mediante feature flags o proxys locales.
+  1. **Enrutamiento en Frontera:** Desviar una fracción controlada del tráfico (1% → 10% → 100%) hacia el nuevo módulo mediante feature flags o proxys locales.
   2. **Monitoreo de Telemetría Silenciosa:** Alertar únicamente si se detectan anomalías de severidad media/alta o excepciones no controladas.
   3. **Desmantelamiento Quirúrgico:** Una vez que el nuevo módulo opera al 100% sin incidencias, eliminar el código legacy en un commit dedicado exclusivamente a limpieza.
 
@@ -95,7 +106,7 @@ y cualquier motor de datos (SQL, NoSQL, Key-Value, archivos locales o memoria).
 
 ## 3. PLANTILLAS DE SALIDA ESTANDARIZADAS
 
-Todo agente de IA debe estructurar sus respuestas utilizando exclusivamente las siguientes plantillas según la fase activa:
+Todo agente de IA debe estructurar sus respuestas utilizando exclusivamente las siguientes plantillas según la fase activa.
 
 ### ARTEFACTO A: REPORTE FORENSE (Fases 1 y 2)
 
@@ -118,8 +129,11 @@ Todo agente de IA debe estructurar sus respuestas utilizando exclusivamente las 
 
 ### 5. ZONAS ROJAS DE RIESGO
 - [Puntos vulnerables a timeouts, nulos, concurrencia o saturación de memoria]
-ARTEFACTO B: COMPARATIVA DE PARIDAD SHADOW (Fase 4)
-Markdown
+```
+
+### ARTEFACTO B: COMPARATIVA DE PARIDAD SHADOW (Fase 4)
+
+```markdown
 ### 1. EVALUACIÓN DE PARIDAD FUNCIONAL
 | Caso de Prueba | Entrada | Salida Legacy | Salida Nuevo (ZNVE) | Estado |
 |---|---|---|---|---|
@@ -132,27 +146,44 @@ Markdown
 - **Dependencias añadidas:** 0 (Uso exclusivo de APIs nativas)
 - **Manejo de hilos:** [Asíncrono / Fuera de UI Thread / Pool acotado]
 - **Liberación de recursos:** [Verificada en bloque finally/dispose]
-4. DIRECTIVAS DE ACCIÓN INMEDIATA (PROMPTS DE DISPARO)
-Copia y pega la directiva correspondiente para ordenar la ejecución al agente:
+```
 
-Disparo Fase 1 y 2: Diagnóstico Inicial
-Plaintext
+---
+
+## 4. DIRECTIVAS DE ACCIÓN INMEDIATA (PROMPTS DE DISPARO)
+
+Copia y pega la directiva correspondiente para ordenar la ejecución al agente.
+
+### Disparo Fases 1 y 2: Diagnóstico Inicial
+
+```text
+/znve-forensic --target=[RUTA_DEL_ARCHIVO]
 Bajo el protocolo ZNVE_LEGACY_PROTOCOL.md, asume el rol de Ingeniero Forense.
-Analiza el archivo [RUTA_DEL_ARCHIVO] en MODO SOLO LECTURA.
-RESTRICCIÓN: Prohibido modificar archivos, prohibido proponer refactorizaciones 
+Analiza el archivo en MODO SOLO LECTURA.
+RESTRICCIÓN: Prohibido modificar archivos, prohibido proponer refactorizaciones
 y prohibido agregar dependencias.
 Entrega exclusivamente el ARTEFACTO A: Reporte Forense completo.
-Disparo Fase 3: Arnés de Pruebas
-Plaintext
+```
+
+### Disparo Fase 3: Arnés de Pruebas
+
+```text
+/znve-harness --target=[RUTA_DEL_ARCHIVO]
 Bajo el protocolo ZNVE_LEGACY_PROTOCOL.md, genera la FASE 3: Arnés de Caracterización (Golden Master).
-Objetivo: Probar [RUTA_DEL_ARCHIVO] como caja negra SIN ALTERAR UNA SOLA LÍNEA de su código.
-Construye las pruebas en un archivo dentro de tests/characterization/ cubriendo casos estándar, 
+Objetivo: Probar el archivo como caja negra SIN ALTERAR UNA SOLA LÍNEA de su código.
+Construye las pruebas en un archivo dentro de tests/characterization/ cubriendo casos estándar,
 límites y valores erróneos. Entrega el código de prueba y el comando exacto para ejecutarlo.
-Disparo Fase 4 y 5: Implementación en Sombra y Migración
-Plaintext
-Bajo el protocolo ZNVE_LEGACY_PROTOCOL.md, ejecuta las FASES 4 y 5 sobre [RUTA_DEL_ARCHIVO]:
-1. Implementa el módulo nuevo desacoplado en [RUTA_NUEVA] bajo contrato estricto ZNVE 
+```
+
+### Disparo Fases 4 y 5: Implementación en Sombra y Migración
+
+```text
+/znve-legacy-rescue
+Bajo el protocolo ZNVE_LEGACY_PROTOCOL.md, ejecuta las FASES 4 y 5 sobre [RUTA_DEL_ARCHIVO].
+Requisito previo: el Golden Master de la Fase 3 está al 100% en verde.
+1. Implementa el módulo nuevo desacoplado en [RUTA_NUEVA] bajo contrato estricto ZNVE
    (mínima huella, cero librerías parásitas, tipado estricto).
 2. Proporciona la suite comparativa dual que verifique: Salida(Nuevo) == Salida(Legacy).
 3. Entrega el ARTEFACTO B con la comparativa y el plan de conmutación Strangler Fig.
 RESTRICCIÓN: El archivo legacy de producción permanece intacto.
+```

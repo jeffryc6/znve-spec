@@ -2,9 +2,11 @@
 /**
  * ==============================================================================
  * ZNVE MCP SERVER: Spec-Driven Model Context Protocol Server for Antigravity
- * Framework: Zero-Noise Vibe Engineering (ZNVE) v1.0.0
+ * >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano)
+ * Framework: Zero-Noise Vibe Engineering (ZNVE) v2.3.0
  * Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
  * Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
+ * <<< znve:generated
  * ==============================================================================
  */
 
@@ -19,10 +21,15 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 
-// Fuente única de verdad del manual: junto al servidor (protocols/COMMANDS.md) o en el cwd como respaldo.
+// Antigravity lanza el proceso con un cwd arbitrario: la raíz del workspace se declara con ZNVE_WORKSPACE.
+const WORKSPACE_ROOT = path.resolve(process.env.ZNVE_WORKSPACE || process.cwd());
+const SERVER_DIR = path.dirname(fileURLToPath(import.meta.url));
+
+// Fuente única de verdad del manual: relativo al servidor (fuente o dist/) o al workspace como respaldo.
 const MANUAL_CANDIDATES = [
-  fileURLToPath(new URL("../COMMANDS.md", import.meta.url)),
-  path.resolve(process.cwd(), "protocols/COMMANDS.md"),
+  path.resolve(SERVER_DIR, "../COMMANDS.md"),
+  path.resolve(SERVER_DIR, "../../COMMANDS.md"),
+  path.resolve(WORKSPACE_ROOT, "protocols/COMMANDS.md"),
 ];
 
 // Encabezados "## " de COMMANDS.md que corresponden a cada tema de znve_help.
@@ -32,8 +39,14 @@ const HELP_TOPIC_HEADINGS: Record<string, string> = {
   modes: "SECCIÓN 4",
 };
 
+// >>> znve:generated:fallback (znve-auto/builder.py desde master_spec.json; no editar a mano)
 const HELP_FALLBACK =
-  "[ZNVE_HELP_FALLBACK] protocols/COMMANDS.md no disponible. Usa: /znve-forensic, /znve-contract, /znve-harness, /znve-execute, /znve-triage, /znve-hotfix, /znve-upgrade, /znve-audit o /znve-legacy-rescue.";
+  "[ZNVE_HELP_FALLBACK] protocols/COMMANDS.md no disponible. Comandos ZNVE v2.3.0: /znve-help, /znve-contract, /znve-execute, /znve-triage, /znve-hotfix, /znve-upgrade, /znve-forensic, /znve-harness, /znve-legacy-rescue, /znve-audit.";
+// <<< znve:generated:fallback
+
+function resolveInWorkspace(p: string): string {
+  return path.resolve(WORKSPACE_ROOT, p);
+}
 
 async function readManual(): Promise<string | null> {
   for (const candidate of MANUAL_CANDIDATES) {
@@ -49,7 +62,7 @@ async function readManual(): Promise<string | null> {
 const server = new Server(
   {
     name: "znve-mcp-core",
-    version: "1.0.0",
+    version: "1.1.0",
   },
   {
     capabilities: {
@@ -60,21 +73,6 @@ const server = new Server(
 
 // Definición de herramientas operativas ZNVE
 const TOOLS: Tool[] = [
-  {
-    name: "znve_help",
-    description:
-      "Devuelve el catálogo maestro de comandos /znve-*, herramientas MCP y sintaxis de uso del estándar ZNVE.",
-    inputSchema: {
-      type: "object",
-      properties: {
-        topic: {
-          type: "string",
-          enum: ["all", "commands", "mcp_tools", "modes"],
-          description: "Sección específica del manual que se desea consultar. Por defecto 'all'.",
-        },
-      },
-    },
-  },
   {
     name: "znve_forensic_scan",
     description:
@@ -172,6 +170,20 @@ const TOOLS: Tool[] = [
       required: ["code_snippet"],
     },
   },
+  {
+    name: "znve_help",
+    description: "Devuelve el catálogo maestro de comandos /znve-*, herramientas MCP y sintaxis de uso del estándar ZNVE.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        topic: {
+          type: "string",
+          enum: ["all", "commands", "mcp_tools", "modes"],
+          description: "Sección específica del manual que se desea consultar. Por defecto 'all'."
+        }
+      }
+    }
+  }
 ];
 
 // Listar herramientas disponibles
@@ -185,26 +197,9 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
   try {
     switch (name) {
-      case "znve_help": {
-        const topic = String(args?.topic ?? "all");
-        const manual = await readManual();
-        if (manual === null) {
-          return { content: [{ type: "text", text: HELP_FALLBACK }] };
-        }
-
-        let text = manual;
-        const heading = HELP_TOPIC_HEADINGS[topic];
-        if (heading) {
-          const section = manual.split(/^(?=## )/m).find((s) => s.startsWith("## ") && s.includes(heading));
-          text = section ?? manual;
-        }
-
-        return { content: [{ type: "text", text }] };
-      }
-
       case "znve_forensic_scan": {
         const filePath = String(args?.file_path);
-        const resolvedPath = path.resolve(process.cwd(), filePath);
+        const resolvedPath = resolveInWorkspace(filePath);
         const content = await fs.readFile(resolvedPath, "utf-8");
 
         return {
@@ -223,14 +218,12 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
         const detectedViolations: string[] = [];
 
-        // Detección de consultas ciegas sin proyecciones
         if (contract.includes("SELECT *") || contract.includes(".find({})")) {
           detectedViolations.push(
             "Violación Pilar 4: Consultas ciegas no indexadas ('SELECT *' o '.find({})' detectadas)."
           );
         }
 
-        // Detección de librerías vetadas en el Anti-Bloat Fence
         for (const lib of banned) {
           if (contract.includes(lib)) {
             detectedViolations.push(`Violación Anti-Bloat Fence: La dependencia '${lib}' está prohibida.`);
@@ -264,12 +257,11 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const testFilename = String(args?.test_filename);
         const harnessCode = String(args?.harness_code);
 
-        // Garantizar aislamiento estricto (tests/ o sandbox/)
         if (!harnessDir.includes("test") && !harnessDir.includes("sandbox")) {
           throw new Error("El arnés debe ubicarse en un directorio 'tests/' o 'sandbox/' aislado.");
         }
 
-        const targetDir = path.resolve(process.cwd(), harnessDir);
+        const targetDir = resolveInWorkspace(harnessDir);
         await fs.mkdir(targetDir, { recursive: true });
 
         const testFilePath = path.join(targetDir, testFilename);
@@ -290,7 +282,6 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const codeContent = String(args?.code_content);
         const disposal = String(args?.disposal_pattern);
 
-        // Guardrail: Prohibir bloques try/catch vacíos
         const emptyCatchRegex = /catch\s*\([^)]*\)\s*\{\s*\}/;
         if (emptyCatchRegex.test(codeContent)) {
           throw new Error(
@@ -298,14 +289,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           );
         }
 
-        // Guardrail: Obligar a declarar la liberación de recursos
         if (disposal === "not_applicable" && (codeContent.includes("open(") || codeContent.includes("connect("))) {
           throw new Error(
             "Violación Pilar 3: Se detectó apertura de flujo o socket sin un patrón de desecho explícito."
           );
         }
 
-        const resolvedPath = path.resolve(process.cwd(), targetFile);
+        const resolvedPath = resolveInWorkspace(targetFile);
         await fs.mkdir(path.dirname(resolvedPath), { recursive: true });
         await fs.writeFile(resolvedPath, codeContent, "utf-8");
 
@@ -323,7 +313,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         const snippet = String(args?.code_snippet);
         const findings: string[] = [];
 
-        if (snippet.includes("Thread.sleep") || snippet.includes("setTimeout") && snippet.includes("while")) {
+        if (snippet.includes("Thread.sleep") || (snippet.includes("setTimeout") && snippet.includes("while"))) {
           findings.push("Riesgo de bloqueo o busy-waiting sin jitter ni backoff.");
         }
         if (snippet.includes(".Result") || snippet.includes(".Wait()")) {
@@ -351,6 +341,23 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         };
       }
 
+      case "znve_help": {
+        const topic = String(args?.topic ?? "all");
+        const manual = await readManual();
+        if (manual === null) {
+          return { content: [{ type: "text", text: HELP_FALLBACK }] };
+        }
+
+        let text = manual;
+        const heading = HELP_TOPIC_HEADINGS[topic];
+        if (heading) {
+          const section = manual.split(/^(?=## )/m).find((s) => s.startsWith("## ") && s.includes(heading));
+          text = section ?? manual;
+        }
+
+        return { content: [{ type: "text", text }] };
+      }
+
       default:
         throw new Error(`Herramienta no reconocida por el estándar ZNVE: ${name}`);
     }
@@ -367,10 +374,13 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-// Arranque por stdio (ultra bajo consumo de recursos)
+// Arranque por stdio
 async function run() {
   const transport = new StdioServerTransport();
   await server.connect(transport);
+  // stdout está reservado para JSON-RPC: todo diagnóstico va a stderr.
+  process.stderr.write(`[znve-mcp] listo (stdio). Workspace: ${WORKSPACE_ROOT}
+`);
 }
 
 run().catch((error) => {

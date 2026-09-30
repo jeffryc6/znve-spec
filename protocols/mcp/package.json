@@ -1,0 +1,26 @@
+{
+  "name": "znve-mcp-server",
+  "version": "1.1.0",
+  "description": "ZNVE MCP Protocol Server",
+  "type": "module",
+  "main": "dist/znve-mcp-server.js",
+  "bin": {
+    "znve-mcp-server": "dist/znve-mcp-server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/znve-mcp-server.js",
+    "install:antigravity": "node install-antigravity.mjs",
+    "uninstall:antigravity": "node install-antigravity.mjs --uninstall"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.30.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.0.0"
+  }
+}

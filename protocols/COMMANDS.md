@@ -1,599 +1,414 @@
-```markdown
-# ==============================================================================
-# ZNVE COMMANDS & TOOLS SPECIFICATION (MANUAL DE COMANDOS Y MCP)
-# Archivo: protocols/COMMANDS.md
-# Versión: 2.2.0
-# Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
-# Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
-# ==============================================================================
+# Manual de comandos y herramientas ZNVE v2.3.0
 
-Este documento recopila el catálogo maestro de comandos agénticos (`/znve-*`), herramientas de contexto de modelo (MCP Tools) y directivas de ejecución utilizadas durante el ciclo de vida del software bajo el estándar Zero-Noise Vibe Engineering (ZNVE).
+<!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
+
+> **Axioma 1:** "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
+> **Axioma 2:** "La IA no inventa arquitectura; ejecuta contratos deterministas."
+
+Este documento recopila el catálogo maestro de comandos agénticos (`/znve-*`), las herramientas MCP (`znve_*`) y la forma de activarlos en cada asistente bajo el estándar Zero-Noise Vibe Engineering (ZNVE).
 
 ---
 
 ## 🧭 TABLA DE REFERENCIA RÁPIDA
 
-| Comando / Herramienta | Tipo | Modos Aplicables | Entornos e IAs Compatibles |
-|---|---|---|---|
-| `/znve-forensic` | Slash Command | Modo 2, 5, 6 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama |
-| `/znve-contract` | Slash Command | Modo 1, 2, 4 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama |
-| `/znve-harness` | Slash Command | Modo 5 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama |
-| `/znve-execute` | Slash Command | Modo 1, 2, 4, 5 | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama |
-| `/znve-triage` | Slash Command | Modo 3 (Hotfix) | Claude, Cursor, Copilot, DeepSeek, OpenRouter |
-| `/znve-hotfix` | Slash Command | Modo 3 (Hotfix) | Claude, Cursor, Copilot, DeepSeek, OpenRouter |
-| `/znve-upgrade` | Slash Command | Modo 4 (Upgrade) | Claude, Cursor, Copilot, DeepSeek, OpenRouter |
-| `/znve-audit` | Slash Command | Modo 6 (Hardening) | Claude, Cursor, Copilot, DeepSeek, OpenRouter, Ollama |
-| `/znve-legacy-rescue` | Slash Command | Modo 5 (Legacy) | Claude, Cursor, Copilot, DeepSeek, OpenRouter |
-| `znve_forensic_scan` | MCP Tool (JSON-RPC) | Fases de Ingesta | Antigravity, Cursor MCP, Claude Desktop, Windsurf |
-| `znve_validate_contract` | MCP Tool (JSON-RPC) | Fase Contractual | Antigravity, Cursor MCP, Claude Desktop, Windsurf |
-| `znve_scaffold_harness` | MCP Tool (JSON-RPC) | Fase de Aislamiento | Antigravity, Cursor MCP, Claude Desktop, Windsurf |
-| `znve_surgical_write` | MCP Tool (JSON-RPC) | Fase de Escritura | Antigravity, Cursor MCP, Claude Desktop, Windsurf |
-| `znve_audit_resources` | MCP Tool (JSON-RPC) | Fase de Hardening | Antigravity, Cursor MCP, Claude Desktop, Windsurf |
+| Comando / Herramienta | Tipo | Modos o fase |
+|---|---|---|
+| `/znve-help` | Comando de barra | Todos |
+| `/znve-contract` | Comando de barra | Modo 1, 2, 4 |
+| `/znve-execute` | Comando de barra | Modo 1, 2, 4, 5 |
+| `/znve-triage` | Comando de barra | Modo 3 |
+| `/znve-hotfix` | Comando de barra | Modo 3 |
+| `/znve-upgrade` | Comando de barra | Modo 4 |
+| `/znve-forensic` | Comando de barra | Modo 2, 5, 6 |
+| `/znve-harness` | Comando de barra | Modo 5 |
+| `/znve-legacy-rescue` | Comando de barra | Modo 5 |
+| `/znve-audit` | Comando de barra | Modo 6 |
+| `znve_help` | Herramienta MCP | Ayuda |
+| `znve_forensic_scan` | Herramienta MCP | Ingesta |
+| `znve_validate_contract` | Herramienta MCP | Contrato |
+| `znve_scaffold_harness` | Herramienta MCP | Aislamiento |
+| `znve_surgical_write` | Herramienta MCP | Escritura |
+| `znve_audit_resources` | Herramienta MCP | Hardening |
 
 ---
 
 ## 🎛️ SECCIÓN 1: COMANDOS DE BARRA (`/znve-*`) PARA ASISTENTES Y AGENTES
 
-Los comandos de barra son palabras clave de activación que instruyen al modelo de lenguaje a adoptar un rol técnico cerrado, restringir sus capacidades generativas e imponer un formato de salida estandarizado.
+Los comandos de barra son palabras clave que instruyen al modelo a adoptar un rol técnico cerrado, restringir su generación e imponer un formato de salida estándar. Formas de invocación equivalentes:
 
-### 1. `/znve-forensic` (Ingesta Pasiva & Radiografía)
-* **Propósito:** Analizar un archivo o repositorio desconocido extrayendo su grafo de ejecución y efectos secundarios sin modificar el disco.
-* **Entornos recomendados:**
-  * **Claude:** Modo Projects o Claude Code CLI.
-  * **DeepSeek (R1):** Aprovecha la cadena de razonamiento `<think>` para trazar flujos sin emitir código.
-  * **GitHub Copilot:** `@workspace /znve-forensic` en la ventana de chat.
-  * **Cursor / Windsurf:** En el Composer o Chat en modo lectura.
-* **Restricción estricta:** MODO SOLO LECTURA. Prohibido proponer código de reemplazo, refactorizaciones o parches.
-* **Formato de entrega:**
-  1. `RESUMEN DE DOMINIO`: Propósito operativo del archivo.
-  2. `MATRIZ IO`: Parámetros de entrada, variables globales y estado mutado.
-  3. `SIDE EFFECTS`: Operaciones en almacenamiento, red, disco e IPC.
-  4. `EQUILIBRIOS ACCIDENTALES`: Funciones duplicadas o código contradictorio con coexistencia funcional por orden de evaluación.
-  5. `ZONAS ROJAS`: Riesgos de fuga, condiciones de carrera, bloqueos o excepciones no gestionadas.
-* **Ejemplo de uso:**
-  ```text
-  /znve-forensic Analiza el archivo server/transfers/processor.ts y entrega la radiografía forense sin alterar nada.
+- `/znve-contract …` (forma canónica)
+- `/znve contract …` o `/znve -contract …` (skill elegida en el menú y comando a continuación)
 
-```
+Sin comando, toda respuesta técnica sigue los 4 bloques: [1] Blueprint y Contrato -> [2] Racional -> [3] Tarea Atómica -> [4] Verificación.
 
----
+### 1. `/znve-help` — Manual operativo y ayuda rápida
 
-### 2. `/znve-contract` (Diseño de Contratos Deterministas)
+- **Sintaxis:** `/znve-help`
+- **Cuándo se usa:** El usuario escribe `/znve-?`, `/znve-help`, `/znve help`, solo `/znve`, o pregunta cómo usar ZNVE.
+- **Restricción:** Solo lectura. No inspecciones ni generes código del proyecto; imprime el catálogo y la regla por defecto en 4 bloques.
+- **Entornos recomendados:** Todos los asistentes; en MCP, la herramienta `znve_help`.
+- **Salida:** el catálogo de comandos:
 
-* **Propósito:** Definir formalmente las fronteras de datos, tipos de error y restricciones operativas antes de escribir cualquier algoritmo interno.
-
-
-* **Entornos recomendados:** Claude 3.5 Sonnet, GPT-4o (OpenRouter), DeepSeek V3, Ollama (`qwen2.5-coder`).
-
-
-* **Restricción estricta:** Prohibido escribir lógica de negocio interna. Definir únicamente estructuras de datos, interfaces y esquemas inmutables.
-
-
-* **Formato de entrega:**
-1. `CONTRATO IO`: DTOs e interfaces inmutables de entrada y salida con tipos cerrados.
-
-
-2. `CONTRATO PERSISTENCIA`: Esquema agnóstico al motor con proyecciones y claves indexadas explícitas.
-
-
-3. `CONTRATO ERRORES`: Tipos cerrados con los modos de fallo tolerados.
-
-
-4. `ANTI-BLOAT FENCE`: Lista explícita de librerías externas vetadas y prohibiciones arquitectónicas.
-
-
-
-
-* **Ejemplo de uso:**
 ```text
-/znve-contract Diseña el contrato DTO y persistencia para un almacén local clave-valor persistente en disco.
+🛠️ CATÁLOGO DE COMANDOS ZNVE v2.3.0:
+• /znve-help         : Manual operativo e índice de comandos.
+• /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
+• /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.
+• /znve-triage       : Diagnóstico y contención de radio de impacto ante caídas.
+• /znve-hotfix       : Parche quirúrgico atómico con test de regresión obligatorio.
+• /znve-upgrade      : Migración de dependencias mediante Adaptador desacoplado.
+• /znve-forensic     : Ingesta en solo lectura, matriz I/O y efectos secundarios.
+• /znve-harness      : Suite Golden Master de caja negra sobre código intacto.
+• /znve-legacy-rescue: Orquestación integral en 5 fases para código legacy.
+• /znve-audit        : Hardening de hilos, memoria, descriptores y seguridad.
 
+📋 REGLA POR DEFECTO (SIN COMANDO):
+Toda respuesta técnica se estructura en 4 bloques:
+[1] Blueprint y Contrato -> [2] Racional -> [3] Tarea Atómica -> [4] Verificación.
+
+💡 USO: /znve <comando> <petición>   (ej.: /znve contract Diseña el DTO de usuario)
 ```
 
+- **Ejemplo:**
 
-
----
-
-### 3. `/znve-harness` (Arnés de Caracterización / Golden Master)
-
-* **Propósito:** Congelar el comportamiento actual de código legacy sin tests mediante pruebas de caja negra, garantizando paridad antes de modernizar.
-
-
-* **Entornos recomendados:** Claude Projects, Cursor, Copilot Chat, DeepSeek Reasoner.
-
-
-* **Restricción estricta:** EL CÓDIGO PRODUCTIVO ORIGINAL NO SE MODIFICA. El arnés reside exclusivamente en un directorio aislado (`tests/characterization/` o `sandbox/`).
-
-
-* **Formato de entrega:**
-1. `UBICACIÓN`: Directorio aislado de pruebas.
-
-
-2. `BATERÍA DE INYECCIÓN`: Casos válidos, límites numéricos, cadenas vacías y datos corruptos.
-
-
-3. `SNAPSHOTS`: Registro de salidas reales actuales (incluso comportamientos accidentales tolerados).
-
-
-4. `COMANDO EJECUTABLE`: Comando de terminal exacto para certificar 100% de éxito contra el código legacy intacto.
-
-
-
-
-* **Ejemplo de uso:**
 ```text
-/znve-harness Construye una batería Golden Master en tests/characterization/ para congelar el comportamiento de legacy_calc.py.
-
+/znve-help
 ```
 
+### 2. `/znve-contract` — Diseño de contratos deterministas
 
+- **Sintaxis:** `/znve-contract [--platform=desktop|web|mobile|hybrid] [--delta]`
+- **Cuándo se usa:** Antes de programar cualquier funcionalidad, endpoint, pantalla o módulo.
+- **Restricción:** No escribas lógica de negocio; define solo las fronteras estructurales. En In-Flight, los contratos existentes no se alteran: se extienden.
+- **Entornos recomendados:** Claude, OpenRouter, DeepSeek V3, Ollama (`qwen2.5-coder`).
+- **Formato de entrega:**
+  1. `CONTRATO DE ENTRADA Y SALIDA` — DTOs tipados con validación estricta de límites.
+  2. `CONTRATO DE PERSISTENCIA` — esquema agnóstico con proyecciones y claves indexadas explícitas.
+  3. `CONTRATO DE ERRORES` — enums o tipos cerrados con los modos de fallo previstos.
+  4. `ANTI-BLOAT FENCE` — campos descartados, abstracciones innecesarias y paquetes prohibidos.
+- **Stack por plataforma (`--platform`):**
+  - **Escritorio (Windows / macOS / Linux)** (`desktop`): Rust + Tauri v2 o WinUI 3 nativo · persistencia: SQLite (WAL mode) / DuckDB.
+  - **Web-App** (`web`): Vite + TypeScript / Next.js App Router · persistencia: IndexedDB (Dexie.js).
+  - **Híbrida (Mobile / Desktop)** (`hybrid`): Tauri Mobile / Flutter / React Native Bare · persistencia: MMKV / WatermelonDB.
+  - **Android nativo** (`mobile`): Kotlin + Jetpack Compose + Corrutinas · persistencia: Room DB.
+  - **macOS / iOS nativo** (`mobile`): Swift 6 + SwiftUI · persistencia: SwiftData.
+- **Lista de chequeo de solidez:**
+  1. **Estructura invariable:** entradas, salidas, entidades y enums tipados.
+  2. **Defensas de frontera:** errores explicitados, sin `any` ni `catch` genéricos.
+  3. **Cero dependencias parásitas:** solo el SDK nativo o el runtime aprobado.
+  4. **Filtro de diferimiento:** ideas secundarias movidas a `contracts/CONTRACT_BACKLOG.md`.
+- **Criterio de parada:** al cumplirse los 4 puntos, emite "Contrato v1 sólido y cerrado. Listo para /znve-execute." y detén la generación.
+- **Modo `--delta` (In-Flight):**
+  1. Audita las discrepancias entre `contracts/` y `src/`.
+  2. Clasifica los cambios en **Cubo A** (requerido ya, etapa activa) y **Cubo B** (diferido a `contracts/CONTRACT_BACKLOG.md`).
+  3. Muestra el diff del Cubo A y re-congela el contrato antes de modificar código.
+- **Ejemplo:**
 
----
-
-### 4. `/znve-execute` (Implementación Quirúrgica Atómica)
-
-* **Propósito:** Generar la implementación de código que cumple estrictamente un contrato previamente aprobado.
-
-
-* **Entornos recomendados:** Cursor Composer, Copilot Edits, Windsurf, Claude Code CLI, Ollama Local.
-
-
-* **Restricción estricta:** Prohibido agregar librerías externas parásitas. Prohibido inventar propiedades fuera del contrato. Prohibido añadir bloques `catch` vacíos.
-
-
-* **Formato de entrega:**
-1. `TARGET_FILE`: Ruta exacta del único archivo a crear o intervenir.
-
-
-2. `CÓDIGO ATÓMICO`: Implementación quirúrgica basada en APIs nativas y mínimas operaciones.
-
-
-3. `LIBERACIÓN DE RECURSOS`: Bloque determinista de desecho (`dispose`, `close`, `finally`).
-
-
-4. `VERIFICACIÓN ATÓMICA`: Test ejecutable o comando terminal para validar la paridad de inmediato.
-
-
-
-
-* **Ejemplo de uso:**
 ```text
-/znve-execute Implementa el contrato UserSessionContract en src/auth/session.ts utilizando utilidades nativas de crypto.
-
+/znve-contract --platform=desktop Diseña el contrato DTO y de persistencia para un almacén local clave-valor en disco.
 ```
 
+### 3. `/znve-execute` — Implementación quirúrgica atómica
 
+- **Sintaxis:** `/znve-execute --target=<ruta/archivo>`
+- **Cuándo se usa:** Tras la aprobación de un contrato de `/znve-contract`. Si no hay contrato aprobado, pídelo antes de escribir código.
+- **Restricción:** Cero dependencias nuevas, cero `catch` vacíos, cero campos o parámetros fuera del contrato. Solo se modifica el `TARGET_FILE`.
+- **Entornos recomendados:** Cursor Composer, Copilot Edits, Windsurf, Claude Code, Ollama.
+- **Formato de entrega:**
+  1. `TARGET_FILE` — ruta exacta del archivo objetivo.
+  2. `CÓDIGO QUIRÚRGICO` — implementación modular, mínima y de huella casi nula.
+  3. `LIBERACIÓN DE RECURSOS` — desecho explícito (`close`, `dispose`, `finally`, desuscripción de listeners).
+  4. `VERIFICACIÓN ATÓMICA` — comando de terminal o test exacto para validar de inmediato.
+- **Ejemplo:**
 
----
-
-### 5. `/znve-triage` (Diagnóstico de Emergencia en Producción)
-
-* **Propósito:** Analizar caídas de servicio, bloqueos o excepciones no controladas en aplicaciones modernas activas (Modo 3).
-
-
-* **Entornos recomendados:** Claude, Cursor, Copilot, DeepSeek R1.
-
-
-* **Restricción estricta:** MODO SOLO LECTURA. Prohibido aplicar parches a ciegas (*monkey-patching*) o alterar contratos de datos públicos.
-
-
-* **Formato de entrega:**
-1. `COMPONENTE AFECTADO`: Archivo, endpoint o vista que manifiesta el síntoma.
-
-
-2. `CAUSA RAÍZ`: Diagnóstico determinista (deadlock, pool agotado, fuga de memoria, timeout).
-
-
-3. `RADIO DE IMPACTO & CONTENCIÓN`: Plan de aislamiento inmediato (fallback local, degradación elegante) sin mutar contratos públicos.
-
-
-
-
-* **Ejemplo de uso:**
 ```text
-/znve-triage Analiza este log de error de conexión a la base de datos y aísla el radio de impacto: [pegar stack trace].
-
+/znve-execute --target=src/auth/session.ts Implementa el contrato UserSessionContract con las utilidades nativas de crypto.
 ```
 
+### 4. `/znve-triage` — Diagnóstico de emergencia y blast radius
 
+- **Sintaxis:** `/znve-triage`
+- **Cuándo se usa:** Caídas de servicio, bloqueos de UI o excepciones imprevistas en producción.
+- **Restricción:** Solo lectura estricta. Nada de parches a ciegas: un parche sin diagnóstico suele mover el fallo a otro sitio.
+- **Entornos recomendados:** Claude, Cursor, Copilot, DeepSeek R1.
+- **Formato de entrega:**
+  1. `COMPONENTE AFECTADO` — endpoint, servicio o vista donde se manifiesta la falla.
+  2. `CAUSA RAÍZ DETERMINISTA` — deadlock, pool agotado, timeout, fuga de memoria, etc.
+  3. `RADIO DE IMPACTO (BLAST RADIUS)` — componentes en riesgo.
+  4. `PLAN DE CONTENCIÓN INMEDIATA` — fallback local o degradación elegante sin alterar contratos de datos.
+- **Ejemplo:**
 
----
-
-### 6. `/znve-hotfix` (Parche Quirúrgico Bounded de Producción)
-
-* **Propósito:** Remediar una falla crítica en producción diagnosticada previamente mediante `/znve-triage` (Modo 3).
-
-
-* **Entornos recomendados:** Cursor, Claude Code, GitHub Copilot.
-
-
-* **Restricción estricta:** Modificación restringida estrictamente a un único `TARGET_FILE`. Prohibido alterar firmas públicas de métodos.
-
-
-* **Formato de entrega:**
-1. `TARGET_FILE`: Ruta exacta del archivo con la falla.
-
-
-2. `CÓDIGO QUIRÚRGICO`: Parche atómico acotado.
-
-
-3. `TEST DE REGRESIÓN`: Prueba unitaria que falla sin el hotfix y pasa al 100% tras aplicarlo.
-
-
-4. `COMANDO DE VALIDACIÓN`: Orden terminal para ejecutar la prueba de forma reproducible.
-
-
-
-
-* **Ejemplo de uso:**
 ```text
-/znve-hotfix Aplica el parche correctivo sobre src/network/http_client.ts con su respectivo test de regresión.
-
+/znve-triage Analiza este log de error de conexión a la base de datos y aísla el radio de impacto: [stack trace].
 ```
 
+### 5. `/znve-hotfix` — Parche quirúrgico acotado
 
+- **Sintaxis:** `/znve-hotfix --incident=<ID>`
+- **Cuándo se usa:** Remediación tras el diagnóstico de `/znve-triage`.
+- **Restricción:** Modifica un único `TARGET_FILE` en la frontera del adaptador, sin tocar el núcleo. No rompas firmas públicas ni silencies errores; propaga `X-Run-ID` para la trazabilidad.
+- **Entornos recomendados:** Cursor, Claude Code, GitHub Copilot.
+- **Formato de entrega:**
+  1. `TARGET_FILE` — ruta exacta del archivo defectuoso.
+  2. `CÓDIGO QUIRÚRGICO` — parche atómico acotado.
+  3. `TEST DE REGRESIÓN` — prueba que falla sin el parche y pasa al 100 % con él.
+  4. `COMANDO DE VALIDACIÓN` — orden de terminal reproducible.
+- **Ejemplo:**
 
----
-
-### 7. `/znve-upgrade` (Migración con Capa Anti-Corrupción)
-
-* **Propósito:** Actualizar versiones mayores de SDKs, APIs de terceros o dependencias que introducen *breaking changes* (Modo 4).
-
-
-* **Entornos recomendados:** Claude Projects, Cursor, DeepSeek.
-
-
-* **Restricción estricta:** Prohibido modificar la lógica del dominio central; los cambios disruptivos deben aislarse detrás de un adaptador.
-
-
-* **Formato de entrega:**
-1. `MATRIZ DE BREAKING CHANGES`: Tabla comparando versión previa vs. versión objetivo.
-
-
-2. `DISEÑO DE ADAPTADOR`: Interfaz interna (`Port`) y adaptador desacoplado (`Adapter`).
-
-
-3. `VERIFICACIÓN DUAL`: Pruebas de paridad funcional y huella de memoria.
-
-
-
-
-* **Ejemplo de uso:**
 ```text
-/znve-upgrade Planifica la migración de Axios a fetch nativo diseñando un adaptador HTTP interno desacoplado.
-
+/znve-hotfix --incident=INC-142 Aplica el parche sobre src/network/http_client.ts con su test de regresión.
 ```
 
+### 6. `/znve-upgrade` — Migración con capa anti-corrupción
 
+- **Sintaxis:** `/znve-upgrade --dependency=<librería>`
+- **Cuándo se usa:** Actualización de SDKs, APIs de terceros o librerías con breaking changes.
+- **Restricción:** Las incompatibilidades externas no se propagan al dominio; quedan encapsuladas tras un `Port` y un `Adapter`.
+- **Entornos recomendados:** Claude Projects, Cursor, DeepSeek.
+- **Formato de entrega:**
+  1. `MATRIZ DE BREAKING CHANGES` — versión previa vs. versión objetivo.
+  2. `DISEÑO DE ADAPTADOR ANTI-CORRUPCIÓN` — interfaz interna (`Port`) y adaptador (`Adapter`).
+  3. `CÓDIGO DEL ADAPTADOR` — implementación aislada sin tocar el dominio.
+  4. `VERIFICACIÓN DUAL DE PARIDAD` — tests de paridad funcional y comprobación de huella de memoria.
+- **Ejemplo:**
 
----
-
-### 8. `/znve-audit` (Auditoría Forense y Rendimiento)
-
-* **Propósito:** Diagnóstico de consumo de CPU, retención de sockets, contención de hilos de interfaz gráfica o puertos expuestos (Modo 6).
-
-
-* **Entornos recomendados:** DeepSeek R1, Claude, Copilot, Ollama.
-
-
-* **Restricción estricta:** Prohibido aplicar parches cosméticos o retardos arbitrarios (`sleep`, `setTimeout`).
-
-
-* **Formato de entrega:**
-1. `HILOS Y CONCURRENCIA`: Bloqueos de UI Thread, sincronización bloqueante (.Result/.Wait()).
-
-
-2. `SUPERFICIE DE RED`: Puertos expuestos fuera de loopback y políticas de timeout.
-
-
-3. `FUGAS Y CICLO DE VIDA`: Descriptores abiertos, listeners huérfanos y memory leaks.
-
-
-4. `HOJA DE REMEDIACIÓN`: Lista priorizada de acciones atómicas por causa raíz.
-
-
-
-
-* **Ejemplo de uso:**
 ```text
-/znve-audit Audita este worker en segundo plano para certificar que libera sockets y no mantiene la CPU despierta.
-
+/znve-upgrade --dependency=axios Planifica la migración a fetch nativo con un adaptador HTTP interno desacoplado.
 ```
 
+### 7. `/znve-forensic` — Ingesta pasiva y radiografía forense
 
+- **Sintaxis:** `/znve-forensic --target=<ruta/módulo>`
+- **Cuándo se usa:** Análisis inicial de archivos, repositorios desconocidos o monolitos legacy.
+- **Restricción:** Solo lectura estricta. No propongas código de reemplazo ni dependencias.
+- **Entornos recomendados:** Claude (Projects o Claude Code), DeepSeek R1 (razonamiento `<think>`), Copilot (`@workspace /znve-forensic`), Cursor en modo lectura.
+- **Formato de entrega:**
+  1. `RESUMEN DE DOMINIO` — función operativa real, en un párrafo.
+  2. `MATRIZ DE ENTRADAS, SALIDAS Y ESTADO` — variables de entorno, parámetros, estado mutado y globales.
+  3. `EFECTOS SECUNDARIOS` — persistencia, red, I/O e IPC.
+  4. `EQUILIBRIOS ACCIDENTALES` — código duplicado o contradictorio que funciona por orden de evaluación. No lo "limpies": suele sostener comportamientos de negocio no documentados.
+  5. `ZONAS ROJAS` — condiciones de carrera, desconexiones, nulos o saturación.
+- **Ejemplo:**
 
----
-
-### 9. `/znve-legacy-rescue` (Protocolo Integral en 5 Fases)
-
-* **Propósito:** Orquestar de punta a punta la modernización de un archivo monolítico sin tests (Modo 5).
-
-
-* **Entornos recomendados:** Claude Projects, Cursor Composer.
-
-
-* **Flujo inmutable:**
-* Fase 1 y 2: Radiografía e Ingesta Pasiva (`/znve-forensic`).
-
-
-* Fase 3: Arnés de Caracterización Golden Master (`/znve-harness`).
-
-
-* Fase 4: Shadow Run en módulo desacoplado validando `Salida(Nuevo) == Salida(Legacy)`.
-
-
-* Fase 5: Conmutación gradual (Strangler Fig) sin downtime.
-
-
-
-
-* **Ejemplo de uso:**
 ```text
-/znve-legacy-rescue Inicia el rescate integral del monolito legacy_billing.py siguiendo las 5 fases.
-
+/znve-forensic --target=server/transfers/processor.ts Entrega la radiografía forense sin alterar nada.
 ```
 
+### 8. `/znve-harness` — Arnés de caracterización (Golden Master)
 
+- **Sintaxis:** `/znve-harness --target=<archivo_legacy>`
+- **Cuándo se usa:** Antes de modernizar código legacy sin tests.
+- **Restricción:** El archivo de producción no se modifica. El arnés vive aislado (`tests/characterization/` o `sandbox/`).
+- **Entornos recomendados:** Claude Projects, Cursor, Copilot Chat, DeepSeek Reasoner.
+- **Formato de entrega:**
+  1. `CONFIGURACIÓN DE AISLAMIENTO` — invocación del módulo original intacto (CLI, importación o sandbox).
+  2. `BATERÍA DE INYECCIÓN` — casos estándar, límites, strings vacíos y datos corruptos.
+  3. `SNAPSHOTS GOLDEN MASTER` — salidas reales actuales, incluidos los comportamientos accidentales tolerados.
+  4. `COMANDO DE EJECUCIÓN` — orden de terminal que certifique 100 % de éxito contra el original.
+- **Ejemplo:**
+
+```text
+/znve-harness --target=legacy_calc.py Construye la batería Golden Master en tests/characterization/.
+```
+
+### 9. `/znve-legacy-rescue` — Protocolo integral en 5 fases
+
+- **Sintaxis:** `/znve-legacy-rescue`
+- **Cuándo se usa:** Rescate de un monolito o módulo legacy sin tests.
+- **Restricción:** Orquesta el rescate de punta a punta y no avances de fase sin que la anterior esté verificada. En la primera respuesta entrega solo el reporte forense (fases 1 y 2) y el diseño del arnés (fase 3).
+- **Entornos recomendados:** Claude Projects, Cursor Composer.
+- **Fases:**
+  1. **Fases 1 y 2 — Ingesta y reporte forense:** con `/znve-forensic`.
+  2. **Fase 3 — Golden Master:** con `/znve-harness` sobre el código intacto; debe quedar 100 % en verde.
+  3. **Fase 4 — Shadow Run:** nuevo módulo aislado (`/znve-contract` + `/znve-execute`) ejecutado en sombra hasta confirmar `Salida(Nuevo) == Salida(Legacy)`.
+  4. **Fase 5 — Strangler Fig:** conmutación gradual sin downtime.
+- **Ejemplo:**
+
+```text
+/znve-legacy-rescue Inicia el rescate integral del monolito legacy_billing.py.
+```
+
+### 10. `/znve-audit` — Auditoría forense de recursos y seguridad
+
+- **Sintaxis:** `/znve-audit --target=<módulo>`
+- **Cuándo se usa:** Fugas de memoria, cuellos de botella, bloqueos de UI, logs ruidosos o puertos expuestos.
+- **Restricción:** Nada de parches cosméticos ni retardos arbitrarios; ataca la causa raíz y entrega la hoja de remediación para aprobación.
+- **Entornos recomendados:** DeepSeek R1, Claude, Copilot, Ollama.
+- **Formato de entrega:**
+  1. `CONCURRENCIA E HILOS` — contención, bloqueos del UI Thread o procesos zombis.
+  2. `SUPERFICIE DE RED Y SEGURIDAD` — timeouts, puertos expuestos y manejo de desconexión.
+  3. `CICLO DE VIDA Y RECURSOS` — handles no liberados, listeners huérfanos o buffers saturados.
+  4. `HOJA DE REMEDIACIÓN` — acciones atómicas priorizadas por severidad.
+- **Ejemplo:**
+
+```text
+/znve-audit --target=src/workers Certifica que el worker libera sockets y no mantiene la CPU despierta.
+```
 
 ---
 
 ## 🛠️ SECCIÓN 2: HERRAMIENTAS MCP (`znve_*`) PARA AGENTES AUTÓNOMOS
 
-Las herramientas del Model Context Protocol (MCP) actúan como barandillas físicas expuestas por el servidor `protocols/mcp/znve-mcp-server.ts`. Los agentes como **Antigravity**, **Cursor** o **Claude Desktop** invocan estas funciones mediante llamadas a herramientas estructuradas (JSON-RPC).
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                    AGENTE AUTÓNOMO                          │
-│               (Antigravity / Cursor / Claude)               │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ JSON-RPC (Tool Calls)
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                 ZNVE MCP PROTOCOL SERVER                    │
-│                                                             │
-│  1. znve_forensic_scan      --> Ingesta en solo lectura     │
-│  2. znve_validate_contract  --> Validación Anti-Bloat       │
-│  3. znve_scaffold_harness   --> Despliegue Golden Master    │
-│  4. znve_surgical_write     --> Escritura en TARGET_FILE    │
-│  5. znve_audit_resources    --> Detección de antipatrones   │
-└──────────────────────────────┬──────────────────────────────┘
-                               │ Aislamiento en disco
-                               ▼
-┌─────────────────────────────────────────────────────────────┐
-│                    SISTEMA DE ARCHIVOS                      │
-└─────────────────────────────────────────────────────────────┘
-
-```
-
-### 1. `znve_forensic_scan`
-
-* **Definición:** Lee el contenido íntegro de un archivo objetivo en modo estrictamente de solo lectura.
-
-
-* **Cuándo se usa:** En las Fases 1 y 2 para alimentar el contexto del agente sin permitirle escribir en disco.
-
-
-* **Parámetros (`inputSchema`):**
-* `file_path` *(string, obligatorio)*: Ruta relativa o absoluta del archivo a inspeccionar.
-
-
-
-
-* **Respuesta del servidor:** Snapshot inmutable con el recuento exacto de bytes y contenido intacto.
-
-
-
-### 2. `znve_validate_contract`
-
-* **Definición:** Valida que una especificación de interfaz o DTO cumpla las cláusulas de higiene de dependencias y proyección de datos antes de programar.
-
-
-* **Cuándo se usa:** Tras definir un DTO y antes de autorizar la escritura de código.
-
-
-* **Parámetros (`inputSchema`):**
-* `contract_code` *(string, obligatorio)*: Código fuente de la interfaz, struct o DTO propuesto.
-
-
-* `banned_libraries` *(array de strings, opcional)*: Lista de librerías vetadas por el Anti-Bloat Fence.
-
-
-
-
-* **Comportamiento determinista:** Falla automáticamente y devuelve `REJECTED` si detecta consultas no proyectadas (`SELECT *`, `find({})`) o dependencias prohibidas.
-
-
-
-### 3. `znve_scaffold_harness`
-
-* **Definición:** Crea una suite de caracterización (Golden Master) en un directorio de aislamiento sin modificar los archivos de producción.
-
-
-* **Cuándo se usa:** En la Fase 3 del rescate legacy.
-
-
-* **Parámetros (`inputSchema`):**
-* `harness_directory` *(string, obligatorio)*: Directorio aislado (debe contener obligatoriamente `test` o `sandbox`).
-
-
-* `test_filename` *(string, obligatorio)*: Nombre del archivo de prueba.
-
-
-* `harness_code` *(string, obligatorio)*: Código de la prueba de caja negra.
-
-
-
-
-* **Comportamiento determinista:** El servidor rechaza la creación si el directorio de destino intenta mezclarse con la raíz de producción.
-
-
-
-### 4. `znve_surgical_write`
-
-* **Definición:** Permite persistir cambios en disco de forma atómica y controlada.
-
-
-* **Cuándo se usa:** En la Fase 4 de implementación tras aprobar el contrato.
-
-
-* **Parámetros (`inputSchema`):**
-* `target_file` *(string, obligatorio)*: Ruta exacta del único archivo a escribir.
-
-
-* `code_content` *(string, obligatorio)*: Contenido fuente que satisface el contrato.
-
-
-* `disposal_pattern` *(enum, obligatorio)*: Patrón de desecho de recursos (`dispose`, `close`, `finally`, `autocloseable`, `not_applicable`).
-
-
-
-
-* **Comportamiento determinista:** Falla automáticamente y aborta la escritura si:
-* El código contiene bloques `catch` vacíos.
-
-
-* Se abren sockets, conexiones o flujos declarando `disposal_pattern: "not_applicable"`.
-
-
-
-
-
-### 5. `znve_audit_resources`
-
-* **Definición:** Analizador estático de código que detecta patrones lesivos para la memoria, hilos y CPU.
-
-
-* **Cuándo se usa:** En auditorías de hardening o durante revisiones previas al commit.
-
-
-* **Parámetros (`inputSchema`):**
-* `code_snippet` *(string, obligatorio)*: Fragmento de código a evaluar.
-
-
-
-
-* **Detección automática:** Identifica bloqueos del despachador de UI (`.Result`, `.Wait()`), busy-waiting sin jitter, y retenciones no administradas como `WakeLock.acquire()`.
-
-
+El servidor `protocols/mcp/znve-mcp-server.ts` expone estas herramientas por JSON-RPC (stdio). Las rutas se resuelven contra la variable `ZNVE_WORKSPACE`.
+
+### 1. `znve_help`
+
+- **Fase:** Ayuda
+- **Qué hace:** Devuelve este manual completo o una sección: `commands`, `mcp_tools` o `modes`.
+- **Parámetros:**
+  - `topic` (enum, opcional): `all` (por defecto), `commands`, `mcp_tools` o `modes`.
+- **Comportamiento:** Si el manual no existe, devuelve un catálogo corto de respaldo; cualquier otro error se informa.
+
+### 2. `znve_forensic_scan`
+
+- **Fase:** Ingesta
+- **Qué hace:** Lee un archivo del workspace en modo estrictamente de solo lectura.
+- **Parámetros:**
+  - `file_path` (string, obligatorio): Ruta del archivo, relativa a `ZNVE_WORKSPACE`.
+- **Comportamiento:** Devuelve el contenido intacto y su tamaño; nunca escribe en disco.
+
+### 3. `znve_validate_contract`
+
+- **Fase:** Contrato
+- **Qué hace:** Valida que un DTO o interfaz cumpla el Anti-Bloat Fence y la proyección de datos.
+- **Parámetros:**
+  - `contract_code` (string, obligatorio): Código de la interfaz, struct o DTO propuesto.
+  - `banned_libraries` (string[], opcional): Librerías vetadas por el Anti-Bloat Fence.
+- **Comportamiento:** Rechaza el contrato si detecta `SELECT *`, `.find({})` o una librería vetada.
+
+### 4. `znve_scaffold_harness`
+
+- **Fase:** Aislamiento
+- **Qué hace:** Crea una suite Golden Master en un directorio aislado sin tocar producción.
+- **Parámetros:**
+  - `harness_directory` (string, obligatorio): Directorio aislado; debe contener `test` o `sandbox`.
+  - `test_filename` (string, obligatorio): Nombre del archivo de prueba.
+  - `harness_code` (string, obligatorio): Código de la prueba de caja negra.
+- **Comportamiento:** Rechaza directorios que no sean de pruebas o sandbox.
+
+### 5. `znve_surgical_write`
+
+- **Fase:** Escritura
+- **Qué hace:** Escribe un único `TARGET_FILE` tras aprobar el contrato.
+- **Parámetros:**
+  - `target_file` (string, obligatorio): Ruta exacta del único archivo a escribir.
+  - `code_content` (string, obligatorio): Contenido que satisface el contrato.
+  - `disposal_pattern` (enum, obligatorio): `dispose`, `close`, `finally`, `autocloseable` o `not_applicable`.
+- **Comportamiento:** Aborta si hay un `catch` vacío o si se abren sockets o flujos con `not_applicable`.
+
+### 6. `znve_audit_resources`
+
+- **Fase:** Hardening
+- **Qué hace:** Analiza un fragmento de código en busca de antipatrones de hilos, memoria y CPU.
+- **Parámetros:**
+  - `code_snippet` (string, obligatorio): Fragmento de código a evaluar.
+- **Comportamiento:** Marca `.Result`/`.Wait()`, busy-waiting sin backoff y `WakeLock.acquire()`.
 
 ---
 
-## 💻 SECCIÓN 3: MATRIZ DE CONFIGURACIÓN POR HERRAMIENTA E IA
+## 💻 SECCIÓN 3: CONFIGURACIÓN POR HERRAMIENTA E IA
 
-Instrucciones exactas de integración para activar los comandos y herramientas según la plataforma elegida:
+### 1. Claude (claude.ai, Claude Code y Claude Projects)
 
-### 1. Claude (Anthropic)
+- claude.ai: sube `protocols/agents/claude/skills/znve.zip` en **Settings → Capabilities → Skills**.
+- Claude Code: copia la carpeta `protocols/agents/claude/skills/znve/` a `~/.claude/skills/` o a `.claude/skills/` del proyecto.
+- Claude Projects: pega `protocols/agents/claude-system-skills.md` en **Project Instructions** o en `CLAUDE.md`.
+- Invocación: `/znve-contract`, `/znve contract` o `/znve -contract`.
 
-* **Dónde configurar:** En la sección **Project Instructions** (Claude Projects) o en el archivo de reglas locales.
+### 2. GitHub Copilot (VS Code, Visual Studio, JetBrains)
 
+- Usa `.github/copilot-instructions.md`: es la ruta que Copilot lee.
+- En el chat: `@workspace /znve-*`.
 
-* **Archivo de origen:** Pegar el contenido de `protocols/agents/claude-system-skills.md`.
+### 3. Cursor y Windsurf
 
+- Copia `protocols/agents/cursor-rules.md` a `.cursorrules` en la raíz del proyecto.
 
-* **Invocación:** Directa mediante barra (`/znve-forensic`, `/znve-contract`, etc.).
+### 4. DeepSeek (web, API o extensión)
 
+- Inyecta `protocols/agents/deepseek-directive.md` como mensaje con rol `system`.
+- En R1 (Reasoner), las 4 fases de validación ocurren dentro de `<think>`.
 
+### 5. Ollama (modelos locales)
 
-### 2. GitHub Copilot (VS Code / JetBrains / Visual Studio)
-
-* **Dónde configurar:** En `.github/copilot-instructions.md` en la raíz del repositorio.
-
-
-* **Comportamiento:** Indexa las reglas de autocompletado inline y habilita los comandos en el panel de chat invocando `@workspace /znve-*`.
-
-
-
-### 3. DeepSeek (Web, API o IDE Extension)
-
-* **Dónde configurar:** Inyectar `protocols/agents/deepseek-directive.md` como mensaje inicial con rol `system`.
-
-
-* **Modo R1 Reasoner:** El modelo canaliza las 4 fases de validación mental dentro de su bloque `<think>` antes de emitir los artefactos técnicos.
-
-
-
-### 4. Ollama (Modelos Locales CLI)
-
-* **Dónde configurar:** Compilar el agente local mediante `protocols/agents/ollama/Modelfile`:
-
+- Compila el agente local con el `Modelfile`:
 
 ```bash
 ollama create znve-agent -f ./protocols/agents/ollama/Modelfile
 ollama run znve-agent
-
 ```
 
+### 6. OpenRouter
 
-* **Invocación:** Escribir el comando directamente en el prompt interactivo de la terminal.
+- Usa `protocols/agents/openrouter/system-prompt.md` como prompt de sistema y `response-schema.json` como `response_format`.
 
+### 7. Antigravity y clientes MCP (Cursor, Windsurf, Claude Desktop)
 
+- Instala el servidor MCP (compila, verifica las 6 herramientas y registra `znve-engine`):
 
-### 5. Antigravity & IDEs con Soporte MCP (Cursor, Windsurf, Claude Desktop)
+```bash
+cd protocols/mcp
+node install-antigravity.mjs --workspace "<ruta>/tu-proyecto"
+```
 
-* **Dónde configurar:** Registrar el servidor en el archivo de configuración JSON del cliente MCP (`mcp_config.json`):
-
+- O regístralo a mano en `mcp_config.json`:
 
 ```json
 {
   "mcpServers": {
-    "znve-core": {
+    "znve-engine": {
       "command": "node",
-      "args": ["protocols/mcp/znve-mcp-server.js"],
+      "args": ["<ruta>/znve-spec/protocols/mcp/dist/znve-mcp-server.js"],
       "env": {
+        "ZNVE_WORKSPACE": "<ruta>/tu-proyecto",
         "NODE_ENV": "production"
       }
     }
   }
 }
-
 ```
-
-
-* **Operación:** El agente detecta las capacidades expuestas y llama automáticamente a `znve_forensic_scan`, `znve_validate_contract` o `znve_surgical_write` según la fase de la tarea.
-
-
 
 ---
 
-## 🔄 SECCIÓN 4: FLUJOS OPERATIVOS COMPLETOS (WORKFLOWS PASO A PASO)
+## 🔄 SECCIÓN 4: MODOS OPERATIVOS Y FLUJOS PASO A PASO
 
-### Flujo A: Creación de Módulo Nuevo (Modo 1 - Greenfield)
+1. **Modo 1: Greenfield (proyectos nuevos, día 0)** — `/znve-contract` → `/znve-execute`
+2. **Modo 2: In-Flight (proyectos activos y nuevas capacidades)** — `/znve-contract --delta` → `/znve-execute`
+3. **Modo 3: Hotfix & Recovery (triaje de crisis en producción)** — `/znve-triage` → `/znve-hotfix`
+4. **Modo 4: Modern Maintenance (migración de SDKs y breaking changes)** — `/znve-upgrade`
+5. **Modo 5: Legacy Rescue (refactorización en 5 fases de monolitos críticos)** — `/znve-forensic`, `/znve-harness`, `/znve-legacy-rescue`
+6. **Modo 6: Audit & Hardening (higiene técnica, memoria y seguridad)** — `/znve-audit`
+
+### Flujo A: Creación de módulo nuevo (Modo 1 - Greenfield)
 
 ```text
-1. Usuario  --> Inyecta requerimiento con /znve-contract
-2. Agente   --> Retorna DTO tipado + Esquema + Anti-Bloat Fence
+1. Usuario  --> Inyecta el requerimiento con /znve-contract
+2. Agente   --> Retorna DTO tipado + esquema + Anti-Bloat Fence y se detiene
 3. Usuario  --> Revisa y aprueba el contrato inmutable
 4. Usuario  --> Dispara /znve-execute sobre el contrato aprobado
 5. Agente   --> Genera TARGET_FILE con desecho de recursos y test atómico
 6. Terminal --> Ejecuta el comando de validación para certificar la paridad
-
 ```
 
-### Flujo B: Crisis en Producción (Modo 3 - Hotfix)
+### Flujo B: Crisis en producción (Modo 3 - Hotfix)
 
 ```text
-1. Usuario  --> Pega el error o stack trace acompañado de /znve-triage
-2. Agente   --> Identifica causa raíz determinista y delimita radio de impacto (solo lectura)
+1. Usuario  --> Pega el error o stack trace con /znve-triage
+2. Agente   --> Identifica la causa raíz y delimita el radio de impacto (solo lectura)
 3. Usuario  --> Autoriza la intervención y dispara /znve-hotfix
-4. Agente   --> Modifica exclusivamente un único TARGET_FILE e incluye test de regresión
-5. Terminal --> Corre el test de regresión (100% verde) antes de desplegar a producción
-
+4. Agente   --> Modifica un único TARGET_FILE e incluye test de regresión
+5. Terminal --> Corre el test de regresión (100 % verde) antes de desplegar
 ```
 
-### Flujo C: Rescate de Monolito Legacy (Modo 5 - Legacy Rescue)
+### Flujo C: Rescate de monolito legacy (Modo 5 - Legacy Rescue)
 
 ```text
 1. Usuario  --> Ejecuta /znve-forensic sobre el archivo monolítico (Zero-Touch)
-2. Agente   --> Emite el Reporte Forense con contratos implícitos y zonas rojas
+2. Agente   --> Emite el reporte forense con contratos implícitos y zonas rojas
 3. Usuario  --> Ejecuta /znve-harness
-4. Agente   --> Despliega suite Golden Master en tests/characterization/ (Legacy intacto)
-5. Usuario  --> Verifica que el test sobre el código original quede 100% verde
-6. Usuario  --> Ejecuta /znve-execute para diseñar el nuevo módulo en sandbox
-7. Agente   --> Realiza ejecución dual en sombra validando Salida(Nuevo) == Salida(Legacy)
-8. Usuario  --> Despliega el módulo nuevo gradualmente mediante Strangler Fig
-
-```
-
-```
-
+4. Agente   --> Despliega la suite Golden Master en tests/characterization/ (legacy intacto)
+5. Usuario  --> Verifica que el test sobre el código original quede 100 % verde
+6. Usuario  --> Ejecuta /znve-execute para el nuevo módulo en sandbox
+7. Agente   --> Ejecuta en sombra validando Salida(Nuevo) == Salida(Legacy)
+8. Usuario  --> Despliega el módulo nuevo gradualmente con Strangler Fig
 ```

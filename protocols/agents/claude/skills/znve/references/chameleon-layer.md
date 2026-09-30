@@ -1,5 +1,7 @@
 # 🦎 Capa Camaleónica de Plataforma (Chameleon Layer)
 
+<!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
+
 Restricciones adicionales por stack. Se suman a los guardrails globales de ZNVE; no los reemplazan.
 
 | Plataforma | Prioridades ZNVE | Antipatrones prohibidos |

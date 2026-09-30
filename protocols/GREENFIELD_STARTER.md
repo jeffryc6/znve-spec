@@ -1,6 +1,6 @@
 # GREENFIELD STARTER: ZERO-NOISE VIBE ENGINEERING (ZNVE)
 **Plantilla de Inicio Rápido para Proyectos Nuevos (Día 0)**
-*Versión: 2.2.0 | Estándar: Spec-Driven Agentic Architecture*
+*Versión: 2.3.0 | Estándar: Spec-Driven Agentic Architecture | Modo 1 de [ZNVE_PROTOCOL.md](ZNVE_PROTOCOL.md)*
 
 ---
 
@@ -9,15 +9,15 @@ Esta plantilla proporciona la estructura mínima inviolable y el conjunto de com
 
 ---
 
-## 📂 ESTRUCTURA MÍNIMA DEL PROYECTO (SCRUM / REPO LAYOUT)
+## 📂 ESTRUCTURA MÍNIMA DEL PROYECTO (REPO LAYOUT)
 
 ```text
 my-new-project/
-├── .cursorrules                       <-- Directiva agéntica local para Cursor / Windsurf / Roo Code
-├── ZNVE_PROTOCOL.md                   <-- Protocolo operativo universal (6 Modos)
+├── .cursorrules                       <-- Directiva agéntica (Cursor / Windsurf), o la de tu asistente
 ├── contracts/                         <-- FRONTERA DE DATOS (Contratos inmutables)
-│   ├── index.ts                       <-- Exportación de DTOs e Interfaces
-│   └── schemas/                       <-- Esquemas de validación (Zod / TypeBox / Pydantic)
+│   ├── [modulo].contract.ts           <-- DTOs e Interfaces del módulo
+│   ├── schemas/                       <-- Esquemas de validación (Zod / TypeBox / Pydantic)
+│   └── CONTRACT_BACKLOG.md            <-- Ideas diferidas (Cubo B)
 ├── src/                               <-- CÓDIGO QUIRÚRGICO DE IMPLEMENTACIÓN
 │   └── ...                            <-- Archivos objetivo (TARGET_FILE)
 ├── tests/                             <-- BATERÍA DE VERIFICACIÓN ATÓMICA
@@ -29,21 +29,21 @@ my-new-project/
 
 ## 🚀 FLUJO DE INICIO RÁPIDO EN 4 PASOS (GREENFIELD WORKFLOW)
 
-```
+```text
 ┌─────────────────────────────────────────────────────────────┐
-│ PASO 1: INSTALACIÓN DE BARANDILLAS (.cursorrules)          │
-│        --> Copiar .cursorrules en la raíz del proyecto.     │
+│ PASO 1: INSTALAR ZNVE EN TU ASISTENTE                       │
+│        --> Skill, directiva o servidor MCP (ver tabla).     │
 ├─────────────────────────────────────────────────────────────┤
 │ PASO 2: ISLA DE ALCANCE (ANTI-BLOAT FENCE)                  │
 │        --> Delimitar qué resuelve el MVP y vetar paquetes.  │
 ├─────────────────────────────────────────────────────────────┤
-│ PASO 3: CONTRATO PRIMERO (/znve-contract)                   │
-│        --> Diseñar DTOs/Interfaces en contracts/ antes      │
-│            de generar código de negocio.                    │
+│ PASO 3: CONTRATO PRIMERO (/znve-contract --platform=...)    │
+│        --> DTOs en contracts/ + lista de chequeo de 4       │
+│            puntos + criterio de parada.                     │
 ├─────────────────────────────────────────────────────────────┤
-│ PASO 4: EJECUCIÓN ATÓMICA (/znve-execute)                  │
+│ PASO 4: EJECUCIÓN ATÓMICA (/znve-execute --target=...)      │
 │        --> Implementar únicamente en TARGET_FILE y          │
-│            ejecutar la prueba de verificación.             │
+│            ejecutar la prueba de verificación.              │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -51,47 +51,66 @@ my-new-project/
 
 ## 🛠️ PASO A PASO: DEL PROMPT AL CÓDIGO PRODUCTIVO
 
-### Paso 1: Configurar las Barandillas Agénticas
-Copia el archivo `.cursorrules` (o `protocols/agents/claude-system-skills.md` en tu proyecto de Claude/Windsurf) en la raíz.
+### Paso 1: Instalar ZNVE en tu asistente
 
-### Paso 2: Declarar el Perímetro y el Comando Inicial (GREENFIELD MODO 1)
-Envía este prompt a tu asistente de IA (Cursor, Windsurf, Claude, Copilot):
+| Asistente | Qué usar |
+|---|---|
+| Claude (claude.ai) | Sube `protocols/agents/claude/skills/znve.zip` en *Settings → Capabilities → Skills*. |
+| Claude Code | Copia `protocols/agents/claude/skills/znve/` a `~/.claude/skills/` o a `.claude/skills/` del proyecto. |
+| Claude Projects | Pega `protocols/agents/claude-system-skills.md` en *Project Instructions* o en `CLAUDE.md`. |
+| GitHub Copilot | Copia `.github/copilot-instructions.md` a tu proyecto. |
+| Cursor / Windsurf | Copia `protocols/agents/cursor-rules.md` como `.cursorrules`. |
+| DeepSeek / OpenRouter / Ollama | `deepseek-directive.md`, `openrouter/system-prompt.md` u `ollama/Modelfile`. |
+| Antigravity | Skill: `protocols/Antigravity/Skills/INSTALL_ANTIGRAVITY.md`. MCP: `protocols/mcp/ANTIGRAVITY_INSTALL.md`. |
+
+Comprueba la instalación escribiendo `/znve-help`: debe aparecer el catálogo de 10 comandos.
+
+### Paso 2: Declarar el Perímetro y el Contrato Inicial (MODO 1)
+Envía este prompt a tu asistente de IA:
 
 ```text
+/znve-contract --platform=[desktop|web|mobile|hybrid]
 Bajo ZNVE Modo 1 (Greenfield), vamos a iniciar el desarrollo del módulo [NOMBRE_DEL_MÓDULO].
 
 1. Delimita el Anti-Bloat Fence: Prohibido instalar librerías de terceros; usaremos exclusivamente las APIs nativas del runtime/SDK.
-2. Ejecuta /znve-contract: Diseña el contrato DTO y la interfaz de datos inmutable en `contracts/[modulo].contract.ts`.
-3. No escribas código de implementación todavía. Espera mi aprobación del contrato.
+2. Recomienda el stack para la plataforma y diseña el contrato DTO y la interfaz de datos inmutable en `contracts/[modulo].contract.ts`.
+3. Aplica la lista de chequeo de solidez y, si se cumple, emite el criterio de parada.
+4. No escribas código de implementación todavía. Espera mi aprobación del contrato.
 ```
 
 ### Paso 3: Revisión y Congelación del Contrato
-Asegúrate de que la salida del Bloque 1 de la IA contenga:
-- DTOs con tipos primitivos o cerrados.
-- Tipos de error previstos (`Enum` o uniones discriminadas).
-- Ausencia total de campos opcionales no solicitados o abstracciones prematuras.
+Aprueba el contrato solo si cumple la **lista de chequeo de solidez**:
+- [ ] **Estructura invariable:** entradas, salidas, entidades y enums tipados.
+- [ ] **Defensas de frontera:** tipos de error explícitos (enums o uniones discriminadas), sin `any` ni `catch` genéricos.
+- [ ] **Cero dependencias parásitas:** solo el SDK nativo o el runtime aprobado.
+- [ ] **Filtro de diferimiento:** ideas secundarias movidas a `contracts/CONTRACT_BACKLOG.md`.
+
+Con los 4 puntos cumplidos, la IA debe responder *"Contrato v1 sólido y cerrado. Listo para /znve-execute."* y dejar de proponer cambios.
 
 ### Paso 4: Orden de Ejecución Quirúrgica
 Una vez aprobado el contrato, ordena la implementación:
 
 ```text
-Contrato aprobado. Ejecuta /znve-execute para implementar la lógica interna en `src/[modulo]/[servicio].ts`.
+/znve-execute --target=src/[modulo]/[servicio].ts
+Contrato aprobado. Implementa la lógica interna.
 
-RESTRICCIONES STRICTAS:
+RESTRICCIONES ESTRICTAS:
 - TARGET_FILE exclusivo: `src/[modulo]/[servicio].ts`.
 - Aplica desecho determinista de recursos (finally / dispose / close).
 - Prohibidos bloques try/catch vacíos.
 - Incluye el comando de verificación atómica ejecutable.
 ```
 
+Para añadir capacidades más adelante, usa `/znve-contract --delta` (Modo 2): la IA separa lo requerido ya (Cubo A) de lo diferido (Cubo B) antes de tocar código.
+
 ---
 
 ## 📋 VERIFICACIÓN DE SALIDA OBLIGATORIA (RESPUESTA EN 4 BLOQUES)
 
-Toda IA trabajando en este proyecto Greenfield DEBE responder con la siguiente estructura:
+Toda consulta técnica sin comando debe responderse con la siguiente estructura:
 
 1. **BLOQUE 1: SYSTEM BLUEPRINT & CONTRATO:** Delimitación de alcance, plataforma objetivo y contrato inmutable (`contracts/`).
-2. **BLOQUE 2: RACIONAL DE INGENIERÍA:** 2 viñetas justificando la huella mínima de CPU/RAM y la ausencia de dependencias parásitas.
+2. **BLOQUE 2: RACIONAL DE INGENIERÍA:** 2-3 viñetas justificando la huella mínima de CPU/RAM y la ausencia de dependencias parásitas.
 3. **BLOQUE 3: TAREAS ATÓMICAS DE IMPLEMENTACIÓN:** `TARGET_FILE` único, acción quirúrgica y restricciones aplicadas.
 4. **BLOQUE 4: VERIFICACIÓN ATÓMICA:** Comando terminal ejecutable o prueba unitaria (`tests/unit/`) para certificar el funcionamiento.
 
@@ -99,8 +118,8 @@ Toda IA trabajando en este proyecto Greenfield DEBE responder con la siguiente e
 
 ## 🛡️ LISTA DE CHEQUEO DÍA 0 (GREENFIELD CHECKLIST)
 
-- [ ] `.cursorrules` / Directiva agéntica colocada en la raíz.
-- [ ] Directorio `contracts/` creado con DTOs/interfaces aprobados.
+- [ ] ZNVE instalado en el asistente y `/znve-help` responde con el catálogo.
+- [ ] Directorio `contracts/` creado con DTOs/interfaces aprobados y `CONTRACT_BACKLOG.md` para lo diferido.
 - [ ] Cero dependencias externas agregadas a `package.json` / `requirements.txt` / `Cargo.toml`.
 - [ ] Pruebas unitarias de frontera ejecutadas y en verde.
 - [ ] Cero logs de confirmación rutinaria (`"OK"`, `"Success"`) en el código de producción.

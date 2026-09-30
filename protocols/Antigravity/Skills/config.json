@@ -1,0 +1,9 @@
+{
+  "skills": {
+    "znve": {
+      "path": "./skills/znve/znve_skill.py",
+      "entrypoint": "get_znve_skill",
+      "strict_mode": true
+    }
+  }
+}

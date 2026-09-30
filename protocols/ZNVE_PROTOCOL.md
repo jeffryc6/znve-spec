@@ -1,19 +1,27 @@
 # ==============================================================================
 # ZERO-NOISE VIBE ENGINEERING (ZNVE) — PROTOCOLO OPERATIVO UNIVERSAL
-# Framework: Zero-Noise Vibe Engineering (ZNVE)
+# Archivo: protocols/ZNVE_PROTOCOL.md
+# Versión: 2.3.0
 # Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
 # Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
 # ==============================================================================
 
-Este documento es la especificación técnica inmutable que rige el trabajo entre el 
-humano (Director de Arquitectura) y los agentes de Inteligencia Artificial 
-(Claude, Cursor, Windsurf, Copilot, ChatGPT, Antigravity).
+Este documento es el protocolo operativo que rige el trabajo entre el humano
+(Director de Arquitectura) y los agentes de Inteligencia Artificial (Claude,
+Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity). La norma
+formal está en [SPECIFICATION.md](../SPECIFICATION.md) y el catálogo de comandos
+en [COMMANDS.md](COMMANDS.md).
 
 Aplica con igual rigor a:
 - Aplicaciones Móviles (Android nativo / iOS nativo).
 - Aplicaciones de Escritorio (Windows WinUI/WPF/C#, macOS, Linux, C++, Rust).
 - Aplicaciones Híbridas y Multiplataforma (Flutter, Tauri, React Native, Electron).
 - Aplicaciones Web, Servicios Backend, Microservicios, CLIs y Sistemas Embebidos.
+
+Protocolos especializados:
+- [ZNVE_MODERN_APPS_PROTOCOL.md](ZNVE_MODERN_APPS_PROTOCOL.md): modos 3 y 4 (hotfix y upgrades).
+- [ZNVE_LEGACY_PROTOCOL.md](ZNVE_LEGACY_PROTOCOL.md): modo 5 (rescate legacy en 5 fases).
+- [GREENFIELD_STARTER.md](GREENFIELD_STARTER.md): modo 1 paso a paso.
 
 ---
 
@@ -30,6 +38,7 @@ Aplica con igual rigor a:
   - En datos: DTOs, esquemas tipados, modelos inmutables o entidades validadas.
   - En UI/Plataforma: Interfaces de eventos, contratos de estado (State Machines) o protocolos de enlace IPC.
 - El código generado debe satisfacer el contrato al 100%, sin agregar propiedades inventadas, abstracciones prematuras ni lógica especulativa.
+- **Poda de Contexto:** el agente trabaja solo con el contrato activo y el archivo objetivo (`TARGET_FILE`).
 
 ### 3. Eficiencia Asimétrica y Mínima Huella de Recursos
 - **"Cerebro en el diseño, reflejo en el dispositivo":**
@@ -45,7 +54,7 @@ Aplica con igual rigor a:
 ### 5. Seguridad Defensiva y Diagnóstico Forense (Zero-Trust & Zero-Crash)
 - Cualquier entrada externa, parámetro de red, evento de hardware o intent del sistema se asume hostil y no sanitizado.
 - Prohibido enmascarar excepciones con bloques defensivos vacíos o retardos arbitrarios (`sleep` / `setTimeout`).
-- Cada falla se investiga hasta su causa de fondo: desbordamiento de memoria, bloqueos mutuos (deadlocks), contención de hilos o incompatibilidad con el sistema operativo anfitrión.
+- Cada falla se investiga hasta su causa de fondo: desbordamiento de memoria, bloqueos mutuos (deadlocks), contención de hilos o incompatibilidad con el sistema operativo anfitrión. La trazabilidad se apoya en `X-Run-ID`, no en logs rutinarios.
 
 ---
 
@@ -56,45 +65,69 @@ Al intervenir en un stack específico, la IA debe activar automáticamente los c
 | Plataforma | Prioridades de Ejecución ZNVE | Anti-patrones Prohibidos para la IA |
 |---|---|---|
 | **Android** | Respetar `LifecycleOwner`, trabajo diferido con `WorkManager`, StateFlow/Flows eficientes, arranque rápido (*Cold Boot*). | Despertar la CPU con `WakeLock` innecesarios, bloquear el Main Thread, ignorar muerte del proceso por el sistema operativo. |
+| **iOS / macOS (Swift)** | SwiftUI sobre `@MainActor` solo para vistas, trabajo pesado en `Actors` de fondo, tareas diferidas con `BGTaskScheduler`, persistencia ligera con SwiftData o SQLite. | Bloquear el hilo principal, capturas fuertes de `self` en closures (usar `[weak self]`), tareas de fondo infinitas que provoquen la terminación por el Watchdog. |
 | **Windows Desktop** | Liberación de recursos no administrados (`IDisposable`), procesamiento asíncrono (`async/await` sin `Wait()`), instancia única (*Single Instance Mutex*). | Bloquear el despachador de UI (UI Dispatcher), dependencias masivas en runtime, dejar procesos secundarios en segundo plano al salir. |
 | **Híbrido (Tauri / Flutter / RN)** | Mensajería binaria optimizada a través del puente (Bridge/IPC), inmutabilidad de estado, mínimo tamaño de binario compilado. | Pasar objetos JSON gigantescos por el puente nativo en cada frame, re-renderizar todo el árbol de vistas por cambios locales. |
-| **Web & Backend** | Modularidad sin dependencias redundantes, contención de concurrencia, límites estrictos de memoria por worker, compresión de transferencias. | Cargar librerías de utilidad completas para funciones triviales, escaneos no indexados en la base de datos, fugas en event listeners. |
+| **Web & Backend** | Modularidad sin dependencias redundantes, contención de concurrencia, límites estrictos de memoria por worker, timeouts explícitos y apagado elegante. | Cargar librerías de utilidad completas para funciones triviales, escaneos no indexados en la base de datos, fugas en event listeners. |
 
 ---
 
-## 🎛️ MODOS OPERATIVOS UNIVERSALES
+## 🎛️ LOS 6 MODOS OPERATIVOS UNIVERSALES
 
-Antes de iniciar una tarea, se declara el **MODO ACTIVO** de la intervención:
+Antes de iniciar una tarea, se declara el **MODO ACTIVO** de la intervención. Cada modo tiene su secuencia de comandos `/znve-*`.
 
 ### 🟢 MODO 1: GREENFIELD (CREACIÓN DESDE CERO)
-*Aplicar cuando se diseña un módulo, pantalla, servicio o cliente nuevo.*
+*Aplicar cuando se diseña un módulo, pantalla, servicio o cliente nuevo.* Comandos: `/znve-contract` → `/znve-execute`.
 1. **Definir Perímetro:** Delimitar qué resuelve el MVP y qué queda explícitamente fuera (Anti-Bloat Fence).
-2. **Definir Contrato:** Redactar el DTO, interfaz de estado o firma de eventos antes de escribir lógica interna.
-3. **Implementación Atómica:** Generar la lógica mínima y eficiente que satisface el contrato.
+2. **Definir Contrato:** `/znve-contract --platform=<desktop|web|mobile|hybrid>` redacta los DTOs, la interfaz de estado o la firma de eventos y recomienda el stack. La IA se detiene al cumplir la lista de chequeo de solidez: *"Contrato v1 sólido y cerrado. Listo para /znve-execute."*
+3. **Implementación Atómica:** `/znve-execute --target=<archivo>` genera la lógica mínima que satisface el contrato.
 4. **Verificación:** Ejecutar una prueba atómica (test unitario, verificación de compilación o benchmark local).
 
-### 🟡 MODO 2: LEGACY RESCUE (REFACTORIZACIÓN DE SISTEMAS CRÍTICOS)
-*Aplicar al intervenir archivos monolíticos, código espagueti o sistemas legacy en producción.*
+### 🔵 MODO 2: IN-FLIGHT (PROYECTOS ACTIVOS Y NUEVAS CAPACIDADES)
+*Aplicar al añadir funcionalidades a un sistema en desarrollo o en producción.* Comandos: `/znve-contract --delta` → `/znve-execute`.
+1. **Análisis Delta:** Comparar `contracts/` con `src/` y clasificar los cambios en **Cubo A** (requerido ya) y **Cubo B** (diferido a `contracts/CONTRACT_BACKLOG.md`).
+2. **Extensión, no mutación:** Los contratos activos se extienden; nunca se alteran sus campos o firmas existentes.
+3. **Re-congelación:** Mostrar el diff del Cubo A y esperar aprobación antes de modificar código.
+4. **Implementación y verificación:** `/znve-execute` sobre un único `TARGET_FILE` por tarea.
+
+### 🟠 MODO 3: HOTFIX & RECOVERY (CRISIS EN PRODUCCIÓN)
+*Aplicar ante caídas, bloqueos o excepciones en producción.* Comandos: `/znve-triage` → `/znve-hotfix`. Detalle en [ZNVE_MODERN_APPS_PROTOCOL.md](ZNVE_MODERN_APPS_PROTOCOL.md), Flujo A.
+1. **Contención:** Aislar el radio de impacto (fallback local, circuit breaker) sin alterar contratos públicos.
+2. **Diagnóstico Causal:** `/znve-triage` en solo lectura hasta encontrar la causa raíz reproducible.
+3. **Hotfix Atómico:** `/znve-hotfix --incident=<ID>` sobre un único `TARGET_FILE`, con `X-Run-ID` en el punto de fallo.
+4. **Regresión:** Test que falla sin el parche y pasa al 100% con él.
+
+### 🟣 MODO 4: MODERN MAINTENANCE (SDKs Y BREAKING CHANGES)
+*Aplicar al actualizar dependencias, SDKs o APIs externas con cambios disruptivos.* Comando: `/znve-upgrade`. Detalle en [ZNVE_MODERN_APPS_PROTOCOL.md](ZNVE_MODERN_APPS_PROTOCOL.md), Flujo B.
+1. **Matriz de Breaking Changes:** versión previa frente a versión objetivo.
+2. **Capa Anti-Corrupción:** contrato interno (`Port`) y adaptador (`Adapter`) que absorbe los cambios.
+3. **Migración Aislada:** los cambios viven solo en el adaptador; el dominio no se entera.
+4. **Verificación Dual:** paridad funcional y huella de memoria/binario.
+
+### 🟡 MODO 5: LEGACY RESCUE (REFACTORIZACIÓN DE SISTEMAS CRÍTICOS)
+*Aplicar al intervenir archivos monolíticos, código espagueti o sistemas legacy en producción.* Comandos: `/znve-forensic` → `/znve-harness` → `/znve-legacy-rescue`. Detalle en [ZNVE_LEGACY_PROTOCOL.md](ZNVE_LEGACY_PROTOCOL.md).
 1. **Fase 1 (Ingesta Pasiva - Zero Touch):** La IA analiza el código en modo estrictamente de lectura. Prohibido sugerir o escribir cambios en este paso.
 2. **Fase 2 (Reporte Forense):** La IA documenta entradas, salidas, efectos secundarios (llamadas a disco, hardware, base de datos, APIs) y dependencias ocultas.
-3. **Fase 3 (Arnés de Caracterización):** Se construyen pruebas de caja negra contra el código original intacto para congelar su comportamiento actual (Snapshot).
-4. **Fase 4 (Extracción Quirúrgica):** Se extrae módulo por módulo bajo nuevos contratos tipados, garantizando que el arnés de pruebas se mantenga en verde.
+3. **Fase 3 (Arnés de Caracterización):** Se construyen pruebas de caja negra contra el código original intacto para congelar su comportamiento actual (Golden Master).
+4. **Fase 4 (Shadow Run):** El módulo nuevo se ejecuta en sombra hasta confirmar `Salida(Nuevo) == Salida(Legacy)`.
+5. **Fase 5 (Strangler Fig):** Conmutación gradual sin downtime y retirada del código legacy en un commit dedicado.
 
-### 🔴 MODO 3: HARDENING, RENDIMIENTO & AUDITORÍA
-*Aplicar en optimización de rendimiento, contención de fallos, auditoría de seguridad y concurrencia.*
-1. **Auditoría de Superficie y Recursos:** Identificar fugas de memoria, descriptores abiertos, consumo parásito de CPU/batería o puertos/interfaces expuestas innecesariamente.
+### 🔴 MODO 6: AUDIT & HARDENING (HIGIENE TÉCNICA, MEMORIA Y SEGURIDAD)
+*Aplicar en optimización de rendimiento, contención de fallos, auditoría de seguridad y concurrencia.* Comando: `/znve-audit`.
+1. **Auditoría de Superficie y Recursos:** Identificar fugas de memoria, descriptores abiertos, consumo parásito de CPU/batería, logs ruidosos o puertos/interfaces expuestos innecesariamente.
 2. **Aislamiento de Tareas Pesadas:** Desacoplar el trabajo de computación pesada del hilo principal o de la interfaz de usuario mediante workers, colas o hilos en segundo plano.
 3. **Pruebas de Esfuerzo y Fallo Controlado:** Verificar la resiliencia del sistema ante desconexión total de red, datos corruptos y apagado abrupto.
+4. **Hoja de Remediación:** Acciones atómicas priorizadas por causa raíz, cada una con su `TARGET_FILE` y verificación, entregadas para aprobación antes de tocar código.
 
 ---
 
 ## 📋 DIRECTIVA DE EJECUCIÓN PARA AGENTES DE IA (AI DIRECTIVE)
 
-Al recibir una tarea bajo el protocolo ZNVE, responde obligatoriamente con la siguiente estructura de 4 bloques:
+Si la tarea usa un comando `/znve-*`, la respuesta sigue el formato de salida de ese comando ([COMMANDS.md](COMMANDS.md)). Sin comando, responde obligatoriamente con la siguiente estructura de 4 bloques:
 
 ### BLOQUE 1: SYSTEM BLUEPRINT / ESPECIFICACIÓN
 - **Objetivo y Límites:** Qué resuelve la tarea y qué queda estrictamente fuera de alcance.
-- **Plataforma y Entorno:** Plataforma objetivo (Android, Windows, Web, Híbrido, etc.) y modelo de hilos aplicable.
+- **Plataforma y Entorno:** Plataforma objetivo (Android, iOS, Windows, Web, Híbrido, etc.) y modelo de hilos aplicable.
 - **Contrato de Datos y Estado:** Interfaces inmutables, DTOs, firmas de eventos o esquemas de persistencia.
 
 ### BLOQUE 2: RACIONAL DE INGENIERÍA
@@ -108,3 +141,5 @@ Lista numerada de cambios quirúrgicos. Cada tarea debe indicar:
 
 ### BLOQUE 4: PLAN DE VERIFICACIÓN ATÓMICA
 - Comandos de terminal, tests unitarios, perfiles de memoria o pruebas de ejecución para validar que el cambio funciona, no tiene fugas de recursos ni introduce regresiones.
+
+Las preguntas conceptuales se responden de forma directa y breve, sin forzar los 4 bloques.
