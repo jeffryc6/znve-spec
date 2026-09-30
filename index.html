@@ -403,12 +403,12 @@
         <p class="eyebrow">Zero-Noise Vibe Engineering</p>
         <h1 data-l="es">Programa con IA <em>sin ruido</em>, sin deuda y sin sorpresas.</h1>
         <h1 data-l="en" lang="en">Build with AI <em>without noise</em>, debt or surprises.</h1>
-        <p class="lead" data-l="es">ZNVE es una metodología abierta que convierte a tu asistente de IA (Claude, Copilot, Cursor, DeepSeek, Ollama, OpenRouter o Antigravity) en un ejecutor disciplinado. Primero se diseña un <strong>contrato</strong>; después la IA escribe solo el código necesario, sin dependencias parásitas, sin logs de relleno y sin errores silenciados.</p>
-        <p class="lead" data-l="en" lang="en">ZNVE is an open methodology that turns your AI assistant (Claude, Copilot, Cursor, DeepSeek, Ollama, OpenRouter or Antigravity) into a disciplined executor. First you design a <strong>contract</strong>; then the AI writes only the code that is needed, with no parasitic dependencies, no filler logs and no swallowed errors.</p>
+        <p class="lead" data-l="es">ZNVE es una metodología abierta que convierte a tu asistente de IA (Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter o Antigravity) en un ejecutor disciplinado. Primero se diseña un <strong>contrato</strong>; después la IA escribe solo el código necesario, sin dependencias parásitas, sin logs de relleno y sin errores silenciados.</p>
+        <p class="lead" data-l="en" lang="en">ZNVE is an open methodology that turns your AI assistant (Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter or Antigravity) into a disciplined executor. First you design a <strong>contract</strong>; then the AI writes only the code that is needed, with no parasitic dependencies, no filler logs and no swallowed errors.</p>
         <div class="badges">
           <span class="badge"><span data-l="es">Norma v2.3.0</span><span data-l="en" lang="en">Standard v2.3.0</span></span>
           <span class="badge"><span data-l="es">10 comandos /znve-*</span><span data-l="en" lang="en">10 /znve-* commands</span></span>
-          <span class="badge"><span data-l="es">7 asistentes sincronizados</span><span data-l="en" lang="en">7 assistants in sync</span></span>
+          <span class="badge"><span data-l="es">8 asistentes sincronizados</span><span data-l="en" lang="en">8 assistants in sync</span></span>
           <span class="badge"><span data-l="es">Servidor MCP · 6 herramientas</span><span data-l="en" lang="en">MCP server · 6 tools</span></span>
           <span class="badge">CC BY 4.0 &amp; MIT</span>
         </div>
@@ -946,6 +946,7 @@ def test_golden_master():  # ✓ must pass 100% against the intact code
       <div class="tabs" role="tablist" aria-label="Instalación / Installation">
         <button role="tab" id="itab-claude" aria-controls="ipanel-claude" aria-selected="true">Claude</button>
         <button role="tab" id="itab-code" aria-controls="ipanel-code" aria-selected="false" tabindex="-1">Claude Code</button>
+        <button role="tab" id="itab-gemini" aria-controls="ipanel-gemini" aria-selected="false" tabindex="-1">Gemini</button>
         <button role="tab" id="itab-copilot" aria-controls="ipanel-copilot" aria-selected="false" tabindex="-1">Copilot</button>
         <button role="tab" id="itab-cursor" aria-controls="ipanel-cursor" aria-selected="false" tabindex="-1">Cursor / Windsurf</button>
         <button role="tab" id="itab-local" aria-controls="ipanel-local" aria-selected="false" tabindex="-1">Ollama · DeepSeek · OpenRouter</button>
@@ -974,6 +975,23 @@ cp -r znve-spec/protocols/agents/claude/skills/znve ~/.claude/skills/</code></pr
 Copy-Item -Recurse znve-spec\protocols\agents\claude\skills\znve $HOME\.claude\skills\znve</code></pre><button class="copy" data-copy="cmd-code-win"></button></div>
         <p class="muted" data-l="es">La skill aparece en el menú <code>/</code> como <code>/znve</code>. Para un solo proyecto, cópiala en <code>.claude/skills/</code> dentro del proyecto.</p>
         <p class="muted" data-l="en" lang="en">The skill shows up in the <code>/</code> menu as <code>/znve</code>. For a single project, copy it into <code>.claude/skills/</code> inside that project.</p>
+      </div>
+
+      <div role="tabpanel" id="ipanel-gemini" aria-labelledby="itab-gemini" hidden>
+        <div class="flow">
+          <div class="step"><b data-l="es">1 · Descarga</b><b data-l="en" lang="en">1 · Download</b><small data-l="es">La carpeta <a data-doc href="https://github.com/jeffryc6/znve-spec/tree/main/protocols/agents/gemini/skills/znve">skills/znve</a></small><small data-l="en" lang="en">The <a data-doc href="https://github.com/jeffryc6/znve-spec/tree/main/protocols/agents/gemini/skills/znve">skills/znve</a> folder</small></div>
+          <div class="arrow">→</div>
+          <div class="step"><b data-l="es">2 · Sube</b><b data-l="en" lang="en">2 · Upload</b><small>gemini.google.com → Settings → Skills → Upload</small></div>
+          <div class="arrow">→</div>
+          <div class="step"><b data-l="es">3 · Prueba</b><b data-l="en" lang="en">3 · Test</b><small data-l="es">Chat nuevo: <code>znve-help</code></small><small data-l="en" lang="en">New chat: <code>znve-help</code></small></div>
+        </div>
+        <p class="muted" data-l="es">App web y de Mac. Requiere cuenta personal de Google, mayor de 18 años y la actividad de Keep activada.</p>
+        <p class="muted" data-l="en" lang="en">Web and Mac app. Requires a personal Google Account, age 18+ and Keep Activity turned on.</p>
+        <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span>Gemini CLI</span></div>
+<pre id="cmd-gemini"><code data-lang="sh">gemini skills install https://github.com/jeffryc6/znve-spec.git --path protocols/agents/gemini/skills/znve
+gemini skills list</code></pre><button class="copy" data-copy="cmd-gemini"></button></div>
+        <p class="muted" data-l="es">En Gemini CLI escribe los comandos <b>sin barra inicial</b> (<code>znve-contract …</code>): la CLI reserva <code>/</code> para sus propios comandos. Guía completa: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/agents/gemini/INSTALL_GEMINI.md">INSTALL_GEMINI.md</a>.</p>
+        <p class="muted" data-l="en" lang="en">In Gemini CLI, type commands <b>without the leading slash</b> (<code>znve-contract …</code>): the CLI reserves <code>/</code> for its own commands. Full guide: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/agents/gemini/INSTALL_GEMINI.md">INSTALL_GEMINI.md</a>.</p>
       </div>
 
       <div role="tabpanel" id="ipanel-copilot" aria-labelledby="itab-copilot" hidden>
@@ -1041,16 +1059,16 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
       <p class="eyebrow"><span data-l="es">09 · Cómo funciona por dentro</span><span data-l="en" lang="en">09 · Under the hood</span></p>
       <h2 data-l="es">Una sola especificación genera todo lo demás</h2>
       <h2 data-l="en" lang="en">A single specification generates everything else</h2>
-      <p class="lead" data-l="es">Mantener las mismas reglas en 7 asistentes a mano provocaba versiones desalineadas. Hoy la metodología se declara una vez en <code>znve-auto/master_spec.json</code>, un compilador sin dependencias genera cada directiva y el CI rechaza cualquier desvío.</p>
-      <p class="lead" data-l="en" lang="en">Keeping the same rules across 7 assistants by hand led to drifting versions. Today the methodology is declared once in <code>znve-auto/master_spec.json</code>, a dependency-free compiler generates every directive and CI rejects any drift.</p>
+      <p class="lead" data-l="es">Mantener las mismas reglas en 8 asistentes a mano provocaba versiones desalineadas. Hoy la metodología se declara una vez en <code>znve-auto/master_spec.json</code>, un compilador sin dependencias genera cada directiva y el CI rechaza cualquier desvío.</p>
+      <p class="lead" data-l="en" lang="en">Keeping the same rules across 8 assistants by hand led to drifting versions. Today the methodology is declared once in <code>znve-auto/master_spec.json</code>, a dependency-free compiler generates every directive and CI rejects any drift.</p>
       <div class="flow">
         <div class="step"><b>master_spec.json</b><small data-l="es">Versión, guardrails, modos y 10 comandos</small><small data-l="en" lang="en">Version, guardrails, modes and 10 commands</small></div>
         <div class="arrow">→</div>
-        <div class="step"><b>builder.py</b><small data-l="es">14 plantillas + bloques gestionados</small><small data-l="en" lang="en">14 templates + managed regions</small></div>
+        <div class="step"><b>builder.py</b><small data-l="es">16 plantillas + bloques gestionados</small><small data-l="en" lang="en">16 templates + managed regions</small></div>
         <div class="arrow">→</div>
-        <div class="step"><b data-l="es">22 artefactos</b><b data-l="en" lang="en">22 artifacts</b><small data-l="es">Skills, directivas, manual, MCP, esta web</small><small data-l="en" lang="en">Skills, directives, manual, MCP, this site</small></div>
+        <div class="step"><b data-l="es">25 artefactos</b><b data-l="en" lang="en">25 artifacts</b><small data-l="es">Skills, directivas, manual, MCP, esta web</small><small data-l="en" lang="en">Skills, directives, manual, MCP, this site</small></div>
         <div class="arrow">→</div>
-        <div class="step"><b>test_sync.py</b><small data-l="es">18 pruebas de paridad</small><small data-l="en" lang="en">18 parity tests</small></div>
+        <div class="step"><b>test_sync.py</b><small data-l="es">19 pruebas de paridad</small><small data-l="en" lang="en">19 parity tests</small></div>
         <div class="arrow">→</div>
         <div class="step"><b>GitHub Actions</b><small data-l="es">Falla si algo se desvía</small><small data-l="en" lang="en">Fails on any drift</small></div>
       </div>
@@ -1064,8 +1082,9 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
 ├── protocols/
 │   ├── ZNVE_PROTOCOL.md    los 6 modos
 │   ├── COMMANDS.md         manual de comandos y MCP
-│   ├── agents/             Claude, Copilot, Cursor,
-│   │                       DeepSeek, Ollama, OpenRouter
+│   ├── agents/             Claude, Gemini, Copilot,
+│   │                       Cursor, DeepSeek, Ollama,
+│   │                       OpenRouter
 │   ├── Antigravity/        skill e instaladores
 │   └── mcp/                servidor MCP (6 herramientas)
 ├── znve-auto/              fuente única + builder + tests
@@ -1077,8 +1096,9 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
 ├── protocols/
 │   ├── ZNVE_PROTOCOL.md    the 6 modes
 │   ├── COMMANDS.md         command and MCP manual
-│   ├── agents/             Claude, Copilot, Cursor,
-│   │                       DeepSeek, Ollama, OpenRouter
+│   ├── agents/             Claude, Gemini, Copilot,
+│   │                       Cursor, DeepSeek, Ollama,
+│   │                       OpenRouter
 │   ├── Antigravity/        skill and installers
 │   └── mcp/                MCP server (6 tools)
 ├── znve-auto/              single source + builder + tests
@@ -1088,7 +1108,7 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
           <h3 data-l="es">Mantener y desplegar</h3><h3 data-l="en" lang="en">Maintain and deploy</h3>
           <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span data-l="es">para colaboradores</span><span data-l="en" lang="en">for contributors</span></div>
 <pre id="cmd-build"><code data-lang="sh"># 1. edit znve-auto/master_spec.json
-python znve-auto/builder.py      # 22 artifacts
+python znve-auto/builder.py      # 25 artifacts
 python znve-auto/test_sync.py    # parity check
 git push                         # CI + GitHub Pages</code></pre><button class="copy" data-copy="cmd-build"></button></div>
           <p class="muted" data-l="es">Solo biblioteca estándar de Python. Los archivos generados llevan un aviso y no se editan a mano. Detalles en <a data-doc href="https://github.com/jeffryc6/znve-spec/tree/main/znve-auto">znve-auto/README.md</a>.</p>
@@ -1131,6 +1151,10 @@ git push                         # CI + GitHub Pages</code></pre><button class="
           <h3 data-l="es">Fuente única y sincronización</h3><h3 data-l="en" lang="en">Single source and sync</h3>
           <p data-l="es">Nace <code>znve-auto</code>: 22 artefactos generados, 18 pruebas y CI. Todo el repositorio queda en v2.3.0 y publicado en esta página.</p>
           <p data-l="en" lang="en"><code>znve-auto</code> is born: 22 generated artifacts, 18 tests and CI. The whole repository moves to v2.3.0 and is published on this page.</p></li>
+        <li><time>2026-09-29</time>
+          <h3 data-l="es">Skill para Gemini</h3><h3 data-l="en" lang="en">Gemini skill</h3>
+          <p data-l="es">La misma skill en formato Agent Skills para la app de Gemini y Gemini CLI, generada desde la especificación: 25 artefactos y 19 pruebas.</p>
+          <p data-l="en" lang="en">The same skill in Agent Skills format for the Gemini app and Gemini CLI, generated from the specification: 25 artifacts and 19 tests.</p></li>
       </ol>
     </section>
 

@@ -34,6 +34,10 @@ ZNVE_VERSION_REF = re.compile(r"ZNVE[^\n\d]{0,40}?v?(\d+\.\d+\.\d+)")
 SKILL_KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compatibility"}
 MCP_SERVER = REPO / "protocols" / "mcp" / "znve-mcp-server.ts"
 OPENROUTER_SCHEMA = REPO / "protocols" / "agents" / "openrouter" / "response-schema.json"
+SKILL_FILES = (
+    "protocols/agents/claude/skills/znve/SKILL.md",
+    "protocols/agents/gemini/skills/znve/SKILL.md",
+)
 ANTIGRAVITY_DIR = REPO / "protocols" / "Antigravity" / "Skills"
 HAND_MAINTAINED_SKIP = {".git", "node_modules", "dist", "znve-auto"}
 
@@ -122,15 +126,24 @@ class ArtifactTests(unittest.TestCase):
             self.assertNotIn("utm_source=", text, rel)
             self.assertFalse(text.startswith("```"), f"{rel} empieza con una valla de código")
 
-    def test_claude_skill_frontmatter(self):
-        """La skill de Claude cumple las reglas de subida de claude.ai."""
-        text = self.rendered["protocols/agents/claude/skills/znve/SKILL.md"]
-        keys = frontmatter(text)
-        self.assertTrue(keys, "falta el frontmatter")
-        self.assertLessEqual(set(keys), SKILL_KEYS, f"claves no permitidas: {set(keys) - SKILL_KEYS}")
-        self.assertRegex(keys["name"], r"^[a-z0-9-]{1,64}$")
-        self.assertLessEqual(len(keys["description"]), 1024)
-        self.assertNotRegex(keys["description"], r"[<>]")
+    def test_skill_frontmatter(self):
+        """Las skills de Claude y Gemini cumplen las reglas de subida (formato Agent Skills)."""
+        for rel in SKILL_FILES:
+            with self.subTest(skill=rel):
+                keys = frontmatter(self.rendered[rel])
+                self.assertTrue(keys, "falta el frontmatter")
+                self.assertLessEqual(set(keys), SKILL_KEYS, f"claves no permitidas: {set(keys) - SKILL_KEYS}")
+                self.assertRegex(keys["name"], r"^[a-z0-9]+(-[a-z0-9]+)*$")
+                self.assertLessEqual(len(keys["name"]), 64)
+                self.assertLessEqual(len(keys["description"]), 1024)
+                self.assertNotRegex(keys["description"], r"[<>]")
+
+    def test_skill_references_exist(self):
+        """Cada enlace relativo de una skill apunta a un archivo generado dentro de su carpeta."""
+        for rel in SKILL_FILES:
+            folder = rel.rsplit("/", 1)[0]
+            for link in re.findall(r"\]\((references/[^)]+)\)", self.rendered[rel]):
+                self.assertIn(f"{folder}/{link}", self.rendered, f"{rel} enlaza {link}, que no se genera")
 
     def test_skill_bundle(self):
         """znve.zip contiene exactamente la carpeta de la skill."""

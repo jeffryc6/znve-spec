@@ -1,5 +1,5 @@
 # GUÍA MAESTRA DE PROMPTS ZNVE (ZERO-NOISE VIBE ENGINEERING)
-**Catálogo de Prompts Genéricos para Agentes de IA (Claude, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity)**
+**Catálogo de Prompts Genéricos para Agentes de IA (Claude, Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity)**
 *Versión: 2.3.0 | Estándar: Spec-Driven Agentic Architecture*
 
 ---

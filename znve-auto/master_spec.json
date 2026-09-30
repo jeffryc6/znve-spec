@@ -368,6 +368,7 @@
     {"name": "Cursor y Windsurf", "steps_es": ["Copia `protocols/agents/cursor-rules.md` a `.cursorrules` en la raíz del proyecto."]},
     {"name": "DeepSeek (web, API o extensión)", "steps_es": ["Inyecta `protocols/agents/deepseek-directive.md` como mensaje con rol `system`.", "En R1 (Reasoner), las 4 fases de validación ocurren dentro de `<think>`."]},
     {"name": "Ollama (modelos locales)", "steps_es": ["Compila el agente local con el `Modelfile`:", {"lang": "bash", "code": "ollama create znve-agent -f ./protocols/agents/ollama/Modelfile\nollama run znve-agent"}]},
+    {"name": "Gemini (app web/Mac y Gemini CLI)", "steps_es": ["App de Gemini: en **Settings → Skills → Upload**, sube la carpeta `protocols/agents/gemini/skills/znve/`.", "Gemini CLI: `gemini skills install https://github.com/jeffryc6/znve-spec.git --path protocols/agents/gemini/skills/znve`, o copia la carpeta a `~/.gemini/skills/` o a `.gemini/skills/` del proyecto.", "Invocación: `znve-contract …` sin barra en Gemini CLI (la CLI reserva `/`); en la app también vale `/znve-contract …`.", "Guía completa: `protocols/agents/gemini/INSTALL_GEMINI.md`."]},
     {"name": "OpenRouter", "steps_es": ["Usa `protocols/agents/openrouter/system-prompt.md` como prompt de sistema y `response-schema.json` como `response_format`."]},
     {"name": "Antigravity y clientes MCP (Cursor, Windsurf, Claude Desktop)", "steps_es": ["Instala el servidor MCP (compila, verifica las 6 herramientas y registra `znve-engine`):", {"lang": "bash", "code": "cd protocols/mcp\nnode install-antigravity.mjs --workspace \"<ruta>/tu-proyecto\""}, "O regístralo a mano en `mcp_config.json`:", {"lang": "json", "code": "@mcp.config_example"}]}
   ],
@@ -392,7 +393,10 @@
     {"template": "antigravity_skill.md.tmpl", "output": "protocols/Antigravity/Skills/SKILL.md"},
     {"template": "commands_manual.md.tmpl", "output": "protocols/COMMANDS.md"},
     {"template": "antigravity_install.md.tmpl", "output": "protocols/Antigravity/Skills/INSTALL_ANTIGRAVITY.md", "catalog": false},
-    {"template": "antigravity_workspace.json.tmpl", "output": "protocols/Antigravity/Skills/.antigravity/antigravity.json", "catalog": false}
+    {"template": "antigravity_workspace.json.tmpl", "output": "protocols/Antigravity/Skills/.antigravity/antigravity.json", "catalog": false},
+    {"template": "gemini_skill.md.tmpl", "output": "protocols/agents/gemini/skills/znve/SKILL.md"},
+    {"template": "chameleon_layer.md.tmpl", "output": "protocols/agents/gemini/skills/znve/references/chameleon-layer.md", "catalog": false},
+    {"template": "gemini_install.md.tmpl", "output": "protocols/agents/gemini/INSTALL_GEMINI.md"}
   ],
 
   "regions": [

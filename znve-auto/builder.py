@@ -2,7 +2,7 @@
 """
 ZNVE Artifact Compiler (solo biblioteca estándar de Python).
 
-Genera las directivas de Claude, Copilot, Cursor, DeepSeek, Ollama, OpenRouter y
+Genera las directivas de Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter y
 Antigravity, el manual protocols/COMMANDS.md y el paquete znve.zip a partir de una sola
 fuente de verdad: master_spec.json.
 

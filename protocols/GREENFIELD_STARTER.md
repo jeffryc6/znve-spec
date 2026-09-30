@@ -58,6 +58,7 @@ my-new-project/
 | Claude (claude.ai) | Sube `protocols/agents/claude/skills/znve.zip` en *Settings → Capabilities → Skills*. |
 | Claude Code | Copia `protocols/agents/claude/skills/znve/` a `~/.claude/skills/` o a `.claude/skills/` del proyecto. |
 | Claude Projects | Pega `protocols/agents/claude-system-skills.md` en *Project Instructions* o en `CLAUDE.md`. |
+| Gemini (app y CLI) | Sube la carpeta `protocols/agents/gemini/skills/znve/` en *Settings → Skills*, o en Gemini CLI: `gemini skills install`. Ver `protocols/agents/gemini/INSTALL_GEMINI.md`. |
 | GitHub Copilot | Copia `.github/copilot-instructions.md` a tu proyecto. |
 | Cursor / Windsurf | Copia `protocols/agents/cursor-rules.md` como `.cursorrules`. |
 | DeepSeek / OpenRouter / Ollama | `deepseek-directive.md`, `openrouter/system-prompt.md` u `ollama/Modelfile`. |

@@ -1,0 +1,40 @@
+---
+name: {{name}}
+description: Metodología Zero-Noise Vibe Engineering (ZNVE v{{version}}) para desarrollo asistido por IA gobernado por contratos inmutables, cero dependencias parásitas y mínima huella de ejecución. Define los comandos help, contract, execute, triage, hotfix, upgrade, forensic, harness, legacy-rescue y audit, invocables como /znve-help, znve-help o znve help, en 6 escenarios (Greenfield, In-Flight, Hotfix, Upgrade, Legacy Rescue, Hardening). Usa esta skill siempre que el usuario escriba znve o cualquier comando znve-*, mencione ZNVE o Zero-Noise, o pida diseñar un contrato o DTO antes de programar, diagnosticar una caída en producción con un parche acotado, migrar un SDK con breaking changes mediante un adaptador, rescatar código legacy sin tests (Golden Master, Strangler Fig) o auditar fugas de memoria, hilos, sockets y seguridad, aunque no nombre ZNVE explícitamente.
+license: {{license}}
+metadata:
+  version: {{version}}
+  author: {{author}}
+  framework: ZNVE Universal Specification
+  architecture: Contract-First Agentic Architecture
+  source: {{source}}
+---
+
+{{generated_md}}
+
+# Zero-Noise Vibe Engineering (ZNVE v{{version}})
+
+{{> _claude_core.md.tmpl}}
+
+### Formas de invocación
+Gemini no tiene un menú de comandos para las skills: activa esta skill cuando el mensaje coincide con su descripción. En Gemini CLI, además, un mensaje que empieza por `/` se interpreta como comando interno de la CLI. Por eso estas formas son equivalentes y debes tratarlas igual:
+
+{{invocation_md}}
+- `znve-contract …` o `znve contract …` (sin barra; la forma segura en Gemini CLI)
+- Una petición en lenguaje natural que nombre el comando, por ejemplo: "usa znve-contract para diseñar el DTO de usuario".
+
+{{invocation_fallback}}
+
+---
+
+{{commands_full_md}}
+
+---
+
+## 🦎 Capa Camaleónica (adaptación por plataforma)
+
+Cuando el usuario declare o se detecte un stack concreto (Android, iOS/macOS, Windows Desktop, híbrido o Web/Backend), lee [references/chameleon-layer.md](references/chameleon-layer.md) y aplica sus prioridades y antipatrones además de los guardrails globales.
+
+---
+
+{{> _claude_default.md.tmpl}}

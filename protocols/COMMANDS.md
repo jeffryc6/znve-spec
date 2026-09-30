@@ -338,11 +338,18 @@ ollama create znve-agent -f ./protocols/agents/ollama/Modelfile
 ollama run znve-agent
 ```
 
-### 6. OpenRouter
+### 6. Gemini (app web/Mac y Gemini CLI)
+
+- App de Gemini: en **Settings → Skills → Upload**, sube la carpeta `protocols/agents/gemini/skills/znve/`.
+- Gemini CLI: `gemini skills install https://github.com/jeffryc6/znve-spec.git --path protocols/agents/gemini/skills/znve`, o copia la carpeta a `~/.gemini/skills/` o a `.gemini/skills/` del proyecto.
+- Invocación: `znve-contract …` sin barra en Gemini CLI (la CLI reserva `/`); en la app también vale `/znve-contract …`.
+- Guía completa: `protocols/agents/gemini/INSTALL_GEMINI.md`.
+
+### 7. OpenRouter
 
 - Usa `protocols/agents/openrouter/system-prompt.md` como prompt de sistema y `response-schema.json` como `response_format`.
 
-### 7. Antigravity y clientes MCP (Cursor, Windsurf, Claude Desktop)
+### 8. Antigravity y clientes MCP (Cursor, Windsurf, Claude Desktop)
 
 - Instala el servidor MCP (compila, verifica las 6 herramientas y registra `znve-engine`):
 

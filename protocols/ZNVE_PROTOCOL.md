@@ -8,7 +8,7 @@
 
 Este documento es el protocolo operativo que rige el trabajo entre el humano
 (Director de Arquitectura) y los agentes de Inteligencia Artificial (Claude,
-Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity). La norma
+Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity). La norma
 formal está en [SPECIFICATION.md](../SPECIFICATION.md) y el catálogo de comandos
 en [COMMANDS.md](COMMANDS.md).
 

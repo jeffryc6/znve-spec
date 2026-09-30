@@ -174,7 +174,7 @@ El servidor de referencia (`protocols/mcp/znve-mcp-server.ts`, transporte stdio)
 ## 9. IMPLEMENTACIÓN DE REFERENCIA Y CONFORMIDAD
 
 ### 9.1 Fuente única de verdad
-La versión, los axiomas, los guardrails, los escenarios, los comandos, la Capa Camaleónica y las herramientas MCP se declaran una sola vez en `znve-auto/master_spec.json`. El compilador `znve-auto/builder.py` (biblioteca estándar de Python) genera a partir de ella las directivas de Claude, Copilot, Cursor, DeepSeek, Ollama, OpenRouter y Antigravity, los manuales de comandos y los bloques gestionados de esta especificación, el README y la página web.
+La versión, los axiomas, los guardrails, los escenarios, los comandos, la Capa Camaleónica y las herramientas MCP se declaran una sola vez en `znve-auto/master_spec.json`. El compilador `znve-auto/builder.py` (biblioteca estándar de Python) genera a partir de ella las directivas de Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter y Antigravity, los manuales de comandos y los bloques gestionados de esta especificación, el README y la página web.
 
 ### 9.2 Conformidad
 Una directiva o herramienta es conforme con ZNVE v2.3.0 si:

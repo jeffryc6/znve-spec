@@ -22,7 +22,7 @@
 ### What is ZNVE?
 **Zero-Noise Vibe Engineering (ZNVE)** is an open, deterministic technical standard and agentic governance framework designed to eliminate **AI agentic drift** and **AI death loops** in AI-assisted software development.
 
-Unlike casual "vibe coding", which leads to bloated dependencies, endless repair loops and degraded context windows, ZNVE establishes a **contract-first architecture**. Human developers act as **Directors of Architecture**, while AI models (Claude, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity) operate as **surgical tactical executors**.
+Unlike casual "vibe coding", which leads to bloated dependencies, endless repair loops and degraded context windows, ZNVE establishes a **contract-first architecture**. Human developers act as **Directors of Architecture**, while AI models (Claude, Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity) operate as **surgical tactical executors**.
 
 ### Core Axioms
 1. **Axiom 1 (Asymmetric Efficiency):** *Heavy intelligence in design; near-zero footprint during execution.*
@@ -48,7 +48,7 @@ Unlike casual "vibe coding", which leads to bloated dependencies, endless repair
 ### ¿Qué es ZNVE?
 **Zero-Noise Vibe Engineering (ZNVE)** es un estándar técnico abierto y un marco de gobernanza agéntica diseñado para eliminar la **degradación del contexto de la IA** (*agentic drift*) y los **bucles infinitos de reparación** en el desarrollo asistido por IA.
 
-A diferencia del "vibe coding" caótico, que acumula librerías parásitas y código frágil, ZNVE establece una **arquitectura basada en contratos**. El desarrollador humano actúa como **Director de Arquitectura** y los modelos de IA (Claude, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity) como **ejecutores tácticos quirúrgicos**.
+A diferencia del "vibe coding" caótico, que acumula librerías parásitas y código frágil, ZNVE establece una **arquitectura basada en contratos**. El desarrollador humano actúa como **Director de Arquitectura** y los modelos de IA (Claude, Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity) como **ejecutores tácticos quirúrgicos**.
 
 ### Axiomas centrales
 1. **Axioma 1 (Eficiencia Asimétrica):** *Inteligencia pesada en el diseño; huella casi nula en la ejecución.*
@@ -101,6 +101,7 @@ Full manual with output formats, MCP tools and per-assistant setup / Manual comp
 | **Claude (claude.ai)** | Upload / Sube [`znve.zip`](protocols/agents/claude/skills/znve.zip) in *Settings → Capabilities → Skills* |
 | **Claude Code** | Copy / Copia [`protocols/agents/claude/skills/znve/`](protocols/agents/claude/skills/znve/) to `~/.claude/skills/` |
 | **Claude Projects** | Paste / Pega [`claude-system-skills.md`](protocols/agents/claude-system-skills.md) in *Project Instructions* |
+| **Gemini (app & CLI)** | Upload / Sube [`gemini/skills/znve/`](protocols/agents/gemini/skills/znve/) in *Settings → Skills* · CLI: `gemini skills install` ([`INSTALL_GEMINI.md`](protocols/agents/gemini/INSTALL_GEMINI.md)) |
 | **GitHub Copilot** | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) (already in place / ya incluido) |
 | **Cursor / Windsurf** | Copy / Copia [`cursor-rules.md`](protocols/agents/cursor-rules.md) as / como `.cursorrules` |
 | **DeepSeek** | [`deepseek-directive.md`](protocols/agents/deepseek-directive.md) as the `system` message / como mensaje `system` |
@@ -143,6 +144,7 @@ znve-spec/
 │   ├── agents/
 │   │   ├── claude/skills/znve/        <-- Claude skill + znve.zip (generated)
 │   │   ├── claude-system-skills.md    <-- Claude Projects / CLAUDE.md (generated)
+│   │   ├── gemini/skills/znve/        <-- Gemini app & Gemini CLI skill (generated)
 │   │   ├── copilot-instrucctions.md   <-- Copilot mirror (generated)
 │   │   ├── cursor-rules.md            <-- Cursor / Windsurf rules (generated)
 │   │   ├── deepseek-directive.md      <-- DeepSeek V3 / R1 (generated)
