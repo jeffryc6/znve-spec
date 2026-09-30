@@ -405,11 +405,15 @@ def spec_commands_md(spec: dict) -> str:
 
 
 def index_commands_html(spec: dict) -> str:
+    """Catálogo en los dos idiomas de la web; el CSS muestra el del <html lang> activo."""
     width = max(len(c["name"]) for c in spec["commands"])
-    body = "\n".join(
-        f"{html.escape(c['name']):<{width}}  --&gt; {html.escape(c['summary_es'])}" for c in spec["commands"]
-    )
-    return f'        <pre class="commands">\n{body}</pre>'
+    blocks = []
+    for lang in ("es", "en"):
+        body = "\n".join(
+            f"{html.escape(c['name']):<{width}}  --&gt; {html.escape(c[f'summary_{lang}'])}" for c in spec["commands"]
+        )
+        blocks.append(f'        <pre class="commands" data-l="{lang}" lang="{lang}">\n{body}</pre>')
+    return "\n".join(blocks)
 
 
 def build_context(spec: dict) -> dict:

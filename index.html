@@ -3,8 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Zero-Noise Vibe Engineering (ZNVE) v2.3.0: norma técnica para desarrollo asistido por IA basado en contratos, con 10 comandos /znve-* para Claude, Copilot, Cursor, DeepSeek, Ollama, OpenRouter y Antigravity.">
+  <meta name="description" content="Zero-Noise Vibe Engineering (ZNVE) v2.3.0: metodología abierta para programar con IA sin dependencias parásitas, sin logs de relleno y sin deuda técnica. Open methodology for AI-assisted development without parasitic dependencies, noise or technical debt.">
   <title>Zero-Noise Vibe Engineering (ZNVE) | Spec-Driven Agentic Architecture</title>
+  <link rel="alternate" hreflang="es" href="https://jeffryc6.github.io/znve-spec/?lang=es">
+  <link rel="alternate" hreflang="en" href="https://jeffryc6.github.io/znve-spec/?lang=en">
   <style>
     :root {
       --bg-color: #0d1117;
@@ -12,202 +14,826 @@
       --accent-cyan: #58a6ff;
       --accent-green: #3fb950;
       --accent-purple: #bc8cff;
+      --accent-orange: #f0883e;
+      --accent-red: #f85149;
+      --accent-yellow: #d29922;
       --text-main: #c9d1d9;
       --text-muted: #8b949e;
       --text-bright: #ffffff;
       --border-color: #30363d;
       --code-bg: #090d12;
+      --mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      --nav-h: 56px;
     }
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: calc(var(--nav-h) + 12px); }
+
+    /* Bilingüe: cada bloque existe en es y en; se muestra el del <html lang> activo. */
+    html[lang="es"] [data-l="en"],
+    html[lang="en"] [data-l="es"] { display: none !important; }
+
     body {
       margin: 0;
-      padding: 0;
       background-color: var(--bg-color);
       color: var(--text-main);
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-      line-height: 1.6;
+      line-height: 1.65;
+      overflow-x: hidden;
     }
     canvas#node-canvas {
       position: fixed;
-      top: 0;
-      left: 0;
+      inset: 0;
       width: 100vw;
       height: 100vh;
       z-index: 0;
       pointer-events: none;
-      opacity: 0.25;
+      opacity: 0.32;
     }
+    a { color: var(--accent-cyan); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+    code { font-family: var(--mono); font-size: 0.88em; color: var(--accent-purple); overflow-wrap: anywhere; }
+
+    /* ---------- Navegación ---------- */
+    nav.top {
+      position: sticky;
+      top: 0;
+      z-index: 10;
+      height: var(--nav-h);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 0 1rem;
+      background: rgba(13, 17, 23, 0.82);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border-color);
+    }
+    nav.top .brand {
+      font-family: var(--mono);
+      font-weight: 700;
+      color: var(--text-bright);
+      letter-spacing: 1px;
+      white-space: nowrap;
+    }
+    nav.top .brand span { color: var(--accent-green); }
+    nav.top ul {
+      flex: 1;
+      min-width: 0;
+      display: flex;
+      gap: 1.1rem;
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      overflow-x: auto;
+      scrollbar-width: none;
+      font-size: 0.9rem;
+      white-space: nowrap;
+    }
+    nav.top ul::-webkit-scrollbar { display: none; }
+    nav.top ul a { color: var(--text-muted); }
+    nav.top ul a:hover { color: var(--text-bright); text-decoration: none; }
+    .lang-switch {
+      display: inline-flex;
+      flex-shrink: 0;
+      border: 1px solid var(--border-color);
+      border-radius: 20px;
+      overflow: hidden;
+      font-family: var(--mono);
+      font-size: 0.8rem;
+    }
+    .lang-switch button {
+      background: transparent;
+      color: var(--text-muted);
+      border: 0;
+      padding: 4px 11px;
+      cursor: pointer;
+      font: inherit;
+    }
+    .lang-switch button + button { border-left: 1px solid var(--border-color); }
+    .lang-switch button[aria-pressed="true"] { background: rgba(63, 185, 80, 0.15); color: var(--text-bright); font-weight: 700; }
+
+    /* ---------- Estructura ---------- */
     .container {
       position: relative;
       z-index: 1;
       max-width: 1100px;
       margin: 0 auto;
-      padding: 2rem 1rem;
+      padding: 0 1rem 2rem;
     }
-    header {
-      text-align: center;
-      padding: 3rem 0 2rem;
-      border-bottom: 1px solid var(--border-color);
-    }
-    h1 {
-      font-size: clamp(1.9rem, 5vw, 2.8rem);
-      line-height: 1.2;
-      color: var(--text-bright);
-      margin-bottom: 0.5rem;
-      letter-spacing: -0.5px;
-    }
-    h2 {
-      color: var(--text-bright);
-      margin-top: 2.5rem;
-    }
-    .subtitle {
-      font-size: 1.2rem;
-      color: var(--accent-cyan);
-      margin-top: 0;
-    }
-    .badges {
-      margin-top: 1.5rem;
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-    }
-    .badge {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 0.85rem;
+    section { padding: 3.5rem 0 1rem; }
+    .eyebrow {
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
       color: var(--accent-green);
+      margin: 0 0 0.4rem;
     }
+    .eyebrow::before { content: "// "; color: var(--text-muted); }
+    h1, h2, h3 { color: var(--text-bright); line-height: 1.25; }
+    h2 { font-size: clamp(1.5rem, 3.6vw, 2.1rem); margin: 0 0 0.75rem; }
+    h3 { margin: 0 0 0.5rem; font-size: 1.1rem; }
+    .lead { font-size: 1.08rem; max-width: 780px; color: var(--text-main); }
+    .muted { color: var(--text-muted); }
     .grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
-      gap: 1.5rem;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr));
+      gap: 1.25rem;
       margin: 1.5rem 0;
     }
-    .grid.modes {
-      grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
-      gap: 1rem;
-    }
+    .grid.tight { grid-template-columns: repeat(auto-fit, minmax(min(100%, 210px), 1fr)); gap: 1rem; }
     .card {
+      position: relative;
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 8px;
-      padding: 1.5rem;
+      padding: 1.25rem 1.35rem;
       transition: transform 0.2s, border-color 0.2s;
     }
-    .card:hover {
-      transform: translateY(-2px);
-      border-color: var(--accent-cyan);
+    .card:hover { transform: translateY(-2px); border-color: var(--accent-cyan); }
+    .card p:last-child { margin-bottom: 0; }
+    .node-dot {
+      position: absolute;
+      top: -5px;
+      left: 18px;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan);
     }
-    .card h3 {
+    .tag {
+      display: inline-block;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      padding: 1px 8px;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      color: var(--text-muted);
+      margin-right: 4px;
+    }
+
+    /* ---------- Hero ---------- */
+    .hero {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr));
+      gap: 2rem;
+      align-items: center;
+      padding: 4rem 0 2rem;
+    }
+    .hero h1 { font-size: clamp(2rem, 5.2vw, 3.2rem); margin: 0.3rem 0 1rem; letter-spacing: -0.5px; }
+    .hero h1 em { font-style: normal; color: var(--accent-green); }
+    .badges { display: flex; gap: 8px; flex-wrap: wrap; margin: 1.25rem 0; }
+    .badge {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 3px 12px;
+      border-radius: 20px;
+      font-size: 0.82rem;
+      color: var(--accent-green);
+    }
+    .cta { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.25rem; }
+    .btn {
+      display: inline-block;
+      padding: 0.6rem 1.1rem;
+      border-radius: 6px;
+      font-weight: 600;
+      border: 1px solid var(--border-color);
       color: var(--text-bright);
-      margin-top: 0;
+      background: var(--card-bg);
     }
-    .modes .card {
-      padding: 1rem 1.25rem;
-    }
-    .modes .card p {
-      margin: 0;
-    }
-    .modes code {
-      font-size: 0.85rem;
-    }
-    code {
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      color: var(--accent-purple);
-    }
-    pre {
+    .btn.primary { background: #238636; border-color: #2ea043; }
+    .btn:hover { text-decoration: none; border-color: var(--accent-cyan); }
+
+    /* ---------- Terminal y código ---------- */
+    .terminal {
       background: var(--code-bg);
       border: 1px solid var(--border-color);
-      border-radius: 6px;
-      padding: 1rem;
-      overflow-x: auto;
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
-      font-size: 0.9rem;
-      color: var(--accent-cyan);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 0 0 1px rgba(88, 166, 255, 0.05), 0 16px 40px rgba(0, 0, 0, 0.35);
     }
-    .note {
+    .terminal .bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border-color);
+      font-family: var(--mono);
+      font-size: 0.78rem;
       color: var(--text-muted);
     }
+    .terminal .bar i { width: 10px; height: 10px; border-radius: 50%; background: #30363d; display: inline-block; flex-shrink: 0; }
+    .terminal .bar i:nth-child(1) { background: var(--accent-red); }
+    .terminal .bar i:nth-child(2) { background: var(--accent-yellow); }
+    .terminal .bar i:nth-child(3) { background: var(--accent-green); }
+    .terminal .bar span { margin-left: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    pre {
+      margin: 0;
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      line-height: 1.6;
+      color: var(--text-main);
+      background: var(--code-bg);
+    }
+    pre.commands { color: var(--accent-cyan); }
+    pre.wrap { white-space: pre-wrap; overflow-wrap: anywhere; }
+    .term-prompt { color: var(--accent-green); }
+    .term-out { color: var(--text-muted); }
+    .caret::after { content: "▌"; color: var(--accent-green); animation: blink 1.1s steps(1) infinite; }
+    @keyframes blink { 50% { opacity: 0; } }
+    .tok-kw { color: #ff7b72; }
+    .tok-str { color: #a5d6ff; }
+    .tok-num { color: #79c0ff; }
+    .tok-com { color: var(--text-muted); font-style: italic; }
+    .tok-bad { color: var(--accent-red); font-style: normal; font-weight: 600; }
+    .tok-good { color: var(--accent-green); font-style: normal; font-weight: 600; }
+    .code-wrap { position: relative; }
+    .copy {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      font-size: 0.75rem;
+      font-family: var(--mono);
+      padding: 2px 8px;
+      border-radius: 4px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .copy:hover { color: var(--text-bright); border-color: var(--accent-cyan); }
+
+    /* ---------- Antes / después ---------- */
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin: 1.25rem 0 1rem; }
+    .tabs button {
+      font: inherit;
+      font-size: 0.9rem;
+      padding: 0.4rem 0.9rem;
+      border-radius: 20px;
+      border: 1px solid var(--border-color);
+      background: var(--card-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .tabs button[aria-selected="true"] { color: var(--text-bright); border-color: var(--accent-green); background: rgba(63, 185, 80, 0.12); }
+    .compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 1rem; }
+    .compare .label { font-family: var(--mono); font-size: 0.8rem; margin: 0 0 0.4rem; }
+    .compare .label.bad { color: var(--accent-red); }
+    .compare .label.good { color: var(--accent-green); }
+    .compare .terminal.bad { border-color: rgba(248, 81, 73, 0.45); }
+    .compare .terminal.good { border-color: rgba(63, 185, 80, 0.45); }
+    [role="tabpanel"][hidden] { display: none; }
+    .verdict { margin-top: 0.75rem; font-size: 0.92rem; }
+
+    table.matrix { width: 100%; border-collapse: collapse; margin: 1.5rem 0; font-size: 0.92rem; }
+    table.matrix th, table.matrix td { padding: 0.6rem 0.75rem; border-bottom: 1px solid var(--border-color); text-align: left; vertical-align: top; }
+    table.matrix th { color: var(--text-bright); font-weight: 600; background: var(--card-bg); }
+    table.matrix.compare-table td:nth-child(2) { color: #ffa198; }
+    table.matrix.compare-table td:nth-child(3) { color: #7ee787; }
+    .table-scroll { overflow-x: auto; }
+
+    /* ---------- Flujo y modos ---------- */
+    .flow { display: flex; flex-wrap: wrap; align-items: stretch; gap: 0.5rem; margin: 1.5rem 0; }
+    .flow .step {
+      flex: 1 1 160px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.9rem 1rem;
+    }
+    .flow .step b { display: block; color: var(--text-bright); font-family: var(--mono); font-size: 0.9rem; }
+    .flow .step small { color: var(--text-muted); }
+    .flow .arrow { align-self: center; color: var(--accent-green); font-family: var(--mono); }
+    .modes .card h3 { font-size: 1rem; }
+    .modes .card p { margin: 0.35rem 0 0; font-size: 0.9rem; }
+
+    /* ---------- Caso real ---------- */
+    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 170px), 1fr)); gap: 1rem; margin: 1.5rem 0; }
+    .stat { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 8px; padding: 1rem; }
+    .stat b { display: block; font-size: 1.7rem; color: var(--text-bright); font-family: var(--mono); line-height: 1.2; }
+    .stat span { font-size: 0.85rem; color: var(--text-muted); }
+    .finding { display: grid; grid-template-columns: 14px 1fr; gap: 0.75rem; padding: 0.85rem 0; border-bottom: 1px solid var(--border-color); }
+    .finding:last-child { border-bottom: 0; }
+    .sev { width: 12px; height: 12px; border-radius: 50%; margin-top: 6px; }
+    .sev.red { background: var(--accent-red); box-shadow: 0 0 8px var(--accent-red); }
+    .sev.orange { background: var(--accent-orange); }
+    .sev.green { background: var(--accent-green); }
+    .finding p { margin: 0.2rem 0 0; font-size: 0.9rem; color: var(--text-muted); }
+
+    /* ---------- Línea de tiempo ---------- */
+    .timeline { list-style: none; margin: 1.5rem 0; padding: 0 0 0 1.5rem; border-left: 2px solid var(--border-color); }
+    .timeline li { position: relative; padding: 0 0 1.4rem 1rem; }
+    .timeline li::before {
+      content: "";
+      position: absolute;
+      left: -1.5rem;
+      top: 0.45rem;
+      transform: translateX(-6px);
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: var(--accent-cyan);
+      box-shadow: 0 0 10px var(--accent-cyan);
+    }
+    .timeline time { font-family: var(--mono); font-size: 0.8rem; color: var(--accent-green); }
+    .timeline h3 { margin: 0.15rem 0 0.25rem; font-size: 1rem; }
+    .timeline p { margin: 0; font-size: 0.92rem; color: var(--text-muted); }
+
+    /* ---------- FAQ ---------- */
+    details {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 0.85rem 1.1rem;
+      margin: 0.6rem 0;
+    }
+    details summary { cursor: pointer; color: var(--text-bright); font-weight: 600; }
+    details p { margin: 0.6rem 0 0; color: var(--text-main); }
+
     footer {
       text-align: center;
-      padding: 2rem 0;
-      margin-top: 2.5rem;
+      padding: 2rem 1rem;
+      margin-top: 3rem;
       border-top: 1px solid var(--border-color);
       font-size: 0.9rem;
       color: var(--text-muted);
+      position: relative;
+      z-index: 1;
     }
-    a {
-      color: var(--accent-cyan);
-      text-decoration: none;
-    }
-    a:hover {
-      text-decoration: underline;
-    }
+
     @media (prefers-reduced-motion: reduce) {
-      canvas#node-canvas {
-        display: none;
-      }
-      .card {
-        transition: none;
-      }
-      .card:hover {
-        transform: none;
-      }
+      html { scroll-behavior: auto; }
+      canvas#node-canvas { display: none; }
+      .card, .card:hover { transition: none; transform: none; }
+      .caret::after { animation: none; }
     }
   </style>
 </head>
 <body>
   <canvas id="node-canvas" aria-hidden="true"></canvas>
 
+  <nav class="top" aria-label="Secciones / Sections">
+    <a class="brand" href="#inicio">ZN<span>VE</span></a>
+    <ul>
+      <li><a href="#problema"><span data-l="es">Problema</span><span data-l="en" lang="en">Problem</span></a></li>
+      <li><a href="#que-es"><span data-l="es">Qué es</span><span data-l="en" lang="en">What it is</span></a></li>
+      <li><a href="#antes-despues"><span data-l="es">Antes / Después</span><span data-l="en" lang="en">Before / After</span></a></li>
+      <li><a href="#contratos"><span data-l="es">Contratos</span><span data-l="en" lang="en">Contracts</span></a></li>
+      <li><a href="#comandos"><span data-l="es">Comandos</span><span data-l="en" lang="en">Commands</span></a></li>
+      <li><a href="#caso-real"><span data-l="es">Caso real</span><span data-l="en" lang="en">Case study</span></a></li>
+      <li><a href="#instalacion"><span data-l="es">Instalar</span><span data-l="en" lang="en">Install</span></a></li>
+      <li><a href="#arquitectura"><span data-l="es">Cómo funciona</span><span data-l="en" lang="en">How it works</span></a></li>
+      <li><a href="#historia"><span data-l="es">Historia</span><span data-l="en" lang="en">History</span></a></li>
+      <li><a href="#faq">FAQ</a></li>
+      <li><a href="https://github.com/jeffryc6/znve-spec">GitHub</a></li>
+    </ul>
+    <div class="lang-switch" role="group" aria-label="Idioma / Language">
+      <button type="button" data-set-lang="es" aria-pressed="true" lang="es">ES</button>
+      <button type="button" data-set-lang="en" aria-pressed="false" lang="en">EN</button>
+    </div>
+  </nav>
+
   <div class="container">
-    <header>
-      <h1>Zero-Noise Vibe Engineering (ZNVE)</h1>
-      <p class="subtitle">Norma Técnica Universal &amp; Arquitectura Agéntica Basada en Especificación</p>
-      <div class="badges">
-        <span class="badge">v2.3.0 Standard</span>
-        <span class="badge">CC BY 4.0 &amp; MIT Dual License</span>
-        <span class="badge">MCP Server · 6 herramientas</span>
-        <span class="badge">7 asistentes sincronizados</span>
+
+    <!-- ============================== HERO ============================== -->
+    <header class="hero" id="inicio">
+      <div>
+        <p class="eyebrow">Zero-Noise Vibe Engineering</p>
+        <h1 data-l="es">Programa con IA <em>sin ruido</em>, sin deuda y sin sorpresas.</h1>
+        <h1 data-l="en" lang="en">Build with AI <em>without noise</em>, debt or surprises.</h1>
+        <p class="lead" data-l="es">ZNVE es una metodología abierta que convierte a tu asistente de IA (Claude, Copilot, Cursor, DeepSeek, Ollama, OpenRouter o Antigravity) en un ejecutor disciplinado. Primero se diseña un <strong>contrato</strong>; después la IA escribe solo el código necesario, sin dependencias parásitas, sin logs de relleno y sin errores silenciados.</p>
+        <p class="lead" data-l="en" lang="en">ZNVE is an open methodology that turns your AI assistant (Claude, Copilot, Cursor, DeepSeek, Ollama, OpenRouter or Antigravity) into a disciplined executor. First you design a <strong>contract</strong>; then the AI writes only the code that is needed, with no parasitic dependencies, no filler logs and no swallowed errors.</p>
+        <div class="badges">
+          <span class="badge"><span data-l="es">Norma v2.3.0</span><span data-l="en" lang="en">Standard v2.3.0</span></span>
+          <span class="badge"><span data-l="es">10 comandos /znve-*</span><span data-l="en" lang="en">10 /znve-* commands</span></span>
+          <span class="badge"><span data-l="es">7 asistentes sincronizados</span><span data-l="en" lang="en">7 assistants in sync</span></span>
+          <span class="badge"><span data-l="es">Servidor MCP · 6 herramientas</span><span data-l="en" lang="en">MCP server · 6 tools</span></span>
+          <span class="badge">CC BY 4.0 &amp; MIT</span>
+        </div>
+        <div class="cta">
+          <a class="btn primary" href="#instalacion"><span data-l="es">Instalar en 2 minutos</span><span data-l="en" lang="en">Install in 2 minutes</span></a>
+          <a class="btn" href="#antes-despues"><span data-l="es">Ver antes y después</span><span data-l="en" lang="en">See before and after</span></a>
+          <a class="btn" href="https://github.com/jeffryc6/znve-spec"><span data-l="es">Código fuente</span><span data-l="en" lang="en">Source code</span></a>
+        </div>
+      </div>
+      <div class="terminal">
+        <div class="bar"><i></i><i></i><i></i><span>claude.ai · skill znve</span></div>
+        <pre class="wrap" data-l="es"><span class="term-prompt">&gt;</span> /znve contract --platform=web Diseña el DTO de sesión de usuario
+<span class="term-out">CONTRATO DE ENTRADA Y SALIDA
+  interface UserSession { readonly userId: string; readonly expiresAtEpochMs: number }
+CONTRATO DE PERSISTENCIA
+  SELECT user_id, expires_at FROM sessions WHERE token = $1   -- índice: token
+CONTRATO DE ERRORES
+  type SessionError = "EXPIRED" | "NOT_FOUND" | "STORE_DOWN"
+ANTI-BLOAT FENCE
+  vetado: jsonwebtoken, moment, lodash → Web Crypto nativo
+
+"Contrato v1 sólido y cerrado. Listo para /znve-execute."</span>
+
+<span class="term-prompt">&gt;</span> <span class="caret">/znve execute --target=src/auth/session.ts</span></pre>
+        <pre class="wrap" data-l="en" lang="en"><span class="term-prompt">&gt;</span> /znve contract --platform=web Design the user session DTO
+<span class="term-out">INPUT / OUTPUT CONTRACT
+  interface UserSession { readonly userId: string; readonly expiresAtEpochMs: number }
+PERSISTENCE CONTRACT
+  SELECT user_id, expires_at FROM sessions WHERE token = $1   -- index: token
+ERROR CONTRACT
+  type SessionError = "EXPIRED" | "NOT_FOUND" | "STORE_DOWN"
+ANTI-BLOAT FENCE
+  banned: jsonwebtoken, moment, lodash → native Web Crypto
+
+"Contrato v1 sólido y cerrado. Listo para /znve-execute."   (contract frozen)</span>
+
+<span class="term-prompt">&gt;</span> <span class="caret">/znve execute --target=src/auth/session.ts</span></pre>
       </div>
     </header>
 
-    <main>
-      <section>
-        <h2>🏛️ Axiomas Fundamentales</h2>
-        <div class="grid">
-          <div class="card">
-            <h3>1. Diseño Pesado, Ejecución Silenciosa</h3>
-            <p>Inteligencia concentrada en la fase de arquitectura y definición de contrato DTO. Huella computacional y física mínima durante la ejecución en producción.</p>
+    <!-- ============================== PROBLEMA ============================== -->
+    <section id="problema">
+      <p class="eyebrow"><span data-l="es">01 · El problema</span><span data-l="en" lang="en">01 · The problem</span></p>
+      <h2 data-l="es">El "vibe coding" es rápido… hasta que deja de serlo</h2>
+      <h2 data-l="en" lang="en">"Vibe coding" is fast… until it isn't</h2>
+      <p class="lead" data-l="es">Pedirle código a una IA sin reglas funciona los primeros días. Después aparece la <strong>deriva agéntica</strong> (<em>agentic drift</em>): el asistente pierde el contexto, inventa arquitectura y arregla un error rompiendo otros tres.</p>
+      <p class="lead" data-l="en" lang="en">Asking an AI for code without rules works for the first few days. Then <strong>agentic drift</strong> sets in: the assistant loses context, invents architecture and fixes one bug by breaking three others.</p>
+      <div class="grid">
+        <div class="card"><span class="node-dot"></span>
+          <h3 data-l="es">📦 Dependencias parásitas</h3><h3 data-l="en" lang="en">📦 Parasitic dependencies</h3>
+          <p data-l="es">Instala <code>axios</code>, <code>lodash</code> o <code>moment</code> para tareas que el lenguaje ya resuelve. Cada paquete es superficie de ataque, peso y deuda de actualización.</p>
+          <p data-l="en" lang="en">It installs <code>axios</code>, <code>lodash</code> or <code>moment</code> for tasks the language already solves. Every package is attack surface, weight and upgrade debt.</p>
+        </div>
+        <div class="card"><span class="node-dot"></span>
+          <h3 data-l="es">🔇 Errores silenciados</h3><h3 data-l="en" lang="en">🔇 Swallowed errors</h3>
+          <p data-l="es">Bloques <code>catch {}</code> vacíos y <code>sleep()</code> para "arreglar" condiciones de carrera. El fallo sigue ahí, solo que ahora nadie lo ve.</p>
+          <p data-l="en" lang="en">Empty <code>catch {}</code> blocks and <code>sleep()</code> calls to "fix" race conditions. The bug is still there; now nobody can see it.</p>
+        </div>
+        <div class="card"><span class="node-dot"></span>
+          <h3 data-l="es">📢 Ruido operativo</h3><h3 data-l="en" lang="en">📢 Operational noise</h3>
+          <p data-l="es">Logs de "OK" y "Success" en cada petición. En producción, las alertas reales se pierden entre miles de líneas irrelevantes.</p>
+          <p data-l="en" lang="en">"OK" and "Success" logs on every request. In production, real alerts get lost among thousands of irrelevant lines.</p>
+        </div>
+        <div class="card"><span class="node-dot"></span>
+          <h3 data-l="es">🌀 Bucles de reparación</h3><h3 data-l="en" lang="en">🌀 Repair loops</h3>
+          <p data-l="es">Sin un contrato, la IA propone mejoras infinitas y cambia estructuras que nadie aprobó. El proyecto nunca se estabiliza.</p>
+          <p data-l="en" lang="en">Without a contract, the AI keeps proposing "improvements" and changes structures nobody approved. The project never stabilizes.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================== QUÉ ES ============================== -->
+    <section id="que-es">
+      <p class="eyebrow"><span data-l="es">02 · Qué es ZNVE</span><span data-l="en" lang="en">02 · What ZNVE is</span></p>
+      <h2 data-l="es">Dos axiomas, dos roles y un formato fijo</h2>
+      <h2 data-l="en" lang="en">Two axioms, two roles and a fixed format</h2>
+      <div class="grid">
+        <div class="card">
+          <h3 data-l="es">Axioma 1 · Diseño pesado, ejecución silenciosa</h3><h3 data-l="en" lang="en">Axiom 1 · Heavy design, silent execution</h3>
+          <p data-l="es"><em>"Inteligencia pesada en el diseño; huella casi nula en la ejecución."</em> Todo el razonamiento ocurre antes de programar; lo que llega a producción es mínimo, predecible y fácil de verificar.</p>
+          <p data-l="en" lang="en"><em>"Heavy intelligence in the design; near-zero footprint in execution."</em> All the reasoning happens before coding; what reaches production is minimal, predictable and easy to verify.</p>
+        </div>
+        <div class="card">
+          <h3 data-l="es">Axioma 2 · Ejecución de contratos</h3><h3 data-l="en" lang="en">Axiom 2 · Contract execution</h3>
+          <p data-l="es"><em>"La IA no inventa arquitectura; ejecuta contratos deterministas."</em> La forma de los datos, los errores y las dependencias permitidas se deciden y se aprueban antes de escribir código.</p>
+          <p data-l="en" lang="en"><em>"AI does not invent architecture; it executes deterministic contracts."</em> Data shapes, errors and allowed dependencies are decided and approved before any code is written.</p>
+        </div>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3 data-l="es">👤 Tú: Director de Arquitectura</h3><h3 data-l="en" lang="en">👤 You: Director of Architecture</h3>
+          <p data-l="es">Delimitas qué se construye, apruebas los contratos y certificas que el resultado es correcto.</p>
+          <p data-l="en" lang="en">You set the scope, approve the contracts and certify that the result is correct.</p>
+        </div>
+        <div class="card">
+          <h3 data-l="es">🤖 La IA: Ejecutor Táctico</h3><h3 data-l="en" lang="en">🤖 The AI: Tactical Executor</h3>
+          <p data-l="es">Produce código que cumple el contrato al 100 %, en un único archivo objetivo (<code>TARGET_FILE</code>) por tarea, sin cambios estructurales no autorizados.</p>
+          <p data-l="en" lang="en">It produces code that fulfils the contract 100%, in a single target file (<code>TARGET_FILE</code>) per task, with no unauthorized structural changes.</p>
+        </div>
+      </div>
+      <h3 data-l="es">Toda respuesta técnica llega en 4 bloques</h3>
+      <h3 data-l="en" lang="en">Every technical answer comes in 4 blocks</h3>
+      <div class="flow">
+        <div class="step"><b>1 · Blueprint</b><small data-l="es">Límites, plataforma y contrato (DTO / interfaz)</small><small data-l="en" lang="en">Scope, platform and contract (DTO / interface)</small></div>
+        <div class="arrow">→</div>
+        <div class="step"><b data-l="es">2 · Racional</b><b data-l="en" lang="en">2 · Rationale</b><small data-l="es">Por qué es la solución de menor huella</small><small data-l="en" lang="en">Why it is the lowest-footprint solution</small></div>
+        <div class="arrow">→</div>
+        <div class="step"><b data-l="es">3 · Tarea atómica</b><b data-l="en" lang="en">3 · Atomic task</b><small data-l="es">TARGET_FILE, acción y restricciones</small><small data-l="en" lang="en">TARGET_FILE, action and constraints</small></div>
+        <div class="arrow">→</div>
+        <div class="step"><b data-l="es">4 · Verificación</b><b data-l="en" lang="en">4 · Verification</b><small data-l="es">Comando o test reproducible</small><small data-l="en" lang="en">Reproducible command or test</small></div>
+      </div>
+      <h3 data-l="es">7 reglas que el agente aplica siempre</h3>
+      <h3 data-l="en" lang="en">7 rules the agent always applies</h3>
+      <div class="grid tight">
+        <div class="card"><b>1.</b> <span data-l="es">Anti-Bloat Fence: nada de librerías si la API nativa lo resuelve.</span><span data-l="en" lang="en">Anti-Bloat Fence: no libraries when the native API solves it.</span></div>
+        <div class="card"><b>2.</b> <span data-l="es">Cero ruido: telemetría solo ante anomalías.</span><span data-l="en" lang="en">Zero noise: telemetry only on anomalies.</span></div>
+        <div class="card"><b>3.</b> <span data-l="es">Contrato primero: sin contrato aprobado, no hay código.</span><span data-l="en" lang="en">Contract first: no approved contract, no code.</span></div>
+        <div class="card"><b>4.</b> <span data-l="es">El hilo principal nunca se bloquea.</span><span data-l="en" lang="en">The main thread is never blocked.</span></div>
+        <div class="card"><b>5.</b> <span data-l="es">Nada de <code>SELECT *</code>: proyecciones e índices.</span><span data-l="en" lang="en">No <code>SELECT *</code>: projections and indexes.</span></div>
+        <div class="card"><b>6.</b> <span data-l="es">Prohibidos los <code>catch</code> vacíos y los <code>sleep</code> parche.</span><span data-l="en" lang="en">No empty <code>catch</code> blocks or patch <code>sleep</code> calls.</span></div>
+        <div class="card"><b>7.</b> <span data-l="es">Sin relleno: directo al artefacto técnico.</span><span data-l="en" lang="en">No filler: straight to the technical artifact.</span></div>
+      </div>
+    </section>
+
+    <!-- ============================== ANTES / DESPUÉS ============================== -->
+    <section id="antes-despues">
+      <p class="eyebrow"><span data-l="es">03 · Antes y después</span><span data-l="en" lang="en">03 · Before and after</span></p>
+      <h2 data-l="es">El mismo pedido, sin ZNVE y con ZNVE</h2>
+      <h2 data-l="en" lang="en">The same request, without and with ZNVE</h2>
+      <p class="lead" data-l="es">Ejemplos representativos de lo que suele devolver un asistente sin reglas frente a lo que entrega bajo ZNVE. Las líneas marcadas con ✗ son los antipatrones que ZNVE prohíbe.</p>
+      <p class="lead" data-l="en" lang="en">Representative examples of what an assistant without rules tends to return versus what it delivers under ZNVE. Lines marked with ✗ are the anti-patterns ZNVE forbids.</p>
+
+      <div class="tabs" role="tablist" aria-label="Antes y después / Before and after">
+        <button role="tab" id="tab-ts" aria-controls="panel-ts" aria-selected="true">Backend · TypeScript</button>
+        <button role="tab" id="tab-cs" aria-controls="panel-cs" aria-selected="false" tabindex="-1"><span data-l="es">Escritorio · C#</span><span data-l="en" lang="en">Desktop · C#</span></button>
+        <button role="tab" id="tab-py" aria-controls="panel-py" aria-selected="false" tabindex="-1">Legacy · Python</button>
+      </div>
+
+      <div role="tabpanel" id="panel-ts" aria-labelledby="tab-ts">
+        <p class="muted" data-l="es">Pedido: <em>"Obtén un usuario por id desde la base de datos."</em></p>
+        <p class="muted" data-l="en" lang="en">Request: <em>"Get a user by id from the database."</em></p>
+        <div class="compare">
+          <div>
+            <p class="label bad"><span data-l="es">✗ SIN ZNVE</span><span data-l="en" lang="en">✗ WITHOUT ZNVE</span></p>
+            <div class="terminal bad"><div class="bar"><i></i><i></i><i></i><span>src/users.ts</span></div>
+<pre data-l="es"><code data-lang="ts">import axios from "axios";          // ✗ dependencia parásita
+import _ from "lodash";             // ✗ dependencia parásita
+
+export async function getUser(id) { // ✗ sin tipos ni contrato
+  try {
+    console.log("Fetching user..."); // ✗ ruido en runtime
+    const rows = await db.query("SELECT * FROM users"); // ✗ escaneo ciego
+    console.log("OK");
+    return _.find(rows, { id });
+  } catch (e) {}                      // ✗ error silenciado
+}</code></pre>
+<pre data-l="en" lang="en"><code data-lang="ts">import axios from "axios";          // ✗ parasitic dependency
+import _ from "lodash";             // ✗ parasitic dependency
+
+export async function getUser(id) { // ✗ no types, no contract
+  try {
+    console.log("Fetching user..."); // ✗ runtime noise
+    const rows = await db.query("SELECT * FROM users"); // ✗ blind scan
+    console.log("OK");
+    return _.find(rows, { id });
+  } catch (e) {}                      // ✗ swallowed error
+}</code></pre></div>
           </div>
-          <div class="card">
-            <h3>2. Ejecución Basada en Contratos</h3>
-            <p>La IA no inventa arquitectura ni improvisa dependencias. Opera exclusivamente bajo contratos inmutables (TypeScript, Pydantic v2, JSON Schema).</p>
+          <div>
+            <p class="label good"><span data-l="es">✓ CON ZNVE · /znve-contract → /znve-execute</span><span data-l="en" lang="en">✓ WITH ZNVE · /znve-contract → /znve-execute</span></p>
+            <div class="terminal good"><div class="bar"><i></i><i></i><i></i><span>contracts/user.contract.ts · src/users/get-user.ts</span></div>
+<pre data-l="es"><code data-lang="ts">// contracts/user.contract.ts  ✓ contrato aprobado antes del código
+export interface UserSummary {
+  readonly id: string;
+  readonly name: string;
+  readonly role: "admin" | "operator";
+}
+export type UserError = "NOT_FOUND" | "TIMEOUT";
+
+// src/users/get-user.ts  ✓ único TARGET_FILE, cero dependencias nuevas
+export async function getUser(id: string, db: Db): Promise&lt;UserSummary | UserError&gt; {
+  const signal = AbortSignal.timeout(2_000);             // ✓ timeout explícito
+  try {
+    const row = await db.queryOne&lt;UserSummary&gt;(
+      "SELECT id, name, role FROM users WHERE id = $1",  // ✓ proyección + índice
+      [id], { signal });
+    return row ?? "NOT_FOUND";
+  } catch (err) {
+    if (signal.aborted) return "TIMEOUT";
+    throw new Error("users.getUser failed", { cause: err }); // ✓ nada silenciado
+  }
+}</code></pre>
+<pre data-l="en" lang="en"><code data-lang="ts">// contracts/user.contract.ts  ✓ contract approved before any code
+export interface UserSummary {
+  readonly id: string;
+  readonly name: string;
+  readonly role: "admin" | "operator";
+}
+export type UserError = "NOT_FOUND" | "TIMEOUT";
+
+// src/users/get-user.ts  ✓ single TARGET_FILE, zero new dependencies
+export async function getUser(id: string, db: Db): Promise&lt;UserSummary | UserError&gt; {
+  const signal = AbortSignal.timeout(2_000);             // ✓ explicit timeout
+  try {
+    const row = await db.queryOne&lt;UserSummary&gt;(
+      "SELECT id, name, role FROM users WHERE id = $1",  // ✓ projection + index
+      [id], { signal });
+    return row ?? "NOT_FOUND";
+  } catch (err) {
+    if (signal.aborted) return "TIMEOUT";
+    throw new Error("users.getUser failed", { cause: err }); // ✓ nothing swallowed
+  }
+}</code></pre></div>
           </div>
         </div>
-      </section>
+        <p class="verdict"><span data-l="es">Verificación atómica:</span><span data-l="en" lang="en">Atomic verification:</span> <code>node --test tests/unit/get-user.test.ts</code></p>
+      </div>
 
-      <section>
-        <h2>🎛️ Los 6 Modos Operativos</h2>
-        <div class="grid modes">
-          <div class="card"><h3>🟢 1 · Greenfield</h3><p><code>/znve-contract</code> → <code>/znve-execute</code></p></div>
-          <div class="card"><h3>🔵 2 · In-Flight</h3><p><code>/znve-contract --delta</code> → <code>/znve-execute</code></p></div>
-          <div class="card"><h3>🟠 3 · Hotfix &amp; Recovery</h3><p><code>/znve-triage</code> → <code>/znve-hotfix</code></p></div>
-          <div class="card"><h3>🟣 4 · Modern Maintenance</h3><p><code>/znve-upgrade</code></p></div>
-          <div class="card"><h3>🟡 5 · Legacy Rescue</h3><p><code>/znve-forensic</code> → <code>/znve-harness</code> → <code>/znve-legacy-rescue</code></p></div>
-          <div class="card"><h3>🔴 6 · Audit &amp; Hardening</h3><p><code>/znve-audit</code></p></div>
+      <div role="tabpanel" id="panel-cs" aria-labelledby="tab-cs" hidden>
+        <p class="muted" data-l="es">Pedido: <em>"Carga el informe desde la API al pulsar el botón."</em> (WinUI / WPF)</p>
+        <p class="muted" data-l="en" lang="en">Request: <em>"Load the report from the API when the button is clicked."</em> (WinUI / WPF)</p>
+        <div class="compare">
+          <div>
+            <p class="label bad"><span data-l="es">✗ SIN ZNVE</span><span data-l="en" lang="en">✗ WITHOUT ZNVE</span></p>
+            <div class="terminal bad"><div class="bar"><i></i><i></i><i></i><span>ReportService.cs</span></div>
+<pre data-l="es"><code data-lang="cs">public string LoadReport()
+{
+    var client = new HttpClient();               // ✗ nunca se libera
+    var json = client.GetStringAsync(url).Result; // ✗ congela el UI thread
+    Debug.WriteLine("OK");                       // ✗ ruido
+    return json;                                 // ✗ sin contrato de datos
+}</code></pre>
+<pre data-l="en" lang="en"><code data-lang="cs">public string LoadReport()
+{
+    var client = new HttpClient();               // ✗ never disposed
+    var json = client.GetStringAsync(url).Result; // ✗ freezes the UI thread
+    Debug.WriteLine("OK");                       // ✗ noise
+    return json;                                 // ✗ no data contract
+}</code></pre></div>
+          </div>
+          <div>
+            <p class="label good"><span data-l="es">✓ CON ZNVE · Capa Camaleónica Windows</span><span data-l="en" lang="en">✓ WITH ZNVE · Windows Chameleon Layer</span></p>
+            <div class="terminal good"><div class="bar"><i></i><i></i><i></i><span>ReportService.cs</span></div>
+<pre data-l="es"><code data-lang="cs">public async Task&lt;ReportDto&gt; LoadReportAsync(CancellationToken ct) // ✓ async puro
+{
+    using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+    cts.CancelAfter(TimeSpan.FromSeconds(5));             // ✓ timeout explícito
+    using var response = await _http.GetAsync(_reportUrl, cts.Token); // ✓ IDisposable
+    response.EnsureSuccessStatusCode();
+    return await response.Content.ReadFromJsonAsync&lt;ReportDto&gt;(cts.Token)
+        ?? throw new InvalidDataException("REPORT_EMPTY");  // ✓ error explícito
+}</code></pre>
+<pre data-l="en" lang="en"><code data-lang="cs">public async Task&lt;ReportDto&gt; LoadReportAsync(CancellationToken ct) // ✓ pure async
+{
+    using var cts = CancellationTokenSource.CreateLinkedTokenSource(ct);
+    cts.CancelAfter(TimeSpan.FromSeconds(5));             // ✓ explicit timeout
+    using var response = await _http.GetAsync(_reportUrl, cts.Token); // ✓ IDisposable
+    response.EnsureSuccessStatusCode();
+    return await response.Content.ReadFromJsonAsync&lt;ReportDto&gt;(cts.Token)
+        ?? throw new InvalidDataException("REPORT_EMPTY");  // ✓ explicit error
+}</code></pre></div>
+          </div>
         </div>
-      </section>
+        <p class="verdict" data-l="es">Verificación: analizador CA2000 sin avisos y la UI responde durante la carga.</p>
+        <p class="verdict" data-l="en" lang="en">Verification: CA2000 analyzer with no warnings and the UI stays responsive while loading.</p>
+      </div>
 
-      <section>
-        <h2>🛠️ Comandos Agénticos (/znve-*)</h2>
-        <p class="note">Se escriben como <code>/znve-contract</code>, <code>/znve contract</code> o <code>/znve -contract</code>. Sin comando, toda respuesta técnica sigue 4 bloques: Blueprint y Contrato → Racional → Tarea Atómica → Verificación.</p>
+      <div role="tabpanel" id="panel-py" aria-labelledby="tab-py" hidden>
+        <p class="muted" data-l="es">Pedido: <em>"Refactoriza <code>legacy_calc.py</code>, tiene 900 líneas y ningún test."</em></p>
+        <p class="muted" data-l="en" lang="en">Request: <em>"Refactor <code>legacy_calc.py</code>; it has 900 lines and no tests."</em></p>
+        <div class="compare">
+          <div>
+            <p class="label bad"><span data-l="es">✗ SIN ZNVE</span><span data-l="en" lang="en">✗ WITHOUT ZNVE</span></p>
+            <div class="terminal bad"><div class="bar"><i></i><i></i><i></i><span>legacy_calc.py</span></div>
+<pre data-l="es"><code data-lang="py"># ✗ reescritura completa en una sola respuesta
+# ✗ "limpia" código duplicado que sostenía casos de negocio
+# ✗ nadie puede probar que el resultado es equivalente
+def calculate(a, b):
+    try:
+        return round(float(a) / float(b), 2)
+    except Exception:
+        pass          # ✗ los errores que producción esperaba desaparecen</code></pre>
+<pre data-l="en" lang="en"><code data-lang="py"># ✗ full rewrite in a single answer
+# ✗ "cleans up" duplicated code that held business cases together
+# ✗ nobody can prove the result is equivalent
+def calculate(a, b):
+    try:
+        return round(float(a) / float(b), 2)
+    except Exception:
+        pass          # ✗ errors production relied on disappear</code></pre></div>
+          </div>
+          <div>
+            <p class="label good"><span data-l="es">✓ CON ZNVE · /znve-forensic → /znve-harness</span><span data-l="en" lang="en">✓ WITH ZNVE · /znve-forensic → /znve-harness</span></p>
+            <div class="terminal good"><div class="bar"><i></i><i></i><i></i><span>tests/characterization/test_legacy_calc_harness.py</span></div>
+<pre data-l="es"><code data-lang="py"># ✓ el archivo original no se toca: primero se congela su comportamiento
+import json, pathlib, subprocess
+
+CASES = [["10", "2"], ["0", "0"], ["", "3"], ["-1", "abc"]]
+SNAPSHOTS = pathlib.Path(__file__).with_name("legacy_calc.snapshots.json")
+
+def run(args):
+    p = subprocess.run(["python", "legacy_calc.py", *args], capture_output=True, text=True)
+    return {"code": p.returncode, "out": p.stdout, "err": p.stderr}
+
+def test_golden_master():  # ✓ debe pasar al 100 % contra el código intacto
+    expected = json.loads(SNAPSHOTS.read_text(encoding="utf-8"))
+    assert [run(c) for c in CASES] == expected</code></pre>
+<pre data-l="en" lang="en"><code data-lang="py"># ✓ the original file is untouched: first its behavior is frozen
+import json, pathlib, subprocess
+
+CASES = [["10", "2"], ["0", "0"], ["", "3"], ["-1", "abc"]]
+SNAPSHOTS = pathlib.Path(__file__).with_name("legacy_calc.snapshots.json")
+
+def run(args):
+    p = subprocess.run(["python", "legacy_calc.py", *args], capture_output=True, text=True)
+    return {"code": p.returncode, "out": p.stdout, "err": p.stderr}
+
+def test_golden_master():  # ✓ must pass 100% against the intact code
+    expected = json.loads(SNAPSHOTS.read_text(encoding="utf-8"))
+    assert [run(c) for c in CASES] == expected</code></pre></div>
+          </div>
+        </div>
+        <p class="verdict" data-l="es">Después: Shadow Run (<code>Salida(Nuevo) == Salida(Legacy)</code>) y conmutación gradual con Strangler Fig.</p>
+        <p class="verdict" data-l="en" lang="en">Next: Shadow Run (<code>Output(New) == Output(Legacy)</code>) and gradual switch-over with Strangler Fig.</p>
+      </div>
+
+      <div class="table-scroll">
+        <table class="matrix compare-table" data-l="es">
+          <thead><tr><th>Aspecto</th><th>Sin ZNVE</th><th>Con ZNVE</th></tr></thead>
+          <tbody>
+            <tr><td>Dependencias</td><td>Una librería por tarea</td><td>API nativa primero (Anti-Bloat Fence)</td></tr>
+            <tr><td>Diseño</td><td>La IA improvisa tipos y campos</td><td>Contrato aprobado antes del código</td></tr>
+            <tr><td>Alcance</td><td>Cambios en cascada por todo el proyecto</td><td>Un <code>TARGET_FILE</code> por tarea</td></tr>
+            <tr><td>Errores</td><td><code>catch {}</code> y <code>sleep()</code></td><td>Tipos de error cerrados y causa raíz</td></tr>
+            <tr><td>Logs</td><td>"OK" en cada petición</td><td>Telemetría solo ante anomalías</td></tr>
+            <tr><td>Datos</td><td><code>SELECT *</code></td><td>Proyecciones explícitas sobre índices</td></tr>
+            <tr><td>Legacy</td><td>Reescribir y cruzar los dedos</td><td>Golden Master, Shadow Run y Strangler Fig</td></tr>
+            <tr><td>Cierre</td><td>"Parece que funciona"</td><td>Comando de verificación reproducible</td></tr>
+          </tbody>
+        </table>
+        <table class="matrix compare-table" data-l="en" lang="en">
+          <thead><tr><th>Aspect</th><th>Without ZNVE</th><th>With ZNVE</th></tr></thead>
+          <tbody>
+            <tr><td>Dependencies</td><td>One library per task</td><td>Native API first (Anti-Bloat Fence)</td></tr>
+            <tr><td>Design</td><td>The AI improvises types and fields</td><td>Contract approved before the code</td></tr>
+            <tr><td>Scope</td><td>Cascading changes across the project</td><td>One <code>TARGET_FILE</code> per task</td></tr>
+            <tr><td>Errors</td><td><code>catch {}</code> and <code>sleep()</code></td><td>Closed error types and root cause</td></tr>
+            <tr><td>Logs</td><td>"OK" on every request</td><td>Telemetry only on anomalies</td></tr>
+            <tr><td>Data</td><td><code>SELECT *</code></td><td>Explicit projections over indexes</td></tr>
+            <tr><td>Legacy</td><td>Rewrite and hope for the best</td><td>Golden Master, Shadow Run and Strangler Fig</td></tr>
+            <tr><td>Done</td><td>"Seems to work"</td><td>Reproducible verification command</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ============================== CONTRATOS ============================== -->
+    <section id="contratos">
+      <p class="eyebrow"><span data-l="es">04 · Contrato primero</span><span data-l="en" lang="en">04 · Contract first</span></p>
+      <h2 data-l="es">La IA se detiene cuando el contrato está sólido</h2>
+      <h2 data-l="en" lang="en">The AI stops once the contract is solid</h2>
+      <p class="lead" data-l="es">Con <code>/znve-contract</code> la IA recomienda el stack de la plataforma, diseña los DTOs en <code>contracts/</code> y aplica una lista de chequeo de 4 puntos. Cuando se cumple, emite un criterio de parada y deja de proponer cambios: así se corta el bucle infinito de "mejoras".</p>
+      <p class="lead" data-l="en" lang="en">With <code>/znve-contract</code> the AI recommends the platform stack, designs the DTOs in <code>contracts/</code> and applies a 4-point checklist. Once it passes, it emits a stop criterion and stops proposing changes, which breaks the endless "improvement" loop.</p>
+      <div class="grid">
+        <div class="card">
+          <h3 data-l="es">✅ Lista de chequeo de solidez</h3><h3 data-l="en" lang="en">✅ Solidity checklist</h3>
+          <p data-l="es"><b>1. Estructura invariable:</b> entradas, salidas, entidades y enums tipados.<br>
+             <b>2. Defensas de frontera:</b> errores explícitos, sin <code>any</code>.<br>
+             <b>3. Cero dependencias parásitas:</b> solo SDK nativo o runtime aprobado.<br>
+             <b>4. Filtro de diferimiento:</b> ideas secundarias a <code>contracts/CONTRACT_BACKLOG.md</code>.</p>
+          <p data-l="en" lang="en"><b>1. Invariant structure:</b> typed inputs, outputs, entities and enums.<br>
+             <b>2. Boundary defenses:</b> explicit errors, no <code>any</code>.<br>
+             <b>3. Zero parasitic dependencies:</b> native SDK or approved runtime only.<br>
+             <b>4. Deferral filter:</b> secondary ideas go to <code>contracts/CONTRACT_BACKLOG.md</code>.</p>
+        </div>
+        <div class="card">
+          <h3 data-l="es">🛑 Criterio de parada</h3><h3 data-l="en" lang="en">🛑 Stop criterion</h3>
+          <p data-l="es">Con los 4 puntos cumplidos, la IA responde exactamente:</p>
+          <p data-l="en" lang="en">Once the 4 points pass, the AI replies exactly (the phrase is part of the standard):</p>
+          <pre>"Contrato v1 sólido y cerrado. Listo para /znve-execute."</pre>
+        </div>
+        <div class="card">
+          <h3 data-l="es">🔁 Proyectos en curso: <code>--delta</code></h3><h3 data-l="en" lang="en">🔁 Ongoing projects: <code>--delta</code></h3>
+          <p data-l="es"><code>/znve-contract --delta</code> compara <code>contracts/</code> con <code>src/</code> y separa los cambios en <b>Cubo A</b> (lo que la etapa actual necesita ya) y <b>Cubo B</b> (ideas diferidas al backlog). Los contratos existentes se extienden, nunca se alteran.</p>
+          <p data-l="en" lang="en"><code>/znve-contract --delta</code> compares <code>contracts/</code> with <code>src/</code> and splits changes into <b>Bucket A</b> (what the current stage needs now) and <b>Bucket B</b> (ideas deferred to the backlog). Existing contracts are extended, never altered.</p>
+        </div>
+      </div>
+      <h3 data-l="es">Stack recomendado con <code>--platform</code></h3>
+      <h3 data-l="en" lang="en">Recommended stack with <code>--platform</code></h3>
+      <div class="grid tight">
+        <div class="card"><span class="tag">desktop</span><p>Rust + Tauri v2 <span data-l="es">o</span><span data-l="en" lang="en">or</span> WinUI 3 · SQLite (WAL) / DuckDB</p></div>
+        <div class="card"><span class="tag">web</span><p>Vite + TypeScript / Next.js · IndexedDB</p></div>
+        <div class="card"><span class="tag">hybrid</span><p>Tauri Mobile / Flutter / React Native · MMKV</p></div>
+        <div class="card"><span class="tag">mobile</span><p>Kotlin + Compose + Room · Swift 6 + SwiftUI + SwiftData</p></div>
+      </div>
+    </section>
+
+    <!-- ============================== MODOS ============================== -->
+    <section id="modos">
+      <p class="eyebrow"><span data-l="es">05 · Escenarios</span><span data-l="en" lang="en">05 · Scenarios</span></p>
+      <h2 data-l="es">Los 6 Modos Operativos</h2>
+      <h2 data-l="en" lang="en">The 6 Operating Modes</h2>
+      <p class="lead" data-l="es">Antes de cada tarea se declara el modo. Cada uno tiene su secuencia de comandos, pensada para una situación real del ciclo de vida del software.</p>
+      <p class="lead" data-l="en" lang="en">The mode is declared before every task. Each one has its own command sequence, designed for a real situation in the software lifecycle.</p>
+      <div class="grid modes">
+        <div class="card"><h3>🟢 1 · Greenfield</h3><p data-l="es">Proyecto nuevo, día 0.</p><p data-l="en" lang="en">New project, day 0.</p><p><code>/znve-contract</code> → <code>/znve-execute</code></p></div>
+        <div class="card"><h3>🔵 2 · In-Flight</h3><p data-l="es">Nuevas capacidades en un sistema activo.</p><p data-l="en" lang="en">New features in a live system.</p><p><code>/znve-contract --delta</code> → <code>/znve-execute</code></p></div>
+        <div class="card"><h3>🟠 3 · Hotfix &amp; Recovery</h3><p data-l="es">Producción caída o degradada.</p><p data-l="en" lang="en">Production down or degraded.</p><p><code>/znve-triage</code> → <code>/znve-hotfix</code></p></div>
+        <div class="card"><h3>🟣 4 · Modern Maintenance</h3><p data-l="es">SDKs con breaking changes.</p><p data-l="en" lang="en">SDKs with breaking changes.</p><p><code>/znve-upgrade</code></p></div>
+        <div class="card"><h3>🟡 5 · Legacy Rescue</h3><p data-l="es">Monolitos sin tests, en 5 fases.</p><p data-l="en" lang="en">Untested monoliths, in 5 phases.</p><p><code>/znve-forensic</code> → <code>/znve-harness</code> → <code>/znve-legacy-rescue</code></p></div>
+        <div class="card"><h3>🔴 6 · Audit &amp; Hardening</h3><p data-l="es">Memoria, hilos, red, seguridad y ruido.</p><p data-l="en" lang="en">Memory, threads, network, security and noise.</p><p><code>/znve-audit</code></p></div>
+      </div>
+    </section>
+
+    <!-- ============================== COMANDOS ============================== -->
+    <section id="comandos">
+      <p class="eyebrow"><span data-l="es">06 · Comandos</span><span data-l="en" lang="en">06 · Commands</span></p>
+      <h2 data-l="es">🛠️ Comandos Agénticos (/znve-*)</h2>
+      <h2 data-l="en" lang="en">🛠️ Agentic Commands (/znve-*)</h2>
+      <p class="lead" data-l="es">Los mismos 10 comandos funcionan en todos los asistentes. Se escriben como <code>/znve-contract</code>, <code>/znve contract</code> o <code>/znve -contract</code>. Sin comando, la respuesta sigue los 4 bloques.</p>
+      <p class="lead" data-l="en" lang="en">The same 10 commands work in every assistant. Write them as <code>/znve-contract</code>, <code>/znve contract</code> or <code>/znve -contract</code>. Without a command, the answer follows the 4 blocks.</p>
+      <div class="terminal">
+        <div class="bar"><i></i><i></i><i></i><span>/znve help · master_spec.json</span></div>
         <!-- >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano) -->
-        <pre class="commands">
+        <pre class="commands" data-l="es" lang="es">
 /znve-help           --&gt; Manual operativo e índice de comandos.
 /znve-contract       --&gt; Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
 /znve-execute        --&gt; Implementación atómica en TARGET_FILE con desecho de recursos.
@@ -218,95 +844,565 @@
 /znve-harness        --&gt; Suite Golden Master de caja negra sobre código intacto.
 /znve-legacy-rescue  --&gt; Orquestación integral en 5 fases para código legacy.
 /znve-audit          --&gt; Hardening de hilos, memoria, descriptores y seguridad.</pre>
+        <pre class="commands" data-l="en" lang="en">
+/znve-help           --&gt; Operating manual and command index.
+/znve-contract       --&gt; Immutable interfaces, DTOs and Anti-Bloat Fence.
+/znve-execute        --&gt; Atomic implementation in TARGET_FILE with resource disposal.
+/znve-triage         --&gt; Root-cause diagnosis and blast-radius containment.
+/znve-hotfix         --&gt; Atomic patch with mandatory regression test.
+/znve-upgrade        --&gt; Dependency migration behind a decoupled Adapter.
+/znve-forensic       --&gt; Read-only ingestion, I/O matrix and side effects.
+/znve-harness        --&gt; Black-box Golden Master suite on intact code.
+/znve-legacy-rescue  --&gt; End-to-end 5-phase legacy orchestration.
+/znve-audit          --&gt; Hardening of threads, memory, descriptors and security.</pre>
         <!-- <<< znve:generated -->
-      </section>
+      </div>
+      <p class="muted" data-l="es">Formatos de salida exactos de cada comando: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/COMMANDS.md">protocols/COMMANDS.md</a> · Plantillas de prompts listas para copiar: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/PROMPT_GUIDE.md">PROMPT_GUIDE.md</a></p>
+      <p class="muted" data-l="en" lang="en">Exact output format of each command: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/COMMANDS.md">protocols/COMMANDS.md</a> · Ready-to-copy prompt templates: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/PROMPT_GUIDE.md">PROMPT_GUIDE.md</a></p>
+    </section>
 
-      <section>
-        <h2>📦 Documentación</h2>
-        <div class="grid">
-          <div class="card">
-            <h3>Norma y referencia</h3>
-            <ul>
-              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/SPECIFICATION.md"><strong>SPECIFICATION.md</strong>: norma técnica formal v2.3.0</a></li>
-              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/COMMANDS.md"><strong>COMMANDS.md</strong>: manual de comandos y herramientas MCP</a></li>
-              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/GLOSSARY.md"><strong>GLOSSARY.md</strong>: glosario técnico ES/EN</a></li>
-              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/GREENFIELD_STARTER.md"><strong>GREENFIELD_STARTER.md</strong>: guía de inicio día 0</a></li>
-              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/PROMPT_GUIDE.md"><strong>PROMPT_GUIDE.md</strong>: prompts listos por comando</a></li>
-            </ul>
+    <!-- ============================== CASO REAL ============================== -->
+    <section id="caso-real">
+      <p class="eyebrow"><span data-l="es">07 · Caso real</span><span data-l="en" lang="en">07 · Case study</span></p>
+      <h2 data-l="es">Auditoría de un laboratorio anti-bot con <code>/znve-audit</code></h2>
+      <h2 data-l="en" lang="en">Auditing an anti-bot lab with <code>/znve-audit</code></h2>
+      <p class="lead" data-l="es">ZNVE se aplicó a un laboratorio de detección de bots (proxy mitmproxy, huella TLS JA4, panel en vivo y víctimas en Docker). La auditoría del modo 6 se hizo en solo lectura, con evidencia medida y una hoja de remediación para aprobar.</p>
+      <p class="lead" data-l="en" lang="en">ZNVE was applied to a bot-detection lab (mitmproxy, JA4 TLS fingerprinting, a live dashboard and target services in Docker). The mode 6 audit ran read-only, with measured evidence and a remediation sheet for approval.</p>
+      <div class="stats">
+        <div class="stat"><b>~12.000</b><span data-l="es">peticiones de carga para medir</span><span data-l="en" lang="en">load requests to measure</span></div>
+        <div class="stat"><b>0</b><span data-l="es">archivos modificados durante la auditoría</span><span data-l="en" lang="en">files modified during the audit</span></div>
+        <div class="stat"><b>10</b><span data-l="es">acciones de remediación con TARGET_FILE</span><span data-l="en" lang="en">remediation actions with TARGET_FILE</span></div>
+        <div class="stat"><b>600 → 1</b><span data-l="es">eventos del panel tras aplicar el contrato</span><span data-l="en" lang="en">dashboard events after applying the contract</span></div>
+      </div>
+      <div class="grid">
+        <div class="card">
+          <h3 data-l="es">Hallazgos con evidencia</h3><h3 data-l="en" lang="en">Findings with evidence</h3>
+          <div class="finding"><span class="sev red"></span><div>
+            <b data-l="es">Una segunda puerta a las víctimas.</b><b data-l="en" lang="en">A second door to the targets.</b>
+            <p data-l="es">Por el proxy normal (:18080) y HTTP plano no hay huella TLS: un <code>curl</code> con su UA real obtuvo <code>{"passed":true}</code>.</p>
+            <p data-l="en" lang="en">Through the plain proxy (:18080) over HTTP there is no TLS fingerprint: a <code>curl</code> with its real UA got <code>{"passed":true}</code>.</p>
+          </div></div>
+          <div class="finding"><span class="sev red"></span><div>
+            <b data-l="es">La memoria de mitmproxy crecía sin límite.</b><b data-l="en" lang="en">mitmproxy memory grew without bound.</b>
+            <p data-l="es">Unos 7 MB por cada 1.000 peticiones: base 75 MB y después 145 → 158 → 172 → 186 → 201 MB.</p>
+            <p data-l="en" lang="en">About 7 MB per 1,000 requests: 75 MB baseline, then 145 → 158 → 172 → 186 → 201 MB.</p>
+          </div></div>
+          <div class="finding"><span class="sev orange"></span><div>
+            <b data-l="es">Stack trace completo devuelto al cliente.</b><b data-l="en" lang="en">Full stack trace returned to the client.</b>
+            <p data-l="es">Un JSON mal formado exponía rutas internas; faltaban validación de entrada y <code>NODE_ENV=production</code>.</p>
+            <p data-l="en" lang="en">Malformed JSON exposed internal paths; input validation and <code>NODE_ENV=production</code> were missing.</p>
+          </div></div>
+          <div class="finding"><span class="sev orange"></span><div>
+            <b data-l="es">Ruido: ~5 líneas de log por petición sana.</b><b data-l="en" lang="en">Noise: ~5 log lines per healthy request.</b>
+            <p data-l="es">29.769 líneas para unas 6.000 peticiones, sin rotación de logs.</p>
+            <p data-l="en" lang="en">29,769 lines for about 6,000 requests, with no log rotation.</p>
+          </div></div>
+          <div class="finding"><span class="sev green"></span><div>
+            <b data-l="es">Lo que estaba bien.</b><b data-l="en" lang="en">What was fine.</b>
+            <p data-l="es">Puertos solo en loopback, la cabecera de huella falsa se descartaba y el <code>.env</code> tenía permisos 600.</p>
+            <p data-l="en" lang="en">Ports bound to loopback only, the forged fingerprint header was discarded and <code>.env</code> had 600 permissions.</p>
+          </div></div>
+        </div>
+        <div class="card">
+          <h3 data-l="es">Hoja de remediación (fragmento)</h3><h3 data-l="en" lang="en">Remediation sheet (excerpt)</h3>
+          <div class="table-scroll">
+            <table class="matrix" style="margin:0.5rem 0" data-l="es">
+              <thead><tr><th>#</th><th>Causa raíz</th><th>Acción</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Tráfico sin huella TLS llega a las víctimas</td><td>Rechazar toda petición sin huella, sea cual sea el UA</td></tr>
+                <tr><td>2</td><td>mitmweb guarda todos los flujos</td><td>Usar mitmdump para el tráfico</td></tr>
+                <tr><td>3</td><td>Sin límites ni rotación de logs</td><td><code>mem_limit</code>, <code>cpus</code> y <code>max-size</code> por servicio</td></tr>
+                <tr><td>5</td><td>Sin validación ni manejador de errores</td><td>Validar entrada y responder errores cerrados sin traza</td></tr>
+              </tbody>
+            </table>
+            <table class="matrix" style="margin:0.5rem 0" data-l="en" lang="en">
+              <thead><tr><th>#</th><th>Root cause</th><th>Action</th></tr></thead>
+              <tbody>
+                <tr><td>1</td><td>Traffic without a TLS fingerprint reaches the targets</td><td>Reject every request without a fingerprint, whatever the UA</td></tr>
+                <tr><td>2</td><td>mitmweb keeps every flow in memory</td><td>Use mitmdump for traffic</td></tr>
+                <tr><td>3</td><td>No resource limits or log rotation</td><td><code>mem_limit</code>, <code>cpus</code> and <code>max-size</code> per service</td></tr>
+                <tr><td>5</td><td>No input validation or error handler</td><td>Validate input and return closed errors without traces</td></tr>
+              </tbody>
+            </table>
           </div>
-          <div class="card">
-            <h3>Instalación y automatización</h3>
-            <ul>
-              <li><a href="https://github.com/jeffryc6/znve-spec/tree/main/protocols/agents/claude/skills"><strong>Skill de Claude</strong>: <code>znve.zip</code> para claude.ai y Claude Code</a></li>
-              <li><a href="https://github.com/jeffryc6/znve-spec/tree/main/protocols/agents"><strong>Directivas</strong>: Copilot, Cursor, DeepSeek, Ollama y OpenRouter</a></li>
-              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/Antigravity/Skills/INSTALL_ANTIGRAVITY.md"><strong>Antigravity</strong>: skill e instaladores</a></li>
-              <li><a href="https://github.com/jeffryc6/znve-spec/tree/main/protocols/mcp"><strong>Servidor MCP</strong>: 6 herramientas por stdio</a></li>
-              <li><a href="https://github.com/jeffryc6/znve-spec/tree/main/znve-auto"><strong>znve-auto</strong>: fuente única de verdad y detector de desviaciones</a></li>
-            </ul>
+          <h3 style="margin-top:1rem" data-l="es">Resultado de un arreglo con contrato</h3>
+          <h3 style="margin-top:1rem" data-l="en" lang="en">Result of a contract-driven fix</h3>
+          <p data-l="es">El panel emitía un evento por cada petición. Se escribió primero el contrato (una fila por huella JA4 + User-Agent, con tope de 200) y después el código: <b>600 peticiones iguales generaron 1 evento</b> en lugar de 600.</p>
+          <p data-l="en" lang="en">The dashboard emitted one event per request. The contract came first (one row per JA4 fingerprint + User-Agent, capped at 200), then the code: <b>600 identical requests produced 1 event</b> instead of 600.</p>
+        </div>
+      </div>
+      <p class="muted" data-l="es">En el propio repositorio, la retrospectiva registró 30 hallazgos, de los que 28 ya están resueltos, entre ellos 18 pruebas automáticas y 22 artefactos generados desde una sola especificación.</p>
+      <p class="muted" data-l="en" lang="en">In this very repository, the retrospective logged 30 findings, 28 of them already resolved, backed by 18 automated tests and 22 artifacts generated from a single specification.</p>
+    </section>
+
+    <!-- ============================== INSTALACIÓN ============================== -->
+    <section id="instalacion">
+      <p class="eyebrow"><span data-l="es">08 · Instalación</span><span data-l="en" lang="en">08 · Installation</span></p>
+      <h2 data-l="es">Instálalo en tu asistente</h2>
+      <h2 data-l="en" lang="en">Install it in your assistant</h2>
+      <p class="lead" data-l="es">Elige tu herramienta. Todas reciben los mismos comandos y reglas. Para comprobarlo, escribe <code>/znve help</code>: debe aparecer el catálogo de 10 comandos.</p>
+      <p class="lead" data-l="en" lang="en">Pick your tool. They all get the same commands and rules. To check it, type <code>/znve help</code>: the 10-command catalog should appear. The directives answer in Spanish by default; ask the assistant to reply in English if you prefer.</p>
+
+      <div class="tabs" role="tablist" aria-label="Instalación / Installation">
+        <button role="tab" id="itab-claude" aria-controls="ipanel-claude" aria-selected="true">Claude</button>
+        <button role="tab" id="itab-code" aria-controls="ipanel-code" aria-selected="false" tabindex="-1">Claude Code</button>
+        <button role="tab" id="itab-copilot" aria-controls="ipanel-copilot" aria-selected="false" tabindex="-1">Copilot</button>
+        <button role="tab" id="itab-cursor" aria-controls="ipanel-cursor" aria-selected="false" tabindex="-1">Cursor / Windsurf</button>
+        <button role="tab" id="itab-local" aria-controls="ipanel-local" aria-selected="false" tabindex="-1">Ollama · DeepSeek · OpenRouter</button>
+        <button role="tab" id="itab-ag" aria-controls="ipanel-ag" aria-selected="false" tabindex="-1">Antigravity · MCP</button>
+      </div>
+
+      <div role="tabpanel" id="ipanel-claude" aria-labelledby="itab-claude">
+        <div class="flow">
+          <div class="step"><b data-l="es">1 · Descarga</b><b data-l="en" lang="en">1 · Download</b><small><a href="https://github.com/jeffryc6/znve-spec/raw/main/protocols/agents/claude/skills/znve.zip">znve.zip</a> (8 KB)</small></div>
+          <div class="arrow">→</div>
+          <div class="step"><b data-l="es">2 · Sube</b><b data-l="en" lang="en">2 · Upload</b><small>claude.ai → Settings → Capabilities → Skills → Upload skill</small></div>
+          <div class="arrow">→</div>
+          <div class="step"><b data-l="es">3 · Prueba</b><b data-l="en" lang="en">3 · Test</b><small data-l="es">Conversación nueva: <code>/znve help</code></small><small data-l="en" lang="en">New chat: <code>/znve help</code></small></div>
+        </div>
+        <p class="muted" data-l="es">¿Usas Claude Projects? Pega <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/agents/claude-system-skills.md">claude-system-skills.md</a> en <em>Project Instructions</em>. Si tenías una versión anterior de la skill, elimínala antes de subir la nueva.</p>
+        <p class="muted" data-l="en" lang="en">Using Claude Projects? Paste <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/agents/claude-system-skills.md">claude-system-skills.md</a> into <em>Project Instructions</em>. If you had an older version of the skill, delete it before uploading the new one.</p>
+      </div>
+
+      <div role="tabpanel" id="ipanel-code" aria-labelledby="itab-code" hidden>
+        <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span>macOS / Linux</span></div>
+<pre id="cmd-code-unix"><code data-lang="sh">git clone https://github.com/jeffryc6/znve-spec.git
+cp -r znve-spec/protocols/agents/claude/skills/znve ~/.claude/skills/</code></pre><button class="copy" data-copy="cmd-code-unix"></button></div>
+        <p></p>
+        <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span>Windows (PowerShell)</span></div>
+<pre id="cmd-code-win"><code data-lang="sh">git clone https://github.com/jeffryc6/znve-spec.git
+Copy-Item -Recurse znve-spec\protocols\agents\claude\skills\znve $HOME\.claude\skills\znve</code></pre><button class="copy" data-copy="cmd-code-win"></button></div>
+        <p class="muted" data-l="es">La skill aparece en el menú <code>/</code> como <code>/znve</code>. Para un solo proyecto, cópiala en <code>.claude/skills/</code> dentro del proyecto.</p>
+        <p class="muted" data-l="en" lang="en">The skill shows up in the <code>/</code> menu as <code>/znve</code>. For a single project, copy it into <code>.claude/skills/</code> inside that project.</p>
+      </div>
+
+      <div role="tabpanel" id="ipanel-copilot" aria-labelledby="itab-copilot" hidden>
+        <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span data-l="es">desde la raíz de tu proyecto</span><span data-l="en" lang="en">from your project root</span></div>
+<pre id="cmd-copilot"><code data-lang="sh">mkdir -p .github
+curl -fsSL https://raw.githubusercontent.com/jeffryc6/znve-spec/main/.github/copilot-instructions.md -o .github/copilot-instructions.md</code></pre><button class="copy" data-copy="cmd-copilot"></button></div>
+        <p class="muted" data-l="es">Copilot lee ese archivo automáticamente en VS Code, Visual Studio y JetBrains. En el chat: <code>@workspace /znve-contract …</code></p>
+        <p class="muted" data-l="en" lang="en">Copilot reads that file automatically in VS Code, Visual Studio and JetBrains. In chat: <code>@workspace /znve-contract …</code></p>
+      </div>
+
+      <div role="tabpanel" id="ipanel-cursor" aria-labelledby="itab-cursor" hidden>
+        <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span data-l="es">desde la raíz de tu proyecto</span><span data-l="en" lang="en">from your project root</span></div>
+<pre id="cmd-cursor"><code data-lang="sh">curl -fsSL https://raw.githubusercontent.com/jeffryc6/znve-spec/main/protocols/agents/cursor-rules.md -o .cursorrules</code></pre><button class="copy" data-copy="cmd-cursor"></button></div>
+        <p class="muted" data-l="es">Las reglas de Cursor ya están en inglés.</p>
+        <p class="muted" data-l="en" lang="en">The Cursor rules are already written in English.</p>
+      </div>
+
+      <div role="tabpanel" id="ipanel-local" aria-labelledby="itab-local" hidden>
+        <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span>Ollama</span></div>
+<pre id="cmd-ollama"><code data-lang="sh">git clone https://github.com/jeffryc6/znve-spec.git
+ollama create znve-agent -f znve-spec/protocols/agents/ollama/Modelfile
+ollama run znve-agent</code></pre><button class="copy" data-copy="cmd-ollama"></button></div>
+        <p class="muted" data-l="es"><b>DeepSeek:</b> envía <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/agents/deepseek-directive.md">deepseek-directive.md</a> como mensaje <code>system</code> (en R1 las fases de validación ocurren dentro de <code>&lt;think&gt;</code>). <b>OpenRouter:</b> usa <a data-doc href="https://github.com/jeffryc6/znve-spec/tree/main/protocols/agents/openrouter">system-prompt.md + response-schema.json</a> o el cliente incluido.</p>
+        <p class="muted" data-l="en" lang="en"><b>DeepSeek:</b> send <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/agents/deepseek-directive.md">deepseek-directive.md</a> as the <code>system</code> message (in R1 the validation phases run inside <code>&lt;think&gt;</code>). <b>OpenRouter:</b> use <a data-doc href="https://github.com/jeffryc6/znve-spec/tree/main/protocols/agents/openrouter">system-prompt.md + response-schema.json</a> or the bundled client.</p>
+      </div>
+
+      <div role="tabpanel" id="ipanel-ag" aria-labelledby="itab-ag" hidden>
+        <div class="grid">
+          <div>
+            <h3 data-l="es">Instalador automático del servidor MCP</h3><h3 data-l="en" lang="en">MCP server auto-installer</h3>
+            <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span>Node.js 18+</span></div>
+<pre id="cmd-mcp"><code data-lang="sh">git clone https://github.com/jeffryc6/znve-spec.git
+cd znve-spec/protocols/mcp
+node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><button class="copy" data-copy="cmd-mcp"></button></div>
+            <p class="muted" data-l="es">Instala dependencias, compila, verifica las 6 herramientas con un handshake real, guarda un backup de <code>mcp_config.json</code> y registra <code>znve-engine</code>. Después: <em>Manage MCP Servers → Refresh</em>. Prueba antes con <code>--dry-run</code>.</p>
+            <p class="muted" data-l="en" lang="en">It installs dependencies, builds, verifies the 6 tools with a real handshake, backs up <code>mcp_config.json</code> and registers <code>znve-engine</code>. Then: <em>Manage MCP Servers → Refresh</em>. Try <code>--dry-run</code> first, and replace the path with your own project folder.</p>
+          </div>
+          <div>
+            <h3 data-l="es">Skill global para Antigravity IDE</h3><h3 data-l="en" lang="en">Global skill for Antigravity IDE</h3>
+            <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span>Python 3.10+</span></div>
+<pre id="cmd-ag"><code data-lang="sh">python znve-spec/protocols/Antigravity/Skills/install_znve_global.py</code></pre><button class="copy" data-copy="cmd-ag"></button></div>
+            <p class="muted" data-l="es">Instala la skill <code>znve</code>, el workflow <code>/znve-help</code> y la regla global en <code>~/.gemini</code>. Para un solo proyecto con el SDK: <code>Auto_Installer.py</code> desde la raíz del proyecto.</p>
+            <p class="muted" data-l="en" lang="en">Installs the <code>znve</code> skill, the <code>/znve-help</code> workflow and the global rule in <code>~/.gemini</code>. For a single project with the SDK: run <code>Auto_Installer.py</code> from the project root.</p>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
 
-    <footer>
-      <p>Zero-Noise Vibe Engineering (ZNVE) &copy; 2026 Jeffry Carmona | <a href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE">CC BY 4.0 (especificación) · CC BY 4.0 y MIT (protocolos) · MIT (herramientas)</a> | <a href="https://github.com/jeffryc6/znve-spec">GitHub</a></p>
-    </footer>
+      <h3 style="margin-top:2rem" data-l="es">Primeros pasos en un proyecto nuevo</h3>
+      <h3 style="margin-top:2rem" data-l="en" lang="en">First steps in a new project</h3>
+      <div class="flow">
+        <div class="step"><b data-l="es">1 · Contrato</b><b data-l="en" lang="en">1 · Contract</b><small data-l="es"><code>/znve contract --platform=web</code> + tu requerimiento</small><small data-l="en" lang="en"><code>/znve contract --platform=web</code> + your requirement</small></div>
+        <div class="arrow">→</div>
+        <div class="step"><b data-l="es">2 · Revisión</b><b data-l="en" lang="en">2 · Review</b><small data-l="es">Aprueba cuando se cumpla la lista de 4 puntos</small><small data-l="en" lang="en">Approve once the 4-point checklist passes</small></div>
+        <div class="arrow">→</div>
+        <div class="step"><b data-l="es">3 · Ejecución</b><b data-l="en" lang="en">3 · Execution</b><small><code>/znve execute --target=src/…</code></small></div>
+        <div class="arrow">→</div>
+        <div class="step"><b data-l="es">4 · Verificación</b><b data-l="en" lang="en">4 · Verification</b><small data-l="es">Ejecuta el comando o test que entrega la IA</small><small data-l="en" lang="en">Run the command or test the AI hands you</small></div>
+      </div>
+      <p class="muted" data-l="es">Guía completa del día 0: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/GREENFIELD_STARTER.md">GREENFIELD_STARTER.md</a> · Manual de instalación del MCP: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/mcp/ANTIGRAVITY_INSTALL.md">ANTIGRAVITY_INSTALL.md</a></p>
+      <p class="muted" data-l="en" lang="en">Full day-0 guide: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/GREENFIELD_STARTER.md">GREENFIELD_STARTER.md</a> · MCP installation manual: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/mcp/ANTIGRAVITY_INSTALL.md">ANTIGRAVITY_INSTALL.md</a></p>
+    </section>
+
+    <!-- ============================== ARQUITECTURA ============================== -->
+    <section id="arquitectura">
+      <p class="eyebrow"><span data-l="es">09 · Cómo funciona por dentro</span><span data-l="en" lang="en">09 · Under the hood</span></p>
+      <h2 data-l="es">Una sola especificación genera todo lo demás</h2>
+      <h2 data-l="en" lang="en">A single specification generates everything else</h2>
+      <p class="lead" data-l="es">Mantener las mismas reglas en 7 asistentes a mano provocaba versiones desalineadas. Hoy la metodología se declara una vez en <code>znve-auto/master_spec.json</code>, un compilador sin dependencias genera cada directiva y el CI rechaza cualquier desvío.</p>
+      <p class="lead" data-l="en" lang="en">Keeping the same rules across 7 assistants by hand led to drifting versions. Today the methodology is declared once in <code>znve-auto/master_spec.json</code>, a dependency-free compiler generates every directive and CI rejects any drift.</p>
+      <div class="flow">
+        <div class="step"><b>master_spec.json</b><small data-l="es">Versión, guardrails, modos y 10 comandos</small><small data-l="en" lang="en">Version, guardrails, modes and 10 commands</small></div>
+        <div class="arrow">→</div>
+        <div class="step"><b>builder.py</b><small data-l="es">14 plantillas + bloques gestionados</small><small data-l="en" lang="en">14 templates + managed regions</small></div>
+        <div class="arrow">→</div>
+        <div class="step"><b data-l="es">22 artefactos</b><b data-l="en" lang="en">22 artifacts</b><small data-l="es">Skills, directivas, manual, MCP, esta web</small><small data-l="en" lang="en">Skills, directives, manual, MCP, this site</small></div>
+        <div class="arrow">→</div>
+        <div class="step"><b>test_sync.py</b><small data-l="es">18 pruebas de paridad</small><small data-l="en" lang="en">18 parity tests</small></div>
+        <div class="arrow">→</div>
+        <div class="step"><b>GitHub Actions</b><small data-l="es">Falla si algo se desvía</small><small data-l="en" lang="en">Fails on any drift</small></div>
+      </div>
+      <div class="grid">
+        <div class="terminal">
+          <div class="bar"><i></i><i></i><i></i><span data-l="es">estructura del repositorio</span><span data-l="en" lang="en">repository layout</span></div>
+<pre data-l="es">znve-spec/
+├── README.md               portada bilingüe
+├── SPECIFICATION.md        norma técnica formal
+├── GLOSSARY.md             glosario ES/EN
+├── protocols/
+│   ├── ZNVE_PROTOCOL.md    los 6 modos
+│   ├── COMMANDS.md         manual de comandos y MCP
+│   ├── agents/             Claude, Copilot, Cursor,
+│   │                       DeepSeek, Ollama, OpenRouter
+│   ├── Antigravity/        skill e instaladores
+│   └── mcp/                servidor MCP (6 herramientas)
+├── znve-auto/              fuente única + builder + tests
+└── index.html              esta página</pre>
+<pre data-l="en" lang="en">znve-spec/
+├── README.md               bilingual front page
+├── SPECIFICATION.md        formal technical standard
+├── GLOSSARY.md             ES/EN glossary
+├── protocols/
+│   ├── ZNVE_PROTOCOL.md    the 6 modes
+│   ├── COMMANDS.md         command and MCP manual
+│   ├── agents/             Claude, Copilot, Cursor,
+│   │                       DeepSeek, Ollama, OpenRouter
+│   ├── Antigravity/        skill and installers
+│   └── mcp/                MCP server (6 tools)
+├── znve-auto/              single source + builder + tests
+└── index.html              this page</pre>
+        </div>
+        <div>
+          <h3 data-l="es">Mantener y desplegar</h3><h3 data-l="en" lang="en">Maintain and deploy</h3>
+          <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span data-l="es">para colaboradores</span><span data-l="en" lang="en">for contributors</span></div>
+<pre id="cmd-build"><code data-lang="sh"># 1. edit znve-auto/master_spec.json
+python znve-auto/builder.py      # 22 artifacts
+python znve-auto/test_sync.py    # parity check
+git push                         # CI + GitHub Pages</code></pre><button class="copy" data-copy="cmd-build"></button></div>
+          <p class="muted" data-l="es">Solo biblioteca estándar de Python. Los archivos generados llevan un aviso y no se editan a mano. Detalles en <a data-doc href="https://github.com/jeffryc6/znve-spec/tree/main/znve-auto">znve-auto/README.md</a>.</p>
+          <p class="muted" data-l="en" lang="en">Python standard library only. Generated files carry a notice and are never edited by hand. Details in <a data-doc href="https://github.com/jeffryc6/znve-spec/tree/main/znve-auto">znve-auto/README.md</a>.</p>
+        </div>
+      </div>
+      <h3 data-l="es">Documentación de referencia</h3>
+      <h3 data-l="en" lang="en">Reference documentation</h3>
+      <p class="muted" data-l="es"><a href="https://github.com/jeffryc6/znve-spec#readme">README</a> (español e inglés) · <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/SPECIFICATION.md">SPECIFICATION.md</a> · <a href="https://github.com/jeffryc6/znve-spec/blob/main/GLOSSARY.md">GLOSSARY.md</a> (español e inglés) · <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_PROTOCOL.md">ZNVE_PROTOCOL.md</a> · <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_LEGACY_PROTOCOL.md">ZNVE_LEGACY_PROTOCOL.md</a> · <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_MODERN_APPS_PROTOCOL.md">ZNVE_MODERN_APPS_PROTOCOL.md</a></p>
+      <p class="muted" data-l="en" lang="en"><a href="https://github.com/jeffryc6/znve-spec#readme">README</a> (English and Spanish) · <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/SPECIFICATION.md">SPECIFICATION.md</a> · <a href="https://github.com/jeffryc6/znve-spec/blob/main/GLOSSARY.md">GLOSSARY.md</a> (English and Spanish) · <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_PROTOCOL.md">ZNVE_PROTOCOL.md</a> · <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_LEGACY_PROTOCOL.md">ZNVE_LEGACY_PROTOCOL.md</a> · <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_MODERN_APPS_PROTOCOL.md">ZNVE_MODERN_APPS_PROTOCOL.md</a>. Spanish-only documents open through Google Translate.</p>
+    </section>
+
+    <!-- ============================== HISTORIA ============================== -->
+    <section id="historia">
+      <p class="eyebrow"><span data-l="es">10 · Cómo se creó</span><span data-l="en" lang="en">10 · How it was built</span></p>
+      <h2 data-l="es">De una especificación en Markdown a un sistema en 6 días</h2>
+      <h2 data-l="en" lang="en">From a Markdown spec to a working system in 6 days</h2>
+      <ol class="timeline">
+        <li><time>2026-09-24</time>
+          <h3 data-l="es">Nace la especificación</h3><h3 data-l="en" lang="en">The specification is born</h3>
+          <p data-l="es">Axiomas, pilares, protocolos universal y legacy, RFCs y las primeras reglas para Claude y Cursor.</p>
+          <p data-l="en" lang="en">Axioms, pillars, the universal and legacy protocols, RFCs and the first rules for Claude and Cursor.</p></li>
+        <li><time>2026-09-25</time>
+          <h3 data-l="es">Seis modos y ecosistema multi-agente</h3><h3 data-l="en" lang="en">Six modes and a multi-agent ecosystem</h3>
+          <p data-l="es">Directivas para Copilot, DeepSeek, Ollama y OpenRouter, el primer servidor MCP, el catálogo de comandos y el glosario.</p>
+          <p data-l="en" lang="en">Directives for Copilot, DeepSeek, Ollama and OpenRouter, the first MCP server, the command catalog and the glossary.</p></li>
+        <li><time>2026-09-26</time>
+          <h3 data-l="es">Skill instalable para Claude</h3><h3 data-l="en" lang="en">Installable Claude skill</h3>
+          <p data-l="es">Frontmatter válido, UTF-8, empaquetado en zip y tres formas de invocar: <code>/znve-help</code>, <code>/znve help</code> y <code>/znve -help</code>.</p>
+          <p data-l="en" lang="en">Valid frontmatter, UTF-8, zip packaging and three ways to invoke it: <code>/znve-help</code>, <code>/znve help</code> and <code>/znve -help</code>.</p></li>
+        <li><time>2026-09-26 / 27</time>
+          <h3 data-l="es">Primer proyecto real</h3><h3 data-l="en" lang="en">First real project</h3>
+          <p data-l="es">El laboratorio anti-bot adopta ZNVE: auditoría <code>/znve-audit</code> con evidencia medida y arreglo del panel guiado por contrato.</p>
+          <p data-l="en" lang="en">The anti-bot lab adopts ZNVE: a <code>/znve-audit</code> with measured evidence and a contract-driven dashboard fix.</p></li>
+        <li><time>2026-09-27</time>
+          <h3 data-l="es">MCP para Antigravity</h3><h3 data-l="en" lang="en">MCP for Antigravity</h3>
+          <p data-l="es">Diagnóstico de por qué "se instalaba pero no pasaba nada", instalador automático con verificación real y guía de instalación.</p>
+          <p data-l="en" lang="en">Diagnosis of why it "installed but nothing happened", an auto-installer with real verification and an installation guide.</p></li>
+        <li><time>2026-09-29</time>
+          <h3 data-l="es">Fuente única y sincronización</h3><h3 data-l="en" lang="en">Single source and sync</h3>
+          <p data-l="es">Nace <code>znve-auto</code>: 22 artefactos generados, 18 pruebas y CI. Todo el repositorio queda en v2.3.0 y publicado en esta página.</p>
+          <p data-l="en" lang="en"><code>znve-auto</code> is born: 22 generated artifacts, 18 tests and CI. The whole repository moves to v2.3.0 and is published on this page.</p></li>
+      </ol>
+    </section>
+
+    <!-- ============================== FAQ ============================== -->
+    <section id="faq">
+      <p class="eyebrow"><span data-l="es">11 · Preguntas frecuentes</span><span data-l="en" lang="en">11 · FAQ</span></p>
+      <h2 data-l="es">Preguntas frecuentes</h2>
+      <h2 data-l="en" lang="en">Frequently asked questions</h2>
+      <div data-l="es">
+        <details><summary>¿Tengo que instalar algo en mi proyecto?</summary><p>No. ZNVE son instrucciones para tu asistente de IA (una skill, un archivo de reglas o un prompt de sistema). El servidor MCP es opcional y solo lo necesitan agentes autónomos como Antigravity.</p></details>
+        <details><summary>¿Sirve solo para TypeScript?</summary><p>No. Es agnóstico al lenguaje y a la base de datos. La Capa Camaleónica añade reglas específicas para Android, iOS/macOS, Windows, híbridos (Tauri, Flutter, React Native) y Web/Backend.</p></details>
+        <details><summary>¿Qué pasa si la IA ignora una regla?</summary><p>Tú eres el Director de Arquitectura: los 4 bloques y los encabezados fijos de cada comando hacen visible cualquier desvío. Con el servidor MCP, además, herramientas como <code>znve_surgical_write</code> rechazan físicamente un <code>catch</code> vacío.</p></details>
+        <details><summary>¿Funciona con mi proyecto actual, no solo con proyectos nuevos?</summary><p>Sí. El modo 2 (<code>--delta</code>) añade capacidades sin romper contratos, el modo 3 atiende incidentes en producción y el modo 5 rescata código legacy sin tests.</p></details>
+        <details><summary>¿Está disponible en inglés?</summary><p>Esta página, el README y el glosario son bilingües, y las reglas de Cursor están en inglés. El resto de documentos está en español: en modo inglés sus enlaces se abren a través del traductor de Google, y puedes pedirle a cualquier asistente que responda en inglés.</p></details>
+        <details><summary>¿Cuál es la licencia?</summary><p>La especificación y la documentación usan CC BY 4.0. Los protocolos (<code>/protocols</code>) se ofrecen a la vez bajo CC BY 4.0 y MIT. Las herramientas del repositorio, bajo MIT. Detalles en <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE">LICENSE</a>.</p></details>
+        <details><summary>¿Cómo propongo un cambio?</summary><p>Mediante una RFC: copia <code>rfcs/0000-template.md</code>, abre un pull request y, si modifica comandos o reglas, cambia <code>znve-auto/master_spec.json</code>. Guía en <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p></details>
+      </div>
+      <div data-l="en" lang="en">
+        <details><summary>Do I need to install anything in my project?</summary><p>No. ZNVE is a set of instructions for your AI assistant (a skill, a rules file or a system prompt). The MCP server is optional and only needed by autonomous agents such as Antigravity.</p></details>
+        <details><summary>Is it only for TypeScript?</summary><p>No. It is language- and database-agnostic. The Chameleon Layer adds specific rules for Android, iOS/macOS, Windows, hybrid apps (Tauri, Flutter, React Native) and Web/Backend.</p></details>
+        <details><summary>What if the AI ignores a rule?</summary><p>You are the Director of Architecture: the 4 blocks and each command's fixed headers make any drift visible. With the MCP server, tools such as <code>znve_surgical_write</code> also physically reject an empty <code>catch</code>.</p></details>
+        <details><summary>Does it work with my existing project, not just new ones?</summary><p>Yes. Mode 2 (<code>--delta</code>) adds features without breaking contracts, mode 3 handles production incidents and mode 5 rescues untested legacy code.</p></details>
+        <details><summary>Is ZNVE available in English?</summary><p>This page, the README and the glossary are bilingual, and the Cursor rules are in English. The other documents are in Spanish; in English mode their links open through Google Translate, and you can ask any assistant to reply in English.</p></details>
+        <details><summary>What is the license?</summary><p>The specification and documentation use CC BY 4.0. The protocols (<code>/protocols</code>) are offered under both CC BY 4.0 and MIT. Repository tooling is MIT. Details in <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE">LICENSE</a>.</p></details>
+        <details><summary>How do I propose a change?</summary><p>Through an RFC: copy <code>rfcs/0000-template.md</code>, open a pull request and, if it changes commands or rules, edit <code>znve-auto/master_spec.json</code>. Guide in <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p></details>
+      </div>
+    </section>
   </div>
 
+  <footer>
+    <p data-l="es">Zero-Noise Vibe Engineering (ZNVE) &copy; 2026 Jeffry Carmona | <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE">CC BY 4.0 (especificación) · CC BY 4.0 y MIT (protocolos) · MIT (herramientas)</a> | <a href="https://github.com/jeffryc6/znve-spec">GitHub</a></p>
+    <p data-l="en" lang="en">Zero-Noise Vibe Engineering (ZNVE) &copy; 2026 Jeffry Carmona | <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE">CC BY 4.0 (specification) · CC BY 4.0 and MIT (protocols) · MIT (tooling)</a> | <a href="https://github.com/jeffryc6/znve-spec">GitHub</a></p>
+  </footer>
+
   <script>
-    // Red de nodos decorativa; se desactiva con prefers-reduced-motion.
-    const canvas = document.getElementById('node-canvas');
-    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+    // ---------------------------------------------------------------------
+    // Idioma: ?lang= en la URL, luego la preferencia guardada y, si no hay,
+    // el idioma del navegador. Solo cambia <html lang>; el CSS hace el resto.
+    // En inglés, los documentos que solo existen en español (a[data-doc])
+    // se abren a través del traductor en lugar de duplicarse.
+    // ---------------------------------------------------------------------
+    const I18N = {
+      es: { title: 'Zero-Noise Vibe Engineering (ZNVE) | Arquitectura agéntica basada en especificaciones', copy: 'copiar', copied: 'copiado', manual: 'selecciona y copia' },
+      en: { title: 'Zero-Noise Vibe Engineering (ZNVE) | Spec-Driven Agentic Architecture', copy: 'copy', copied: 'copied', manual: 'select and copy' }
+    };
+    const LANG_KEY = 'znve-lang';
+    const TRANSLATE = 'https://translate.google.com/translate?sl=es&tl=en&u=';
+    const isLang = (value) => Object.prototype.hasOwnProperty.call(I18N, value);
 
-    if (!motion.matches) {
-      const ctx = canvas.getContext('2d');
-      let width = canvas.width = window.innerWidth;
-      let height = canvas.height = window.innerHeight;
+    function storedLang() {
+      try {
+        return localStorage.getItem(LANG_KEY);
+      } catch (err) {
+        return null; // almacenamiento bloqueado (modo privado): se usa el idioma del navegador
+      }
+    }
 
-      window.addEventListener('resize', () => {
-        width = canvas.width = window.innerWidth;
-        height = canvas.height = window.innerHeight;
+    function initialLang() {
+      const fromUrl = new URLSearchParams(location.search).get('lang');
+      if (isLang(fromUrl)) return fromUrl;
+      const saved = storedLang();
+      if (isLang(saved)) return saved;
+      return (navigator.language || 'es').toLowerCase().startsWith('es') ? 'es' : 'en';
+    }
+
+    function setLang(lang, persist) {
+      document.documentElement.lang = lang;
+      document.title = I18N[lang].title;
+      document.querySelectorAll('[data-set-lang]').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.setLang === lang)));
+      document.querySelectorAll('a[data-doc]').forEach((a) => {
+        a.dataset.src = a.dataset.src || a.getAttribute('href');
+        a.href = lang === 'en' ? TRANSLATE + encodeURIComponent(a.dataset.src) : a.dataset.src;
       });
+      document.querySelectorAll('button.copy').forEach((b) => { b.textContent = I18N[lang].copy; });
+      if (persist) {
+        try {
+          localStorage.setItem(LANG_KEY, lang);
+        } catch (err) {
+          document.documentElement.dataset.langNotSaved = 'true'; // la elección vale solo para esta visita
+        }
+      }
+    }
 
-      const nodes = Array.from({ length: 45 }, () => ({
-        x: Math.random() * width,
-        y: Math.random() * height,
-        vx: (Math.random() - 0.5) * 0.8,
-        vy: (Math.random() - 0.5) * 0.8,
-        radius: Math.random() * 2 + 1
-      }));
+    document.querySelectorAll('[data-set-lang]').forEach((b) => b.addEventListener('click', () => setLang(b.dataset.setLang, true)));
+    setLang(initialLang(), false);
 
-      function animate() {
+    // ---------------------------------------------------------------------
+    // Red heurística de nodos: los nodos reaccionan al puntero y pulsos de
+    // "señal" recorren las conexiones. Se desactiva con prefers-reduced-motion
+    // y se pausa sola cuando la pestaña no está visible.
+    // ---------------------------------------------------------------------
+    (() => {
+      const canvas = document.getElementById('node-canvas');
+      if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+      const ctx = canvas.getContext('2d');
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const LINK = 140, POINTER = 180;
+      let width = 0, height = 0, nodes = [], pulses = [], lastPulse = 0;
+      const pointer = { x: -9999, y: -9999 };
+
+      function resize() {
+        width = window.innerWidth;
+        height = window.innerHeight;
+        canvas.width = width * dpr;
+        canvas.height = height * dpr;
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const count = Math.round(Math.min(70, Math.max(28, (width * height) / 22000)));
+        nodes = Array.from({ length: count }, () => ({
+          x: Math.random() * width,
+          y: Math.random() * height,
+          vx: (Math.random() - 0.5) * 0.6,
+          vy: (Math.random() - 0.5) * 0.6,
+          r: Math.random() * 1.8 + 1,
+          hub: Math.random() < 0.12
+        }));
+        pulses = [];
+      }
+
+      window.addEventListener('resize', resize);
+      window.addEventListener('pointermove', (e) => { pointer.x = e.clientX; pointer.y = e.clientY; }, { passive: true });
+      document.addEventListener('pointerleave', () => { pointer.x = pointer.y = -9999; });
+
+      function frame(t) {
         ctx.clearRect(0, 0, width, height);
-        ctx.fillStyle = '#58a6ff';
-        ctx.strokeStyle = '#30363d';
+        const edges = [];
 
-        nodes.forEach((node, i) => {
-          node.x += node.vx;
-          node.y += node.vy;
+        for (const n of nodes) {
+          n.x += n.vx;
+          n.y += n.vy;
+          if (n.x < 0 || n.x > width) n.vx *= -1;
+          if (n.y < 0 || n.y > height) n.vy *= -1;
+        }
 
-          if (node.x < 0 || node.x > width) node.vx *= -1;
-          if (node.y < 0 || node.y > height) node.vy *= -1;
-
-          ctx.beginPath();
-          ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
-          ctx.fill();
-
+        ctx.lineWidth = 1;
+        for (let i = 0; i < nodes.length; i++) {
           for (let j = i + 1; j < nodes.length; j++) {
-            const other = nodes[j];
-            const dist = Math.hypot(node.x - other.x, node.y - other.y);
-            if (dist < 130) {
+            const a = nodes[i], b = nodes[j];
+            const d = Math.hypot(a.x - b.x, a.y - b.y);
+            if (d < LINK) {
+              edges.push([a, b]);
+              ctx.strokeStyle = `rgba(88, 166, 255, ${0.35 * (1 - d / LINK)})`;
               ctx.beginPath();
-              ctx.moveTo(node.x, node.y);
-              ctx.lineTo(other.x, other.y);
+              ctx.moveTo(a.x, a.y);
+              ctx.lineTo(b.x, b.y);
               ctx.stroke();
             }
           }
+        }
+
+        for (const n of nodes) {
+          const d = Math.hypot(n.x - pointer.x, n.y - pointer.y);
+          if (d < POINTER) {
+            ctx.strokeStyle = `rgba(63, 185, 80, ${0.6 * (1 - d / POINTER)})`;
+            ctx.beginPath();
+            ctx.moveTo(n.x, n.y);
+            ctx.lineTo(pointer.x, pointer.y);
+            ctx.stroke();
+            n.x += (pointer.x - n.x) * 0.002;
+            n.y += (pointer.y - n.y) * 0.002;
+          }
+        }
+
+        for (const n of nodes) {
+          ctx.fillStyle = n.hub ? '#3fb950' : '#58a6ff';
+          ctx.beginPath();
+          ctx.arc(n.x, n.y, n.hub ? n.r + 1.2 : n.r, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        if (edges.length && t - lastPulse > 350 && pulses.length < 14) {
+          const [a, b] = edges[Math.floor(Math.random() * edges.length)];
+          pulses.push({ a, b, p: 0 });
+          lastPulse = t;
+        }
+        ctx.fillStyle = '#3fb950';
+        pulses = pulses.filter((s) => {
+          s.p += 0.02;
+          if (s.p >= 1) return false;
+          const x = s.a.x + (s.b.x - s.a.x) * s.p;
+          const y = s.a.y + (s.b.y - s.a.y) * s.p;
+          ctx.beginPath();
+          ctx.arc(x, y, 2.2, 0, Math.PI * 2);
+          ctx.fill();
+          return true;
         });
-        requestAnimationFrame(animate);
+
+        requestAnimationFrame(frame);
       }
-      animate();
-    }
+
+      resize();
+      requestAnimationFrame(frame);
+    })();
+
+    // ---------------------------------------------------------------------
+    // Resaltado de sintaxis mínimo (sin librerías): comentarios, cadenas,
+    // números y palabras clave. Los comentarios con ✗ / ✓ se marcan en color.
+    // ---------------------------------------------------------------------
+    (() => {
+      const KW = {
+        ts: 'import|from|export|async|await|function|const|let|return|try|catch|throw|new|if|interface|type|readonly|of',
+        cs: 'public|private|async|await|var|using|return|new|throw|string|Task|if',
+        py: 'import|def|return|try|except|pass|for|in|assert|with|as',
+        sh: 'git|cd|cp|mkdir|curl|python|node|ollama|Copy-Item'
+      };
+      const esc = (s) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+      document.querySelectorAll('code[data-lang]').forEach((el) => {
+        const lang = el.dataset.lang;
+        const comment = lang === 'py' || lang === 'sh' ? '#[^\\n]*' : '\\/\\/[^\\n]*';
+        const re = new RegExp(
+          `(${comment})|("(?:[^"\\\\\\n]|\\\\.)*"|'(?:[^'\\\\\\n]|\\\\.)*'|\`(?:[^\`\\\\]|\\\\.)*\`)` +
+          `|(\\b\\d[\\d_]*(?:\\.\\d+)?\\b)|(\\b(?:${KW[lang] || 'a^'})\\b)`, 'g');
+        const src = el.textContent;
+        let out = '', last = 0, m;
+        while ((m = re.exec(src))) {
+          out += esc(src.slice(last, m.index));
+          const [tok, com, str, num, kw] = m;
+          if (com) {
+            const cls = com.includes('✗') ? 'tok-bad' : com.includes('✓') ? 'tok-good' : 'tok-com';
+            out += `<span class="${cls}">${esc(tok)}</span>`;
+          } else if (str) out += `<span class="tok-str">${esc(tok)}</span>`;
+          else if (num) out += `<span class="tok-num">${esc(tok)}</span>`;
+          else if (kw) out += `<span class="tok-kw">${esc(tok)}</span>`;
+          last = m.index + tok.length;
+        }
+        el.innerHTML = out + esc(src.slice(last));
+      });
+    })();
+
+    // ---------------------------------------------------------------------
+    // Pestañas accesibles (flechas izquierda/derecha) y botones de copiar.
+    // ---------------------------------------------------------------------
+    (() => {
+      document.querySelectorAll('[role="tablist"]').forEach((list) => {
+        const tabs = [...list.querySelectorAll('[role="tab"]')];
+        const select = (tab) => {
+          tabs.forEach((t) => {
+            const on = t === tab;
+            t.setAttribute('aria-selected', String(on));
+            t.tabIndex = on ? 0 : -1;
+            document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+          });
+        };
+        tabs.forEach((tab, i) => {
+          tab.addEventListener('click', () => select(tab));
+          tab.addEventListener('keydown', (e) => {
+            if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+            const next = tabs[(i + (e.key === 'ArrowRight' ? 1 : tabs.length - 1)) % tabs.length];
+            select(next);
+            next.focus();
+          });
+        });
+      });
+
+      document.querySelectorAll('button.copy').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const target = document.getElementById(btn.dataset.copy);
+          const words = I18N[document.documentElement.lang] || I18N.es;
+          try {
+            await navigator.clipboard.writeText(target.innerText);
+            btn.textContent = words.copied;
+          } catch (err) {
+            btn.textContent = words.manual;
+            const range = document.createRange();
+            range.selectNodeContents(target);
+            const sel = window.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(range);
+          }
+          setTimeout(() => { btn.textContent = words.copy; }, 1800);
+        });
+      });
+    })();
   </script>
 </body>
 </html>
