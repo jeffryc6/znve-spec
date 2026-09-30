@@ -1,24 +1,48 @@
 Zero-Noise Vibe Engineering (ZNVE) Specification & Protocols
 Copyright (c) 2026 Jeffry Carmona (jeffryc6)
 
-Este repositorio utiliza un esquema de licenciamiento dual:
+Este repositorio utiliza dos licencias: Creative Commons Attribution 4.0
+International (CC BY 4.0) y la Licencia MIT. Cada archivo queda cubierto según
+su ubicación:
 
-1. ESPECIFICACIÓN, TEXTOS Y DOCUMENTACIÓN:
-Todo el material conceptual, normativo y documental (incluyendo SPECIFICATION.md,
-README.md, archivos en /rfcs y /case-studies) se distribuye bajo la licencia:
-Creative Commons Attribution 4.0 International (CC BY 4.0)
+1. ESPECIFICACIÓN, TEXTOS Y DOCUMENTACIÓN: CC BY 4.0
+   - SPECIFICATION.md
+   - README.md
+   - GLOSSARY.md
+   - CONTRIBUTING.md
+   - /rfcs
+   - /case-studies
+
+2. PROTOCOLOS: CC BY 4.0 Y MIT (LICENCIA DUAL)
+   - /protocols (protocolos, manual de comandos, directivas de agentes, skills
+     de Claude y Antigravity, servidor MCP e instaladores)
+
+   Todo el contenido de /protocols se ofrece a la vez bajo CC BY 4.0 y bajo la
+   Licencia MIT. Quien lo use puede acogerse a cualquiera de las dos, según le
+   convenga: CC BY 4.0 para citarlo o adaptarlo como texto, o MIT para
+   integrarlo como directiva, configuración o código en su proyecto.
+
+3. CÓDIGO Y HERRAMIENTAS DEL REPOSITORIO: MIT
+   - /znve-auto (especificación maestra, compilador, plantillas y pruebas)
+   - /.github (instrucciones de Copilot y flujos de CI)
+   - copilot-instructions.md
+   - index.html
+
+------------------------------------------------------------------------------
+CREATIVE COMMONS ATTRIBUTION 4.0 INTERNATIONAL (CC BY 4.0)
 https://creativecommons.org/licenses/by/4.0/
+Texto legal completo: https://creativecommons.org/licenses/by/4.0/legalcode
 
-Se permite compartir, copiar, redistribuir y adaptar el material para cualquier
-propósito, incluso comercial, bajo la condición de otorgar el crédito adecuado
-al autor original (Jeffry Carmona / ZNVE Project) y proveer un enlace a la licencia.
+Se permite compartir, copiar, redistribuir y adaptar el material para
+cualquier propósito, incluso comercial, con la condición de otorgar el crédito
+adecuado al autor original (Jeffry Carmona / ZNVE Project), proveer un enlace a
+la licencia e indicar si se realizaron cambios.
 
-2. CÓDIGO FUENTE, SCRIPTS, PROTOCOLOS Y DIRECTIVAS DE AGENTES:
-Todos los artefactos de código, plantillas de prueba, arneses y directivas para
-asistentes de IA (incluyendo archivos en /protocols y /protocols/agents) se
-distribuyen bajo la Licencia MIT:
+------------------------------------------------------------------------------
+MIT License
 
-MIT License:
+Copyright (c) 2026 Jeffry Carmona (jeffryc6)
+
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights

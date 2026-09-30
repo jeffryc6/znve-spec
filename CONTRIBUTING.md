@@ -13,6 +13,6 @@ Agradecemos las contribuciones de la comunidad. Para garantizar que ZNVE manteng
 
 ## ⚖️ Criterios de Aceptación
 - No debe añadir dependencias externas innecesarias ni sobreingeniería de contexto.
-- Si aborda aplicaciones modernas o incidentes, debe alinearse con `ZNVE_ModernApps_Protocol.MD` (aislamiento de radio de impacto y adaptadores anti-corrupción).
+- Si aborda aplicaciones modernas o incidentes, debe alinearse con [`protocols/ZNVE_MODERN_APPS_PROTOCOL.md`](protocols/ZNVE_MODERN_APPS_PROTOCOL.md) (aislamiento de radio de impacto y adaptadores anti-corrupción).
 - Debe incluir un arnés, prueba atómica o comando terminal reproducible que valide la propuesta.
 - Debe preservar los axiomas maestros: *"Inteligencia pesada en el diseño; huella casi nula en la ejecución"* y *"La IA no inventa arquitectura; ejecuta contratos deterministas"*.

@@ -1,107 +1,197 @@
-# ZNVE Specification (v1.1.0)
-**Status:** Stable  
-**Category:** Architecture & AI-Agent Governance  
-**Author:** Jeffry Carmona (jeffryc6)  
-**Date:** 2026-09-25  
+# SPECIFICATION.md: Zero-Noise Vibe Engineering (ZNVE)
+**Norma Técnica Universal y Gobernanza Agéntica v2.3.0**
+*Status: Standard | Classification: Spec-Driven Agentic Software Architecture*
 
-> 🌐 **Idioma / Language:** Haz clic para desplegar tu idioma preferido | Click to expand your preferred language.
+---
 
-<details open>
-<summary><b>🇪🇸 Versión en Español (Click para colapsar)</b></summary>
-<br>
+## 1. PREÁMBULO Y FUNDAMENTOS FILOSÓFICOS
 
-## 1. Alcance y Terminología
-La presente especificación establece las cláusulas normativas que gobiernan la interacción entre desarrolladores de software y modelos de inteligencia artificial generativa durante el ciclo de vida del software (desarrollo nuevo, mantenimiento, recuperación ante incidentes y refactorización legacy).
+Zero-Noise Vibe Engineering (ZNVE) es una norma técnica y metaprotocolo de arquitectura de software diseñado para transformar la programación asistida por Inteligencia Artificial (LLMs, agentes autónomos y asistentes de IDE) en una disciplina quirúrgica, determinista y de alta precisión.
 
-- **Director de Arquitectura (Humano):** Responsable exclusivo de delimitar el perímetro del problema, validar contratos tipados y certificar la paridad funcional.
-- **Ejecutor Táctico (Agente de IA):** Entidad algorítmica restringida a la generación de sintaxis determinista que satisface contratos sin introducir modificaciones estructurales no autorizadas.
-- **Contrato:** Estructura tipada e inmutable (DTO, interfaz, esquema Zod o modelo relacional estricto) que define entradas, salidas, efectos secundarios y modos de fallo tolerados.
-- **Radio de Impacto (Blast Radius):** Alcance máximo de archivos o componentes que pueden ser intervenidos durante una remediación de emergencia.
+ZNVE resuelve estructuralmente el "bucle de degradación agéntica" (*AI agentic drift*) y la acumulación de deuda técnica derivados de la generación no restringida de código.
 
-## 2. Los Dos Axiomas de Gobernanza
-- **Axioma 1 (Asimetría Computacional):** Toda complejidad analítica y modelado de datos debe resolverse en la fase de diseño. El artefacto final en tiempo de ejecución debe operar con una huella de memoria, CPU y red cercana a cero.
-- **Axioma 2 (Determinismo Contractual):** La IA tiene prohibido deducir o improvisar esquemas de datos, topologías o dependencias externas. Toda lógica generada debe derivar de un contrato preaprobado.
+### 1.1 Axiomas Inmutables
+1. **Axioma 1 (Diseño Pesado, Ejecución Silenciosa):** *Inteligencia concentrada en la fase de diseño y contrato; huella física y computacional mínima en la ejecución.*
+2. **Axioma 2 (Ejecución de Contratos Deterministas):** *La IA no inventa arquitectura ni improvisa tipos; ejecuta contratos estrictos y preaprobados.*
 
-## 3. Cláusulas Normativas Universales
+### 1.2 Roles
+* **Director de Arquitectura (humano):** delimita el perímetro, aprueba contratos y certifica la paridad.
+* **Ejecutor Táctico (IA):** produce sintaxis determinista que satisface el contrato, sin cambios estructurales no autorizados.
 
-### 3.1. Cláusula de Higiene de Dependencias (Anti-Bloat Fence)
-Queda prohibido incorporar paquetes de terceros cuando la funcionalidad requerida pueda resolverse mediante las APIs estándar provistas por el lenguaje, runtime o SDK del sistema anfitrión.
+---
 
-### 3.2. Cláusula de Observabilidad Silenciosa (Zero-Noise Runtime)
-La telemetría en rutas críticas debe operar bajo el principio de reporte por excepción. Queda prohibida la emisión de registros rutinarios de confirmación de estado saludable (`"OK"`, `"Success"`). Las alertas se reservan exclusivamente para anomalías operativas de severidad media o alta.
+## 2. LOS 5 PILARES DE ZNVE
 
-### 3.3. Cláusula de Persistencia y Proyección Explícita
-Toda interacción con motores de almacenamiento (relacionales, documentales, clave-valor o en memoria) debe ejecutarse mediante proyecciones de campos explícitos. Quedan prohibidas las consultas de barrido completo (`SELECT *`, `find({})` sin filtros) sin rutas indexadas.
+```
+┌──────────────────────────────────────────────────────────────────────────┐
+│                          LOS 5 PILARES DE ZNVE                           │
+├───────────────┬───────────────┬───────────────┬───────────────┬──────────┤
+│ 1. CERO RUIDO │ 2. CONTRATOS  │ 3. EFICIENCIA │ 4. ESTADO     │ 5. SEG.  │
+│    (ANTI-     │    PRIMERO    │   ASIMÉTRICA  │    AGNÓSTICO  │ DEFENSIVA│
+│    BLOAT)     │ (CONTRACT-1st)│ (LOW-FOOTPRINT│ (PROYECCIONES)│ & FORENS.│
+└───────────────┴───────────────┴───────────────┴───────────────┴──────────┘
+```
 
-### 3.4. Cláusula de Contención y Hotfix Quirúrgico (Blast Radius Fence)
-Ante incidentes críticos o fallos en aplicaciones modernas en producción:
-1. Queda prohibido aplicar soluciones cosméticas (*monkey-patching*), bloques `try/catch` vacíos o retardos arbitrarios (`sleep`).
-2. La remediación debe limitarse a un único archivo causante (`TARGET_FILE`).
-3. El parche debe conservar intactos los contratos públicos y venir acompañado obligatoriamente de una prueba de regresión determinista que reproduzca la falla y valide su resolución.
+### Pilar 1: Cero Ruido (Zero-Noise Operations & Anti-Bloat Fence)
+* Prohibición absoluta de librerías de terceros no esenciales o parásitas.
+* Prohibida la emisión de logs rutinarios de confirmación en entornos de producción. La telemetría opera por excepción.
 
-### 3.5. Cláusula de Aislamiento de Dependencias Modernas (Adapter Anti-Corrupción)
-Al actualizar dependencias externas, frameworks o SDKs que contengan *breaking changes*, el agente de IA tiene prohibido mutar la lógica de negocio central. Toda incompatibilidad debe encapsularse detrás de una interfaz interna (*Port*) y un adaptador desacoplado (*Adapter*).
+### Pilar 2: Contratos Primero (Contract-First AI)
+* Antes de escribir una sola línea de lógica de negocio, se debe definir el contrato inmutable en la carpeta `contracts/` (DTOs, Zod, Pydantic v2 o JSON Schema).
+* Poda de Contexto (*Context Boundary Pruning*): los agentes de IA reciben únicamente el contrato activo y el archivo objetivo (`TARGET_FILE`).
 
-### 3.6. Cláusula de No-Intervención Legacy (Zero-Touch Assurance)
-Ningún agente de IA modificará un archivo catalogado como legacy sin haber generado previamente un arnés de caracterización de caja negra (*Golden Master*) en un directorio aislado que certifique paridad matemática sobre el código original intacto.
+### Pilar 3: Eficiencia Asimétrica y Respeto a Recursos
+* Consumo mínimo de CPU y RAM. Liberación determinista de recursos (`close`, `dispose`, `finally`, `unbinding`).
+* Garantía de hilos no bloqueantes (I/O asíncrono obligatorio).
 
-## 4. Clasificación de Modos Operativos
-Toda tarea ejecutada bajo ZNVE debe encuadrarse en uno de los 6 modos normativos:
-- **Modo 1 (Greenfield):** Desarrollo desde cero con perímetro acotado y contrato previo.
-- **Modo 2 (In-Flight):** Expansión modular sobre proyectos activos sin alterar contratos base.
-- **Modo 3 (Hotfix & Recovery):** Triage forense, contención y parches atómicos en crisis de producción.
-- **Modo 4 (Modern Maintenance):** Migración de SDKs y breaking changes vía capas de adaptación.
-- **Modo 5 (Legacy Rescue):** Modernización de sistemas monolíticos en 5 fases controladas.
-- **Modo 6 (Audit & Hardening):** Mitigación de fugas, contención de sockets y aislamiento de hilos.
+### Pilar 4: Dominio de Estado Agnóstico
+* Consultas y mutaciones de estado estrictamente proyectadas.
+* Prohibidas las consultas ciegas o escaneos masivos en memoria.
 
-</details>
+### Pilar 5: Seguridad Defensiva y Diagnóstico Forense
+* Validación y sanitización estricta en fronteras de entrada.
+* Prohibidos los bloques `try/catch` vacíos o el silenciamiento de excepciones. Trazabilidad con `X-Run-ID`.
 
-<details open>
-<summary><b>🇬🇧 English Version (Click to collapse)</b></summary>
-<br>
+### 2.6 Guardrails operativos
+Las directivas de los asistentes traducen los 5 pilares en 7 guardrails que el agente aplica en cada respuesta:
 
-## 1. Scope and Terminology
-This specification establishes the normative clauses governing the interaction between software developers and generative artificial intelligence models throughout the software lifecycle (new development, maintenance, incident recovery and legacy refactoring).
+| # | Guardrail | Pilar |
+|---|---|---|
+| 1 | Higiene radical de dependencias (Anti-Bloat Fence) | 1 |
+| 2 | Cero ruido en runtime | 1 |
+| 3 | Contrato primero | 2 |
+| 4 | Respeto al hilo principal | 3 |
+| 5 | Persistencia eficiente y agnóstica | 4 |
+| 6 | Cero supresión silenciosa | 5 |
+| 7 | Cero relleno conversacional | 1 |
 
-- **Architecture Director (Human):** Solely responsible for delimiting the problem perimeter, validating typed contracts and certifying functional parity.
-- **Tactical Executor (AI Agent):** Algorithmic entity restricted to generating deterministic syntax that satisfies contracts without introducing unauthorized structural changes.
-- **Contract:** Typed, immutable structure (DTO, interface, Zod schema or strict relational model) that defines inputs, outputs, side effects and tolerated failure modes.
-- **Blast Radius:** Maximum scope of files or components that may be touched during an emergency remediation.
+---
 
-## 2. The Two Governance Axioms
-- **Axiom 1 (Computational Asymmetry):** All analytical complexity and data modeling must be resolved in the design phase. The final runtime artifact must operate with a near-zero memory, CPU and network footprint.
-- **Axiom 2 (Contractual Determinism):** AI is forbidden from inferring or improvising data schemas, topologies or external dependencies. All generated logic must derive from a pre-approved contract.
+## 3. FLUJO DE CONTRATOS Y CONTROL ANTI-BUCLE
 
-## 3. Universal Normative Clauses
+### 3.1 Análisis Tecnológico por Plataforma (`--platform`)
+Al activar `/znve-contract`, la IA evalúa el tipo de aplicación y sugiere el stack con cero peso parásito:
 
-### 3.1. Dependency Hygiene Clause (Anti-Bloat Fence)
-Adding third-party packages is forbidden when the required functionality can be achieved with the standard APIs provided by the host system's language, runtime or SDK.
+* **Escritorio (Windows / macOS / Linux), `desktop`:** Rust + Tauri v2 o WinUI 3 nativo | Persistencia: SQLite (WAL mode) / DuckDB.
+* **Web-App, `web`:** Vite + TypeScript / Next.js App Router | Persistencia: IndexedDB (Dexie.js).
+* **Híbrida (Mobile / Desktop), `hybrid`:** Tauri Mobile / Flutter / React Native Bare | Persistencia: MMKV / WatermelonDB.
+* **Android Nativo, `mobile`:** Kotlin + Jetpack Compose + Corrutinas | Persistencia: Room DB.
+* **macOS / iOS Nativo, `mobile`:** Swift 6 + SwiftUI | Persistencia: SwiftData.
 
-### 3.2. Silent Observability Clause (Zero-Noise Runtime)
-Telemetry on critical paths must follow the report-by-exception principle. Emitting routine healthy-state confirmation logs (`"OK"`, `"Success"`) is forbidden. Alerts are reserved exclusively for medium- or high-severity operational anomalies.
+### 3.2 Lista de Chequeo de Solidez y Criterio de Parada
+Para evitar sugerencias infinitas de la IA, el contrato debe cumplir 4 puntos antes de programar:
 
-### 3.3. Persistence and Explicit Projection Clause
-Every interaction with storage engines (relational, document, key-value or in-memory) must use explicit field projections. Full-scan queries (`SELECT *`, unfiltered `find({})`) without indexed paths are forbidden.
+1. `[x]` **Estructura Invariable:** Entradas, salidas, entidades y Enums tipados.
+2. `[x]` **Defensas de Frontera:** Excepciones y errores explicitados (sin `any` ni `catch` genéricos).
+3. `[x]` **Cero Dependencias Parásitas:** Uso exclusivo del SDK nativo o runtime aprobado.
+4. `[x]` **Filtro de Diferimiento:** Ideas secundarias movidas a `contracts/CONTRACT_BACKLOG.md`.
 
-### 3.4. Containment and Surgical Hotfix Clause (Blast Radius Fence)
-When facing critical incidents or failures in modern production applications:
-1. Cosmetic fixes (*monkey-patching*), empty `try/catch` blocks and arbitrary delays (`sleep`) are forbidden.
-2. Remediation must be limited to a single offending file (`TARGET_FILE`).
-3. The patch must keep public contracts intact and must be accompanied by a deterministic regression test that reproduces the failure and validates its resolution.
+> **🛑 CRITERIO DE PARADA OBLIGATORIO (STOP CRITERION):**
+> Al cumplirse los 4 puntos, la IA emite: *“Contrato v1 sólido y cerrado. Listo para /znve-execute.”* y DETIENE la generación.
 
-### 3.5. Modern Dependency Isolation Clause (Anti-Corruption Adapter)
-When upgrading external dependencies, frameworks or SDKs that contain *breaking changes*, the AI agent is forbidden from mutating core business logic. Every incompatibility must be encapsulated behind an internal interface (*Port*) and a decoupled adapter (*Adapter*).
+### 3.3 Análisis Delta (`/znve-contract --delta`)
+Para proyectos en desarrollo o actualización de versiones:
+1. Audita discrepancias entre `contracts/` y `src/`.
+2. Clasifica en **Cubo A (Requerido Ya / Etapa Activa)** y **Cubo B (Diferido a `CONTRACT_BACKLOG.md`)**.
+3. Sincroniza y re-congela el contrato antes de modificar código.
 
-### 3.6. Legacy Non-Intervention Clause (Zero-Touch Assurance)
-No AI agent shall modify a file classified as legacy without first generating a black-box characterization harness (*Golden Master*) in an isolated directory that certifies mathematical parity against the untouched original code.
+---
 
-## 4. Operating Mode Classification
-Every task executed under ZNVE must fall into one of the 6 normative modes:
-- **Mode 1 (Greenfield):** Development from scratch with a bounded perimeter and a prior contract.
-- **Mode 2 (In-Flight):** Modular expansion of active projects without altering base contracts.
-- **Mode 3 (Hotfix & Recovery):** Forensic triage, containment and atomic patches during production crises.
-- **Mode 4 (Modern Maintenance):** SDK migrations and breaking changes through adaptation layers.
-- **Mode 5 (Legacy Rescue):** Modernization of monolithic systems in 5 controlled phases.
-- **Mode 6 (Audit & Hardening):** Leak mitigation, socket containment and thread isolation.
+## 4. LOS 6 MODOS OPERATIVOS UNIVERSALES
 
-</details>
+| Modo | Nombre | Flujo de comandos |
+|---|---|---|
+| 🟢 1 | **Greenfield** (proyectos nuevos, día 0) | `/znve-contract` → `/znve-execute` |
+| 🔵 2 | **In-Flight** (proyectos activos y nuevas capacidades) | `/znve-contract --delta` → `/znve-execute` |
+| 🟠 3 | **Hotfix & Recovery** (triaje de crisis en producción) | `/znve-triage` → `/znve-hotfix` |
+| 🟣 4 | **Modern Maintenance** (migración de SDKs y breaking changes) | `/znve-upgrade` |
+| 🟡 5 | **Legacy Rescue** (refactorización en 5 fases de monolitos críticos) | `/znve-forensic` → `/znve-harness` → `/znve-legacy-rescue` |
+| 🔴 6 | **Audit & Hardening** (higiene técnica, memoria y seguridad) | `/znve-audit` |
+
+Las 5 fases de Legacy Rescue son: ingesta pasiva, reporte forense, arnés Golden Master, Shadow Run (`Salida(Nuevo) == Salida(Legacy)`) y Strangler Fig. No se avanza de fase sin que la anterior esté verificada.
+
+---
+
+## 5. CAPA CAMALEÓNICA (PLATFORM-SPECIFIC ADAPTERS)
+
+Restricciones adicionales por stack. Se suman a los guardrails globales; no los reemplazan.
+
+* **Android:** `WorkManager`, `LifecycleOwner` y `StateFlow`; sin `WakeLock` innecesarios, sin retener contextos de Activity ni bloquear el hilo de UI.
+* **iOS / macOS (Swift):** SwiftUI sobre `@MainActor` solo para vistas, trabajo pesado en `Actors` de fondo y `BGTaskScheduler`; sin capturas fuertes de `self` (`[weak self]`).
+* **Windows Desktop (C# / WinUI / WPF / C++):** `IDisposable` estricto, `async/await` puro sin `.Result`/`.Wait()`, mutex de instancia única y ciclos de render aislados.
+* **Híbridos (Tauri / Flutter / React Native):** IPC liviano con payloads mínimos y aislamiento de procesos nativos.
+* **Web / Backend:** APIs nativas, contratos OpenAPI / JSON Schema, proyecciones, timeouts estrictos, middleware de sanitización y apagado elegante.
+
+---
+
+## 6. GOBERNANZA AGÉNTICA Y COMANDOS `/znve-*`
+
+Cada comando impone un rol cerrado y un formato de salida con encabezados fijos (ver [protocols/COMMANDS.md](protocols/COMMANDS.md)). Las formas `/znve-contract`, `/znve contract` y `/znve -contract` son equivalentes; `/znve` solo equivale a `/znve-help`.
+
+<!-- >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano) -->
+* `/znve-help` (todos): Manual operativo e índice de comandos. Solo lectura.
+* `/znve-contract [--platform=desktop|web|mobile|hybrid] [--delta]` (modo 1, 2, 4): Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
+* `/znve-execute --target=<ruta/archivo>` (modo 1, 2, 4, 5): Implementación atómica en TARGET_FILE con desecho de recursos.
+* `/znve-triage` (modo 3): Diagnóstico y contención de radio de impacto ante caídas. Solo lectura.
+* `/znve-hotfix --incident=<ID>` (modo 3): Parche quirúrgico atómico con test de regresión obligatorio.
+* `/znve-upgrade --dependency=<librería>` (modo 4): Migración de dependencias mediante Adaptador desacoplado.
+* `/znve-forensic --target=<ruta/módulo>` (modo 2, 5, 6): Ingesta en solo lectura, matriz I/O y efectos secundarios. Solo lectura.
+* `/znve-harness --target=<archivo_legacy>` (modo 5): Suite Golden Master de caja negra sobre código intacto.
+* `/znve-legacy-rescue` (modo 5): Orquestación integral en 5 fases para código legacy.
+* `/znve-audit --target=<módulo>` (modo 6): Hardening de hilos, memoria, descriptores y seguridad. Solo lectura.
+<!-- <<< znve:generated -->
+
+---
+
+## 7. FORMATO DE RESPUESTA POR DEFECTO
+
+Toda consulta técnica sin comando se responde en 4 bloques cerrados:
+
+1. **BLOQUE 1: SYSTEM BLUEPRINT & CONTRATO:** límites, plataforma, Anti-Bloat Fence y contrato estricto (DTO/interfaz).
+2. **BLOQUE 2: RACIONAL DE INGENIERÍA:** 2-3 viñetas que justifican la mínima huella y la ausencia de dependencias parásitas.
+3. **BLOQUE 3: TAREAS ATÓMICAS DE IMPLEMENTACIÓN:** `TARGET_FILE` único, acción quirúrgica y restricciones aplicadas.
+4. **BLOQUE 4: VERIFICACIÓN ATÓMICA:** comando de terminal determinista o prueba reproducible.
+
+Las preguntas conceptuales se responden de forma directa, sin forzar los 4 bloques.
+
+---
+
+## 8. HERRAMIENTAS MCP (`znve_*`)
+
+El servidor de referencia (`protocols/mcp/znve-mcp-server.ts`, transporte stdio) convierte las cláusulas en barandillas físicas para agentes autónomos. Las rutas se resuelven contra `ZNVE_WORKSPACE`.
+
+| Herramienta | Fase | Garantía |
+|---|---|---|
+| `znve_help` | Ayuda | Sirve el manual `protocols/COMMANDS.md`, completo o por tema. |
+| `znve_forensic_scan` | Ingesta | Lectura sin escritura en disco. |
+| `znve_validate_contract` | Contrato | Rechaza `SELECT *`, `.find({})` y librerías vetadas. |
+| `znve_scaffold_harness` | Aislamiento | Solo escribe en directorios de prueba o sandbox. |
+| `znve_surgical_write` | Escritura | Rechaza `catch` vacíos y recursos abiertos sin patrón de desecho. |
+| `znve_audit_resources` | Hardening | Detecta bloqueos síncronos, busy-waiting y `WakeLock` sin liberar. |
+
+---
+
+## 9. IMPLEMENTACIÓN DE REFERENCIA Y CONFORMIDAD
+
+### 9.1 Fuente única de verdad
+La versión, los axiomas, los guardrails, los escenarios, los comandos, la Capa Camaleónica y las herramientas MCP se declaran una sola vez en `znve-auto/master_spec.json`. El compilador `znve-auto/builder.py` (biblioteca estándar de Python) genera a partir de ella las directivas de Claude, Copilot, Cursor, DeepSeek, Ollama, OpenRouter y Antigravity, los manuales de comandos y los bloques gestionados de esta especificación, el README y la página web.
+
+### 9.2 Conformidad
+Una directiva o herramienta es conforme con ZNVE v2.3.0 si:
+1. Expone los 10 comandos con los encabezados de salida definidos en `protocols/COMMANDS.md`.
+2. Aplica los 7 guardrails de la sección 2.6 y la Capa Camaleónica del stack detectado.
+3. Respeta el criterio de parada de la sección 3.2 y el formato por defecto de la sección 7.
+4. Cita una única versión de ZNVE, la de esta especificación.
+
+`znve-auto/test_sync.py` certifica estos puntos para los artefactos del repositorio y se ejecuta en el CI (`.github/workflows/znve-parity.yml`) en cada push y pull request.
+
+---
+
+## 10. VERSIONADO
+
+ZNVE sigue SemVer:
+* **Mayor:** cambios en axiomas, pilares o en la semántica de un comando existente.
+* **Menor:** comandos, opciones (`--platform`, `--delta`) o modos nuevos compatibles con los anteriores.
+* **Parche:** correcciones de redacción, ejemplos o formato.
+
+Las propuestas de cambio siguen el proceso de RFC descrito en [CONTRIBUTING.md](CONTRIBUTING.md).

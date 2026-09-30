@@ -2,232 +2,311 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Zero-Noise Vibe Engineering (ZNVE) | znve-spec</title>
-  <meta name="description" content="ZNVE es un metamodelo de ingeniería asistida por IA (Contract-First Agentic Architecture) que reemplaza el vibe coding improvisado por ejecución determinista de contratos. / ZNVE is an AI-assisted engineering metamodel that replaces improvised vibe coding with deterministic contract execution.">
-  <link rel="canonical" href="https://jeffryc6.github.io/znve-spec/">
-  <meta property="og:title" content="Zero-Noise Vibe Engineering (ZNVE)">
-  <meta property="og:site_name" content="znve-spec">
-  <meta property="og:url" content="https://jeffryc6.github.io/znve-spec/">
-  <meta property="og:type" content="website">
-  <meta name="twitter:card" content="summary">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/github-markdown-css@5.8.1/github-markdown.min.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Zero-Noise Vibe Engineering (ZNVE) v2.3.0: norma técnica para desarrollo asistido por IA basado en contratos, con 10 comandos /znve-* para Claude, Copilot, Cursor, DeepSeek, Ollama, OpenRouter y Antigravity.">
+  <title>Zero-Noise Vibe Engineering (ZNVE) | Spec-Driven Agentic Architecture</title>
   <style>
-    :root { --znve-border: #d0d7de; --znve-muted: #59636e; --znve-active-bg: #f6f8fa; --znve-accent: #0969da; }
-    @media (prefers-color-scheme: dark) {
-      :root { --znve-border: #3d444d; --znve-muted: #9198a1; --znve-active-bg: #212830; --znve-accent: #4493f8; }
+    :root {
+      --bg-color: #0d1117;
+      --card-bg: #161b22;
+      --accent-cyan: #58a6ff;
+      --accent-green: #3fb950;
+      --accent-purple: #bc8cff;
+      --text-main: #c9d1d9;
+      --text-muted: #8b949e;
+      --text-bright: #ffffff;
+      --border-color: #30363d;
+      --code-bg: #090d12;
     }
-    html, body { margin: 0; }
-    body.markdown-body { min-height: 100vh; }
-    .container-lg { max-width: 1012px; margin: 0 auto; padding: 40px 16px; box-sizing: border-box; }
-    .site-header { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
-    .site-header h1 { margin: 0; padding: 0; border: 0; }
-    .lang-switch { display: inline-flex; border: 1px solid var(--znve-border); border-radius: 6px; overflow: hidden; font-family: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace; font-size: 12px; }
-    .lang-switch button { background: transparent; color: var(--znve-muted); border: 0; padding: 5px 12px; cursor: pointer; font: inherit; }
-    .lang-switch button + button { border-left: 1px solid var(--znve-border); }
-    .lang-switch button[aria-pressed="true"] { background: var(--znve-active-bg); color: inherit; font-weight: 600; }
-    .table-wrap { overflow-x: auto; }
-    .markdown-body pre { white-space: pre; }
-    .footer { margin-top: 40px; padding-top: 16px; border-top: 1px solid var(--znve-border); text-align: right; color: var(--znve-muted); font-size: 14px; }
-    .anchorjs-link { color: var(--znve-accent); }
+    * {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+    }
+    canvas#node-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.25;
+    }
+    .container {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    header {
+      text-align: center;
+      padding: 3rem 0 2rem;
+      border-bottom: 1px solid var(--border-color);
+    }
+    h1 {
+      font-size: clamp(1.9rem, 5vw, 2.8rem);
+      line-height: 1.2;
+      color: var(--text-bright);
+      margin-bottom: 0.5rem;
+      letter-spacing: -0.5px;
+    }
+    h2 {
+      color: var(--text-bright);
+      margin-top: 2.5rem;
+    }
+    .subtitle {
+      font-size: 1.2rem;
+      color: var(--accent-cyan);
+      margin-top: 0;
+    }
+    .badges {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .badge {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      padding: 4px 12px;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      color: var(--accent-green);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr));
+      gap: 1.5rem;
+      margin: 1.5rem 0;
+    }
+    .grid.modes {
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+      gap: 1rem;
+    }
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 8px;
+      padding: 1.5rem;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .card:hover {
+      transform: translateY(-2px);
+      border-color: var(--accent-cyan);
+    }
+    .card h3 {
+      color: var(--text-bright);
+      margin-top: 0;
+    }
+    .modes .card {
+      padding: 1rem 1.25rem;
+    }
+    .modes .card p {
+      margin: 0;
+    }
+    .modes code {
+      font-size: 0.85rem;
+    }
+    code {
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      color: var(--accent-purple);
+    }
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 1rem;
+      overflow-x: auto;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+      font-size: 0.9rem;
+      color: var(--accent-cyan);
+    }
+    .note {
+      color: var(--text-muted);
+    }
+    footer {
+      text-align: center;
+      padding: 2rem 0;
+      margin-top: 2.5rem;
+      border-top: 1px solid var(--border-color);
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    a {
+      color: var(--accent-cyan);
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      canvas#node-canvas {
+        display: none;
+      }
+      .card {
+        transition: none;
+      }
+      .card:hover {
+        transform: none;
+      }
+    }
   </style>
 </head>
-<body class="markdown-body">
-  <div class="container-lg">
+<body>
+  <canvas id="node-canvas" aria-hidden="true"></canvas>
 
-    <header class="site-header">
-      <h1><a href="https://jeffryc6.github.io/znve-spec/">znve-spec</a></h1>
-      <div class="lang-switch" role="group" aria-label="Idioma / Language">
-        <button type="button" data-lang="es" aria-pressed="true" onclick="switchLanguage('es')">ES</button>
-        <button type="button" data-lang="en" aria-pressed="false" onclick="switchLanguage('en')">EN</button>
+  <div class="container">
+    <header>
+      <h1>Zero-Noise Vibe Engineering (ZNVE)</h1>
+      <p class="subtitle">Norma Técnica Universal &amp; Arquitectura Agéntica Basada en Especificación</p>
+      <div class="badges">
+        <span class="badge">v2.3.0 Standard</span>
+        <span class="badge">CC BY 4.0 &amp; MIT Dual License</span>
+        <span class="badge">MCP Server · 6 herramientas</span>
+        <span class="badge">7 asistentes sincronizados</span>
       </div>
     </header>
 
-    <h1 id="znve">Zero-Noise Vibe Engineering (ZNVE)</h1>
+    <main>
+      <section>
+        <h2>🏛️ Axiomas Fundamentales</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>1. Diseño Pesado, Ejecución Silenciosa</h3>
+            <p>Inteligencia concentrada en la fase de arquitectura y definición de contrato DTO. Huella computacional y física mínima durante la ejecución en producción.</p>
+          </div>
+          <div class="card">
+            <h3>2. Ejecución Basada en Contratos</h3>
+            <p>La IA no inventa arquitectura ni improvisa dependencias. Opera exclusivamente bajo contratos inmutables (TypeScript, Pydantic v2, JSON Schema).</p>
+          </div>
+        </div>
+      </section>
 
-    <p>
-      <a href="https://github.com/jeffryc6/znve-spec/blob/main/SPECIFICATION.md"><img src="https://img.shields.io/badge/spec-v1.1.0-00f2fe.svg" alt="Specification Version"></a>
-      <a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_PROTOCOL.md"><img src="https://img.shields.io/badge/protocols-v2.2.0-10b981.svg" alt="Protocol Version"></a>
-      <a href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-CC_BY_4.0_%2F_MIT-10b981.svg" alt="License: CC BY 4.0 &amp; MIT"></a>
-      <a href="https://github.com/jeffryc6/znve-spec/blob/main/SPECIFICATION.md"><img src="https://img.shields.io/badge/Architecture-Contract--First-111827.svg" alt="Architecture: Contract-First"></a>
-    </p>
+      <section>
+        <h2>🎛️ Los 6 Modos Operativos</h2>
+        <div class="grid modes">
+          <div class="card"><h3>🟢 1 · Greenfield</h3><p><code>/znve-contract</code> → <code>/znve-execute</code></p></div>
+          <div class="card"><h3>🔵 2 · In-Flight</h3><p><code>/znve-contract --delta</code> → <code>/znve-execute</code></p></div>
+          <div class="card"><h3>🟠 3 · Hotfix &amp; Recovery</h3><p><code>/znve-triage</code> → <code>/znve-hotfix</code></p></div>
+          <div class="card"><h3>🟣 4 · Modern Maintenance</h3><p><code>/znve-upgrade</code></p></div>
+          <div class="card"><h3>🟡 5 · Legacy Rescue</h3><p><code>/znve-forensic</code> → <code>/znve-harness</code> → <code>/znve-legacy-rescue</code></p></div>
+          <div class="card"><h3>🔴 6 · Audit &amp; Hardening</h3><p><code>/znve-audit</code></p></div>
+        </div>
+      </section>
 
-    <blockquote>
-      <p data-en="&lt;strong&gt;Axiom 1:&lt;/strong&gt; &lt;em&gt;“Heavy intelligence in the design; near-zero footprint in execution.”&lt;/em&gt;&lt;br&gt;&lt;strong&gt;Axiom 2:&lt;/strong&gt; &lt;em&gt;“AI does not invent architecture; it executes deterministic contracts.”&lt;/em&gt;"><strong>Axioma 1:</strong> <em>“Inteligencia pesada en el diseño; huella casi nula en la ejecución.”</em><br><strong>Axioma 2:</strong> <em>“La IA no inventa arquitectura; ejecuta contratos deterministas.”</em></p>
-    </blockquote>
+      <section>
+        <h2>🛠️ Comandos Agénticos (/znve-*)</h2>
+        <p class="note">Se escriben como <code>/znve-contract</code>, <code>/znve contract</code> o <code>/znve -contract</code>. Sin comando, toda respuesta técnica sigue 4 bloques: Blueprint y Contrato → Racional → Tarea Atómica → Verificación.</p>
+        <!-- >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano) -->
+        <pre class="commands">
+/znve-help           --&gt; Manual operativo e índice de comandos.
+/znve-contract       --&gt; Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
+/znve-execute        --&gt; Implementación atómica en TARGET_FILE con desecho de recursos.
+/znve-triage         --&gt; Diagnóstico y contención de radio de impacto ante caídas.
+/znve-hotfix         --&gt; Parche quirúrgico atómico con test de regresión obligatorio.
+/znve-upgrade        --&gt; Migración de dependencias mediante Adaptador desacoplado.
+/znve-forensic       --&gt; Ingesta en solo lectura, matriz I/O y efectos secundarios.
+/znve-harness        --&gt; Suite Golden Master de caja negra sobre código intacto.
+/znve-legacy-rescue  --&gt; Orquestación integral en 5 fases para código legacy.
+/znve-audit          --&gt; Hardening de hilos, memoria, descriptores y seguridad.</pre>
+        <!-- <<< znve:generated -->
+      </section>
 
-    <p data-en="&lt;strong&gt;Zero-Noise Vibe Engineering (ZNVE)&lt;/strong&gt; is a technical architecture and governance specification for AI-agent-assisted software development (Contract-First Agentic Architecture). It turns the conversational speed of &lt;em&gt;vibe coding&lt;/em&gt; into a rigorous, asymmetric engineering standard free of technical debt."><strong>Zero-Noise Vibe Engineering (ZNVE)</strong> es una especificación técnica de arquitectura y gobernanza para el desarrollo asistido por agentes de IA (Contract-First Agentic Architecture). Transforma la velocidad conversacional del <em>vibe coding</em> en un estándar de ingeniería riguroso, asimétrico y libre de deuda técnica.</p>
+      <section>
+        <h2>📦 Documentación</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Norma y referencia</h3>
+            <ul>
+              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/SPECIFICATION.md"><strong>SPECIFICATION.md</strong>: norma técnica formal v2.3.0</a></li>
+              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/COMMANDS.md"><strong>COMMANDS.md</strong>: manual de comandos y herramientas MCP</a></li>
+              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/GLOSSARY.md"><strong>GLOSSARY.md</strong>: glosario técnico ES/EN</a></li>
+              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/GREENFIELD_STARTER.md"><strong>GREENFIELD_STARTER.md</strong>: guía de inicio día 0</a></li>
+              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/PROMPT_GUIDE.md"><strong>PROMPT_GUIDE.md</strong>: prompts listos por comando</a></li>
+            </ul>
+          </div>
+          <div class="card">
+            <h3>Instalación y automatización</h3>
+            <ul>
+              <li><a href="https://github.com/jeffryc6/znve-spec/tree/main/protocols/agents/claude/skills"><strong>Skill de Claude</strong>: <code>znve.zip</code> para claude.ai y Claude Code</a></li>
+              <li><a href="https://github.com/jeffryc6/znve-spec/tree/main/protocols/agents"><strong>Directivas</strong>: Copilot, Cursor, DeepSeek, Ollama y OpenRouter</a></li>
+              <li><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/Antigravity/Skills/INSTALL_ANTIGRAVITY.md"><strong>Antigravity</strong>: skill e instaladores</a></li>
+              <li><a href="https://github.com/jeffryc6/znve-spec/tree/main/protocols/mcp"><strong>Servidor MCP</strong>: 6 herramientas por stdio</a></li>
+              <li><a href="https://github.com/jeffryc6/znve-spec/tree/main/znve-auto"><strong>znve-auto</strong>: fuente única de verdad y detector de desviaciones</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
 
-    <p data-en="It covers the full software lifecycle: from clean-slate conception (&lt;em&gt;Greenfield&lt;/em&gt;) to production crisis containment (&lt;em&gt;Hotfix&lt;/em&gt;), monolith rescue (&lt;em&gt;Legacy Rescue&lt;/em&gt;) and migration of modern dependencies with &lt;em&gt;breaking changes&lt;/em&gt;.">Abarca el ciclo de vida completo del software: desde la concepción en hoja limpia (<em>Greenfield</em>) hasta la contención de crisis en producción (<em>Hotfix</em>), rescate de monolitos (<em>Legacy Rescue</em>) y migración de dependencias modernas con <em>breaking changes</em>.</p>
-
-    <hr>
-
-    <h2 id="why" data-en="🎯 Why ZNVE?">🎯 ¿Por qué ZNVE?</h2>
-
-    <p data-en="Conventional &lt;em&gt;vibe coding&lt;/em&gt; delegates critical design decisions to probabilistic language models, producing:">El <em>vibe coding</em> convencional delega decisiones críticas de diseño en modelos de lenguaje probabilísticos, generando:</p>
-    <ul>
-      <li data-en="Massive accumulation of packages and parasitic dependencies.">Acumulación masiva de paquetes y dependencias parásitas.</li>
-      <li data-en="Empty &lt;code&gt;try/catch&lt;/code&gt; blocks or arbitrary delays that mask production failures.">Bloques <code>try/catch</code> vacíos o retrasos arbitrarios que enmascaran caídas en producción.</li>
-      <li data-en="Operational noise in logs, memory leaks and saturation of the UI main thread.">Ruido operativo en logs, fugas de memoria y saturación del hilo principal de UI.</li>
-      <li data-en="Uncontrolled mutations in modern codebases while trying to fix a single bug.">Mutaciones no controladas en bases de código modernas al intentar corregir un bug puntual.</li>
-    </ul>
-
-    <p data-en="Under &lt;strong&gt;ZNVE&lt;/strong&gt;, the developer takes on the role of &lt;strong&gt;Architecture Director&lt;/strong&gt;, defining closed perimeters and immutable contracts (DTOs, typed schemas, interfaces). AI agents (Claude, Cursor, Copilot, Windsurf, Antigravity) operate as surgically precise, contract-governed syntactic compilers.">Bajo <strong>ZNVE</strong>, el desarrollador asume el rol de <strong>Director de Arquitectura</strong>, definiendo perímetros cerrados y contratos inmutables (DTOs, esquemas tipados, interfaces). Los agentes de IA (Claude, Cursor, Copilot, Windsurf, Antigravity) operan como compiladores sintácticos de precisión quirúrgica gobernados por contratos.</p>
-
-    <hr>
-
-    <h2 id="pillars" data-en="🏛️ The 5 Immutable Pillars">🏛️ Los 5 Pilares Inmutables</h2>
-
-    <ol>
-      <li data-en="&lt;strong&gt;Zero-Noise Operations &amp;amp; UX:&lt;/strong&gt; Dead code and parasitic dependencies are forbidden. Telemetry by exception: never emit routine healthy-state confirmations on hot paths; alert only on confirmed anomalies."><strong>Cero Ruido Operativo (Zero-Noise Operations &amp; UX):</strong> Prohibido el código muerto y las dependencias parásitas. Telemetría por excepción: nunca emitir confirmaciones rutinarias de estado saludable en rutas calientes; solo alertar ante anomalías confirmadas.</li>
-      <li data-en="&lt;strong&gt;Deterministic Contracts (Contract-First AI):&lt;/strong&gt; No AI generates production code without a prior typed contract (DTO, interfaces, validation schemas)."><strong>Contratos Deterministas (Contract-First AI):</strong> Ninguna IA genera código de producción sin un contrato previo tipado (DTO, interfaces, esquemas de validación).</li>
-      <li data-en="&lt;strong&gt;Asymmetric Efficiency &amp;amp; Minimalism:&lt;/strong&gt; &lt;em&gt;“Brain in the design, reflex on the device.”&lt;/em&gt; The UI main thread never blocks; memory, sockets and handles are released deterministically."><strong>Eficiencia Asimétrica y Minimalismo:</strong> <em>“Cerebro en el diseño, reflejo en el dispositivo”</em>. El hilo principal de UI nunca se bloquea; la memoria, sockets y handles se liberan deterministamente.</li>
-      <li data-en="&lt;strong&gt;State Mastery &amp;amp; Agnostic Persistence:&lt;/strong&gt; Applies to relational (SQL), document (NoSQL), key-value, time-series or local storage engines. Explicit field projections and indexed paths are mandatory."><strong>Dominio de Estado y Persistencia Agnóstica:</strong> Aplicable a motores relacionales (SQL), documentales (NoSQL), clave-valor, series temporales o almacenamiento local. Proyecciones de campos explícitos y rutas indexadas obligatorias.</li>
-      <li data-en="&lt;strong&gt;Defensive Security &amp;amp; Forensic Diagnosis:&lt;/strong&gt; Zero-Trust posture. Strict validation at the boundary, eradication of failures down to the root cause, and an explicit ban on silencing exceptions."><strong>Seguridad Defensiva y Diagnóstico Forense:</strong> Postura Zero-Trust. Validación estricta en frontera, erradicación de fallos hasta la causa raíz y prohibición expresa de silenciar excepciones.</li>
-    </ol>
-
-    <hr>
-
-    <h2 id="modes" data-en="🎛️ The 6 Operating Modes Matrix">🎛️ La Matriz de los 6 Modos Operativos</h2>
-
-    <p data-en="Before interacting with the AI agent, the &lt;strong&gt;ACTIVE MODE&lt;/strong&gt; of the intervention is declared:">Antes de interactuar con el agente de IA, se declara el <strong>MODO ACTIVO</strong> de la intervención:</p>
-
-    <div class="table-wrap">
-      <table>
-        <thead>
-          <tr>
-            <th data-en="Mode">Modo</th>
-            <th data-en="Application Scenario">Escenario de Aplicación</th>
-            <th data-en="Governing Protocol">Protocolo Rector</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td data-en="🟢 &lt;strong&gt;Mode 1: Greenfield&lt;/strong&gt;">🟢 <strong>Modo 1: Greenfield</strong></td>
-            <td data-en="Creating projects, modules or services from scratch on a clean base.">Creación de proyectos, módulos o servicios desde cero con base limpia.</td>
-            <td><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_PROTOCOL.md"><code>ZNVE_PROTOCOL.md</code></a></td>
-          </tr>
-          <tr>
-            <td data-en="🔵 &lt;strong&gt;Mode 2: In-Flight&lt;/strong&gt;">🔵 <strong>Modo 2: In-Flight</strong></td>
-            <td data-en="Active projects: adding features without mutating existing contracts.">Proyectos activos: adición de funciones sin mutar contratos existentes.</td>
-            <td><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_PROTOCOL.md"><code>ZNVE_PROTOCOL.md</code></a></td>
-          </tr>
-          <tr>
-            <td data-en="🟠 &lt;strong&gt;Mode 3: Hotfix &amp;amp; Recovery&lt;/strong&gt;">🟠 <strong>Modo 3: Hotfix &amp; Recovery</strong></td>
-            <td data-en="Production crisis: impact containment, root-cause diagnosis and a scoped atomic patch.">Crisis en producción: contención de impacto, diagnóstico de causa raíz y parche atómico acotado.</td>
-            <td><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_ModernsApps_Protocol.MD"><code>ZNVE_ModernApps_Protocol.MD</code></a></td>
-          </tr>
-          <tr>
-            <td data-en="🟣 &lt;strong&gt;Mode 4: Modern Maintenance&lt;/strong&gt;">🟣 <strong>Modo 4: Modern Maintenance</strong></td>
-            <td data-en="Major SDK/API upgrades with &lt;em&gt;breaking changes&lt;/em&gt; through anti-corruption adapters.">Actualizaciones mayores de SDKs/APIs con <em>breaking changes</em> mediante adaptadores anti-corrupción.</td>
-            <td><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_ModernsApps_Protocol.MD"><code>ZNVE_ModernApps_Protocol.MD</code></a></td>
-          </tr>
-          <tr>
-            <td data-en="🟡 &lt;strong&gt;Mode 5: Legacy Rescue&lt;/strong&gt;">🟡 <strong>Modo 5: Legacy Rescue</strong></td>
-            <td data-en="Refactoring critical untested monoliths via Golden Master and dual shadow execution.">Refactorización de monolitos críticos sin tests vía Golden Master y ejecución dual en sombra.</td>
-            <td><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_LEGACY_PROTOCOL.md"><code>ZNVE_LEGACY_PROTOCOL.md</code></a></td>
-          </tr>
-          <tr>
-            <td data-en="🔴 &lt;strong&gt;Mode 6: Audit &amp;amp; Hardening&lt;/strong&gt;">🔴 <strong>Modo 6: Audit &amp; Hardening</strong></td>
-            <td data-en="Mitigating memory leaks, containing sockets and threads, and auditing the attack surface.">Mitigación de fugas de memoria, contención de sockets, hilos y auditoría de superficie.</td>
-            <td><a href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/ZNVE_PROTOCOL.md"><code>ZNVE_PROTOCOL.md</code></a></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <hr>
-
-    <h2 id="structure" data-en="📂 Repository Structure">📂 Estructura del Repositorio</h2>
-
-<pre><code data-en="znve-spec/
-├── .github/
-│   └── copilot-instructions.md               &amp;lt;-- [4] GITHUB COPILOT (Official engine location)
-├── case-studies/
-│   ├── 01-anti-bot-detection-lab/
-│   └── 02-legacy-monolith-rescue/
-├── protocols/
-│   ├── ZNVE_PROTOCOL.md                      &amp;lt;-- Master universal protocol (6 Modes)
-│   ├── ZNVE_ModernApps_Protocol.MD           &amp;lt;-- Modern apps protocol (Hotfix/Upgrades)
-│   ├── ZNVE_LEGACY_PROTOCOL.md               &amp;lt;-- Legacy rescue protocol (Golden Master)
-│   ├── agents/                               &amp;lt;-- PER-AGENT DIRECTIVES AND SKILLS
-│   │   ├── claude-system-skills.md           &amp;lt;-- [Claude] Skills and commands (/znve-*)
-│   │   ├── deepseek-directive.md             &amp;lt;-- [1] DEEPSEEK (Reasoner mode R1 / V3)
-│   │   ├── copilot-instructions.md           &amp;lt;-- [4] COPILOT (Reference mirror copy)
-│   │   ├── ollama/
-│   │   │   └── Modelfile                     &amp;lt;-- [2] OLLAMA (Deterministic Modelfile)
-│   │   └── openrouter/
-│   │       ├── system-prompt.md              &amp;lt;-- [3] OPENROUTER (Unified system directive)
-│   │       ├── response-schema.json          &amp;lt;-- [3] OPENROUTER (Structured Output JSON Schema)
-│   │       └── znve-openrouter-client.ts     &amp;lt;-- [3] OPENROUTER (Native Node/TS client)
-│   └── mcp/                                  &amp;lt;-- [5] MCP SERVER FOR ANTIGRAVITY &amp;amp; IDEs
-│       ├── package.json
-│       ├── znve-mcp-server.ts                &amp;lt;-- stdio MCP server source code
-│       ├── tsconfig.json
-│       └── antigravity-config.example.json   &amp;lt;-- JSON config for Antigravity/Cursor
-├── rfcs/
-│   ├── 0000-template.md
-│   └── 0001-ios-swift-chameleon.md
-├── CONTRIBUTING.md
-├── LICENSE
-├── README.md
-├── SPECIFICATION.md
-└── index.html                                &amp;lt;-- Bilingual landing page (GitHub Pages)">znve-spec/
-├── .github/
-│   └── copilot-instructions.md               &lt;-- [4] GITHUB COPILOT (Ubicación oficial del motor)
-├── case-studies/
-│   ├── 01-anti-bot-detection-lab/
-│   └── 02-legacy-monolith-rescue/
-├── protocols/
-│   ├── ZNVE_PROTOCOL.md                      &lt;-- Protocolo universal maestro (6 Modos)
-│   ├── ZNVE_ModernApps_Protocol.MD           &lt;-- Protocolo de apps modernas (Hotfix/Upgrades)
-│   ├── ZNVE_LEGACY_PROTOCOL.md               &lt;-- Protocolo de rescate legacy (Golden Master)
-│   ├── agents/                               &lt;-- DIRECTIVAS Y SKILLS POR AGENTE
-│   │   ├── claude-system-skills.md           &lt;-- [Claude] Skills y comandos (/znve-*)
-│   │   ├── deepseek-directive.md             &lt;-- [1] DEEPSEEK (Modo Reasoner R1 / V3)
-│   │   ├── copilot-instructions.md           &lt;-- [4] COPILOT (Copia espejo referencial)
-│   │   ├── ollama/
-│   │   │   └── Modelfile                     &lt;-- [2] OLLAMA (Modelfile determinista)
-│   │   └── openrouter/
-│   │       ├── system-prompt.md              &lt;-- [3] OPENROUTER (Directiva de sistema unificada)
-│   │       ├── response-schema.json          &lt;-- [3] OPENROUTER (Structured Output JSON Schema)
-│   │       └── znve-openrouter-client.ts     &lt;-- [3] OPENROUTER (Cliente nativo Node/TS)
-│   └── mcp/                                  &lt;-- [5] SERVIDOR MCP PARA ANTIGRAVITY &amp; IDEs
-│       ├── package.json
-│       ├── znve-mcp-server.ts                &lt;-- Código fuente del servidor MCP stdio
-│       ├── tsconfig.json
-│       └── antigravity-config.example.json   &lt;-- Configuración JSON para Antigravity/Cursor
-├── rfcs/
-│   ├── 0000-template.md
-│   └── 0001-ios-swift-chameleon.md
-├── CONTRIBUTING.md
-├── LICENSE
-├── README.md
-├── SPECIFICATION.md
-└── index.html                                &lt;-- Landing page bilingüe (GitHub Pages)</code></pre>
-
-    <div class="footer" data-en="This site is open source. &lt;a href=&quot;https://github.com/jeffryc6/znve-spec/edit/main/index.html&quot;&gt;Improve this page&lt;/a&gt;.">Este sitio es de código abierto. <a href="https://github.com/jeffryc6/znve-spec/edit/main/index.html">Mejora esta página</a>.</div>
-
+    <footer>
+      <p>Zero-Noise Vibe Engineering (ZNVE) &copy; 2026 Jeffry Carmona | <a href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE">CC BY 4.0 (especificación) · CC BY 4.0 y MIT (protocolos) · MIT (herramientas)</a> | <a href="https://github.com/jeffryc6/znve-spec">GitHub</a></p>
+    </footer>
   </div>
 
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/anchor-js/4.1.0/anchor.min.js" integrity="sha256-lZaRhKri35AyJSypXXs4o6OPFTbTmUoltBbDCbdzegg=" crossorigin="anonymous"></script>
   <script>
-    // Spanish lives in the markup; English in data-en. The ES copy is captured once, so no text is duplicated.
-    function switchLanguage(lang) {
-      document.querySelectorAll('[data-en]').forEach(el => {
-        if (!el.dataset.es) el.dataset.es = el.innerHTML;
-        el.innerHTML = el.dataset[lang];
+    // Red de nodos decorativa; se desactiva con prefers-reduced-motion.
+    const canvas = document.getElementById('node-canvas');
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+
+    if (!motion.matches) {
+      const ctx = canvas.getContext('2d');
+      let width = canvas.width = window.innerWidth;
+      let height = canvas.height = window.innerHeight;
+
+      window.addEventListener('resize', () => {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
       });
-      document.documentElement.lang = lang;
-      document.querySelectorAll('.lang-switch button').forEach(b => b.setAttribute('aria-pressed', b.dataset.lang === lang));
-      if (window.anchors) anchors.add('h2');
-      try { localStorage.setItem('znve_lang', lang); } catch (e) {}
+
+      const nodes = Array.from({ length: 45 }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: (Math.random() - 0.5) * 0.8,
+        radius: Math.random() * 2 + 1
+      }));
+
+      function animate() {
+        ctx.clearRect(0, 0, width, height);
+        ctx.fillStyle = '#58a6ff';
+        ctx.strokeStyle = '#30363d';
+
+        nodes.forEach((node, i) => {
+          node.x += node.vx;
+          node.y += node.vy;
+
+          if (node.x < 0 || node.x > width) node.vx *= -1;
+          if (node.y < 0 || node.y > height) node.vy *= -1;
+
+          ctx.beginPath();
+          ctx.arc(node.x, node.y, node.radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          for (let j = i + 1; j < nodes.length; j++) {
+            const other = nodes[j];
+            const dist = Math.hypot(node.x - other.x, node.y - other.y);
+            if (dist < 130) {
+              ctx.beginPath();
+              ctx.moveTo(node.x, node.y);
+              ctx.lineTo(other.x, other.y);
+              ctx.stroke();
+            }
+          }
+        });
+        requestAnimationFrame(animate);
+      }
+      animate();
     }
-    document.addEventListener('DOMContentLoaded', () => {
-      let saved = null;
-      try { saved = localStorage.getItem('znve_lang'); } catch (e) {}
-      switchLanguage(saved || (navigator.language.startsWith('en') ? 'en' : 'es'));
-    });
   </script>
 </body>
 </html>
