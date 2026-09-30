@@ -1,0 +1,414 @@
+{
+  "spec_format": 1,
+  "name": "znve",
+  "title": "Zero-Noise Vibe Engineering",
+  "version": "2.3.0",
+  "author": "jeffryc6",
+  "license": "CC-BY-4.0 AND MIT (licencia dual; ver LICENSE)",
+  "source": "https://github.com/jeffryc6/znve-spec",
+
+  "axioms": [
+    {
+      "es": "Inteligencia pesada en el diseño; huella casi nula en la ejecución.",
+      "en": "Heavy intelligence in the design; near-zero footprint in execution."
+    },
+    {
+      "es": "La IA no inventa arquitectura; ejecuta contratos deterministas.",
+      "en": "AI does not invent architecture; it executes deterministic contracts."
+    }
+  ],
+
+  "guardrails": [
+    {
+      "title_es": "Higiene radical de dependencias (Anti-Bloat Fence)",
+      "text_es": "No instales ni importes librerías de terceros si la API nativa del lenguaje, SDK o runtime lo resuelve. Cada paquete es superficie de ataque, peso y deuda de actualización.",
+      "text_en": "NEVER install third-party libraries if native language/SDK APIs can achieve the goal."
+    },
+    {
+      "title_es": "Cero ruido en runtime",
+      "text_es": "No emitas logs rutinarios de estado saludable (\"OK\", \"Connecting...\", \"Success\") en rutas calientes. La telemetría es por excepción: solo anomalías o fallos confirmados, para que las alertas reales no se pierdan en el ruido.",
+      "text_en": "NEVER emit routine informational logs (\"Success\", \"OK\", \"Done\") in production hot paths. Only alert on confirmed errors or anomalies."
+    },
+    {
+      "title_es": "Contrato primero",
+      "text_es": "No generes código productivo sin un contrato tipado previo (DTO, interfaz, esquema o modelo inmutable). Si no existe, propón el contrato y detente hasta que se apruebe: inventar la forma de los datos es exactamente lo que ZNVE prohíbe.",
+      "text_en": "NEVER generate code without a strict, pre-approved data contract (DTOs, TypeScript interfaces, Zod schemas, or explicit DB models)."
+    },
+    {
+      "title_es": "Respeto al hilo principal",
+      "text_es": "El UI Thread / Event Loop nunca se bloquea con cómputo pesado, I/O síncrono o criptografía.",
+      "text_en": "NEVER block the Main/UI thread with I/O, heavy calculations, or network calls."
+    },
+    {
+      "title_es": "Persistencia eficiente y agnóstica",
+      "text_es": "Prohibido el escaneo ciego (`SELECT *`, `find({})` sin proyección). Proyecta campos explícitos y apóyate en rutas indexadas, sea SQL, NoSQL, clave-valor o almacenamiento local.",
+      "text_en": "NEVER run blind scans (`SELECT *`, `find({})` without projection). Project explicit fields over indexed paths."
+    },
+    {
+      "title_es": "Cero supresión silenciosa",
+      "text_es": "Prohibidos los `catch` vacíos y los retardos arbitrarios (`sleep`, `setTimeout`) para tapar condiciones de carrera. Diagnostica la causa raíz.",
+      "text_en": "NEVER write empty catch blocks or use arbitrary sleeps/timeouts to patch concurrency issues."
+    },
+    {
+      "title_es": "Cero relleno conversacional",
+      "text_es": "Omite disculpas, saludos y preámbulos. Ve directo al artefacto técnico.",
+      "text_en": "Skip polite greetings, transitional fluff, and disclaimers. Go straight to the technical artifact."
+    }
+  ],
+
+  "scenarios": [
+    {"id": 0, "key": "help", "label_es": "Ayuda", "mode_es": "Ayuda", "flow": "`/znve-help` · `/znve-?`", "purpose_es": "Índice de comandos y regla de respuesta por defecto"},
+    {"id": 1, "key": "greenfield_mode_1", "label_es": "1 · Greenfield", "mode_es": "Modo 1: Greenfield (proyectos nuevos, día 0)", "flow": "`/znve-contract` → `/znve-execute`", "purpose_es": "Día 0: contrato y arranque atómico de funcionalidad nueva"},
+    {"id": 2, "key": "in_flight_mode_2", "label_es": "2 · In-Flight", "mode_es": "Modo 2: In-Flight (proyectos activos y nuevas capacidades)", "flow": "`/znve-contract --delta` → `/znve-execute`", "purpose_es": "Nuevas features sin alterar contratos activos"},
+    {"id": 3, "key": "hotfix_mode_3", "label_es": "3 · Crisis / Hotfix", "mode_es": "Modo 3: Hotfix & Recovery (triaje de crisis en producción)", "flow": "`/znve-triage` → `/znve-hotfix`", "purpose_es": "Causa raíz, contención del blast radius y parche con test"},
+    {"id": 4, "key": "upgrade_mode_4", "label_es": "4 · Modern Upgrade", "mode_es": "Modo 4: Modern Maintenance (migración de SDKs y breaking changes)", "flow": "`/znve-upgrade`", "purpose_es": "Migración de SDKs/APIs con adaptador anti-corrupción"},
+    {"id": 5, "key": "legacy_rescue_mode_5", "label_es": "5 · Legacy Rescue", "mode_es": "Modo 5: Legacy Rescue (refactorización en 5 fases de monolitos críticos)", "flow": "`/znve-forensic`, `/znve-harness`, `/znve-legacy-rescue`", "purpose_es": "Rescate de monolitos en 5 fases"},
+    {"id": 6, "key": "audit_hardening_mode_6", "label_es": "6 · Hardening", "mode_es": "Modo 6: Audit & Hardening (higiene técnica, memoria y seguridad)", "flow": "`/znve-audit`", "purpose_es": "Hilos, memoria, descriptores, red y seguridad"}
+  ],
+
+  "sections": [
+    {"title_es": "Escenario 0 · Ayuda", "caps_es": "ESCENARIO 0: ASISTENCIA Y AYUDA RÁPIDA", "caps_en": "SCENARIO 0: HELP & CATALOG", "commands": ["help"]},
+    {"title_es": "Escenarios 1 y 2 · Greenfield e In-Flight", "caps_es": "ESCENARIO 1 & 2: GREENFIELD E IN-FLIGHT", "caps_en": "SCENARIO 1 & 2: GREENFIELD & IN-FLIGHT", "commands": ["contract", "execute"]},
+    {"title_es": "Escenario 3 · Crisis en producción", "caps_es": "ESCENARIO 3: CRISIS EN PRODUCCIÓN Y RESPUESTA A INCIDENTES", "caps_en": "SCENARIO 3: INCIDENT TRIAGE & HOTFIX", "commands": ["triage", "hotfix"]},
+    {"title_es": "Escenario 4 · Mantenimiento evolutivo", "caps_es": "ESCENARIO 4: MANTENIMIENTO MODERNO Y UPGRADES", "caps_en": "SCENARIO 4: MODERN UPGRADES", "commands": ["upgrade"]},
+    {"title_es": "Escenario 5 · Rescate legacy", "caps_es": "ESCENARIO 5: RESCATE DE MONOLITOS LEGACY", "caps_en": "SCENARIO 5: LEGACY MONOLITH RESCUE", "commands": ["forensic", "harness", "legacy-rescue"]},
+    {"title_es": "Escenario 6 · Hardening", "caps_es": "ESCENARIO 6: AUDITORÍA Y HARDENING", "caps_en": "SCENARIO 6: AUDIT & HARDENING", "commands": ["audit"]}
+  ],
+
+  "invocation": {
+    "forms_es": [
+      "`/znve-contract …` (forma canónica)",
+      "`/znve contract …` o `/znve -contract …` (skill elegida en el menú y comando a continuación)"
+    ],
+    "fallback_es": "Si el mensaje contiene solo `/znve`, `/znve ?` o `/znve help`, responde como `/znve-help`. Si el comando no existe, muestra el catálogo de ayuda.",
+    "usage_es": "💡 USO: /znve <comando> <petición>   (ej.: /znve contract Diseña el DTO de usuario)"
+  },
+
+  "commands": [
+    {
+      "id": "help",
+      "name": "/znve-help",
+      "aliases": ["/znve-?", "/znve", "/znve help"],
+      "syntax": "/znve-help",
+      "modes": [],
+      "read_only": true,
+      "title_es": "Manual operativo y ayuda rápida",
+      "summary_es": "Manual operativo e índice de comandos.",
+      "summary_en": "Operating manual and command index.",
+      "activation_es": "el usuario escribe `/znve-?`, `/znve-help`, `/znve help`, solo `/znve`, o pregunta cómo usar ZNVE.",
+      "directive_es": "solo lectura. No inspecciones ni generes código del proyecto; imprime el catálogo y la regla por defecto en 4 bloques.",
+      "directive_en": "READ-ONLY mode. Immediately print the command catalog and the 4-block default structure verbatim.",
+      "outputs": [],
+      "environments_es": "Todos los asistentes; en MCP, la herramienta `znve_help`.",
+      "example_es": "/znve-help"
+    },
+    {
+      "id": "contract",
+      "name": "/znve-contract",
+      "aliases": [],
+      "syntax": "/znve-contract [--platform=desktop|web|mobile|hybrid] [--delta]",
+      "modes": [1, 2, 4],
+      "read_only": false,
+      "title_es": "Diseño de contratos deterministas",
+      "summary_es": "Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.",
+      "summary_en": "Immutable interfaces, DTOs and Anti-Bloat Fence.",
+      "activation_es": "antes de programar cualquier funcionalidad, endpoint, pantalla o módulo.",
+      "directive_es": "no escribas lógica de negocio; define solo las fronteras estructurales. En In-Flight, los contratos existentes no se alteran: se extienden.",
+      "directive_en": "Design the immutable data boundary; no business logic.",
+      "outputs": [
+        {"label_es": "CONTRATO DE ENTRADA Y SALIDA", "desc_es": "DTOs tipados con validación estricta de límites.", "label_en": "Input/Output DTOs"},
+        {"label_es": "CONTRATO DE PERSISTENCIA", "desc_es": "esquema agnóstico con proyecciones y claves indexadas explícitas.", "label_en": "Persistence schema with indexed keys"},
+        {"label_es": "CONTRATO DE ERRORES", "desc_es": "enums o tipos cerrados con los modos de fallo previstos.", "label_en": "Closed error types"},
+        {"label_es": "ANTI-BLOAT FENCE", "desc_es": "campos descartados, abstracciones innecesarias y paquetes prohibidos.", "label_en": "Anti-Bloat Fence"}
+      ],
+      "compact_extra_es": "Con `--delta`: Cubo A (requerido ya) y Cubo B (diferido a `contracts/CONTRACT_BACKLOG.md`). Se detiene al emitir: \"Contrato v1 sólido y cerrado. Listo para /znve-execute.\"",
+      "compact_extra_en": "With `--delta`: Bucket A (needed now) and Bucket B (deferred to `contracts/CONTRACT_BACKLOG.md`). Stop after emitting: \"Contrato v1 sólido y cerrado. Listo para /znve-execute.\"",
+      "environments_es": "Claude, OpenRouter, DeepSeek V3, Ollama (`qwen2.5-coder`).",
+      "example_es": "/znve-contract --platform=desktop Diseña el contrato DTO y de persistencia para un almacén local clave-valor en disco."
+    },
+    {
+      "id": "execute",
+      "name": "/znve-execute",
+      "aliases": [],
+      "syntax": "/znve-execute --target=<ruta/archivo>",
+      "modes": [1, 2, 4, 5],
+      "read_only": false,
+      "title_es": "Implementación quirúrgica atómica",
+      "summary_es": "Implementación atómica en TARGET_FILE con desecho de recursos.",
+      "summary_en": "Atomic implementation in TARGET_FILE with resource disposal.",
+      "activation_es": "tras la aprobación de un contrato de `/znve-contract`. Si no hay contrato aprobado, pídelo antes de escribir código.",
+      "directive_es": "cero dependencias nuevas, cero `catch` vacíos, cero campos o parámetros fuera del contrato. Solo se modifica el `TARGET_FILE`.",
+      "directive_en": "Implement code strictly satisfying the approved contract; touch only the `TARGET_FILE`.",
+      "outputs": [
+        {"label_es": "TARGET_FILE", "desc_es": "ruta exacta del archivo objetivo.", "label_en": "Single `TARGET_FILE`"},
+        {"label_es": "CÓDIGO QUIRÚRGICO", "desc_es": "implementación modular, mínima y de huella casi nula.", "label_en": "Surgical code"},
+        {"label_es": "LIBERACIÓN DE RECURSOS", "desc_es": "desecho explícito (`close`, `dispose`, `finally`, desuscripción de listeners).", "label_en": "Resource disposal (`dispose`/`close`/`finally`)"},
+        {"label_es": "VERIFICACIÓN ATÓMICA", "desc_es": "comando de terminal o test exacto para validar de inmediato.", "label_en": "Atomic verification command"}
+      ],
+      "environments_es": "Cursor Composer, Copilot Edits, Windsurf, Claude Code, Ollama.",
+      "example_es": "/znve-execute --target=src/auth/session.ts Implementa el contrato UserSessionContract con las utilidades nativas de crypto."
+    },
+    {
+      "id": "triage",
+      "name": "/znve-triage",
+      "aliases": [],
+      "syntax": "/znve-triage",
+      "modes": [3],
+      "read_only": true,
+      "title_es": "Diagnóstico de emergencia y blast radius",
+      "summary_es": "Diagnóstico y contención de radio de impacto ante caídas.",
+      "summary_en": "Root-cause diagnosis and blast-radius containment.",
+      "activation_es": "caídas de servicio, bloqueos de UI o excepciones imprevistas en producción.",
+      "directive_es": "solo lectura estricta. Nada de parches a ciegas: un parche sin diagnóstico suele mover el fallo a otro sitio.",
+      "directive_en": "READ-ONLY mode. No blind patches.",
+      "outputs": [
+        {"label_es": "COMPONENTE AFECTADO", "desc_es": "endpoint, servicio o vista donde se manifiesta la falla.", "label_en": "Affected component"},
+        {"label_es": "CAUSA RAÍZ DETERMINISTA", "desc_es": "deadlock, pool agotado, timeout, fuga de memoria, etc.", "label_en": "Root cause"},
+        {"label_es": "RADIO DE IMPACTO (BLAST RADIUS)", "desc_es": "componentes en riesgo.", "label_en": "Blast radius"},
+        {"label_es": "PLAN DE CONTENCIÓN INMEDIATA", "desc_es": "fallback local o degradación elegante sin alterar contratos de datos.", "label_en": "Immediate containment plan"}
+      ],
+      "environments_es": "Claude, Cursor, Copilot, DeepSeek R1.",
+      "example_es": "/znve-triage Analiza este log de error de conexión a la base de datos y aísla el radio de impacto: [stack trace]."
+    },
+    {
+      "id": "hotfix",
+      "name": "/znve-hotfix",
+      "aliases": [],
+      "syntax": "/znve-hotfix --incident=<ID>",
+      "modes": [3],
+      "read_only": false,
+      "title_es": "Parche quirúrgico acotado",
+      "summary_es": "Parche quirúrgico atómico con test de regresión obligatorio.",
+      "summary_en": "Atomic patch with mandatory regression test.",
+      "activation_es": "remediación tras el diagnóstico de `/znve-triage`.",
+      "directive_es": "modifica un único `TARGET_FILE` en la frontera del adaptador, sin tocar el núcleo. No rompas firmas públicas ni silencies errores; propaga `X-Run-ID` para la trazabilidad.",
+      "directive_en": "Scoped emergency patch on a single `TARGET_FILE`; no public signature changes.",
+      "outputs": [
+        {"label_es": "TARGET_FILE", "desc_es": "ruta exacta del archivo defectuoso.", "label_en": "Scoped `TARGET_FILE`"},
+        {"label_es": "CÓDIGO QUIRÚRGICO", "desc_es": "parche atómico acotado.", "label_en": "Atomic patch"},
+        {"label_es": "TEST DE REGRESIÓN", "desc_es": "prueba que falla sin el parche y pasa al 100 % con él.", "label_en": "Mandatory regression test"},
+        {"label_es": "COMANDO DE VALIDACIÓN", "desc_es": "orden de terminal reproducible.", "label_en": "Verification command"}
+      ],
+      "environments_es": "Cursor, Claude Code, GitHub Copilot.",
+      "example_es": "/znve-hotfix --incident=INC-142 Aplica el parche sobre src/network/http_client.ts con su test de regresión."
+    },
+    {
+      "id": "upgrade",
+      "name": "/znve-upgrade",
+      "aliases": [],
+      "syntax": "/znve-upgrade --dependency=<librería>",
+      "modes": [4],
+      "read_only": false,
+      "title_es": "Migración con capa anti-corrupción",
+      "summary_es": "Migración de dependencias mediante Adaptador desacoplado.",
+      "summary_en": "Dependency migration behind a decoupled Adapter.",
+      "activation_es": "actualización de SDKs, APIs de terceros o librerías con breaking changes.",
+      "directive_es": "las incompatibilidades externas no se propagan al dominio; quedan encapsuladas tras un `Port` y un `Adapter`.",
+      "directive_en": "Breaking changes never reach the domain; isolate them behind a Port and an Adapter.",
+      "outputs": [
+        {"label_es": "MATRIZ DE BREAKING CHANGES", "desc_es": "versión previa vs. versión objetivo.", "label_en": "Breaking changes matrix"},
+        {"label_es": "DISEÑO DE ADAPTADOR ANTI-CORRUPCIÓN", "desc_es": "interfaz interna (`Port`) y adaptador (`Adapter`).", "label_en": "Port and anti-corruption Adapter design"},
+        {"label_es": "CÓDIGO DEL ADAPTADOR", "desc_es": "implementación aislada sin tocar el dominio.", "label_en": "Adapter implementation"},
+        {"label_es": "VERIFICACIÓN DUAL DE PARIDAD", "desc_es": "tests de paridad funcional y comprobación de huella de memoria.", "label_en": "Dual verification"}
+      ],
+      "environments_es": "Claude Projects, Cursor, DeepSeek.",
+      "example_es": "/znve-upgrade --dependency=axios Planifica la migración a fetch nativo con un adaptador HTTP interno desacoplado."
+    },
+    {
+      "id": "forensic",
+      "name": "/znve-forensic",
+      "aliases": [],
+      "syntax": "/znve-forensic --target=<ruta/módulo>",
+      "modes": [2, 5, 6],
+      "read_only": true,
+      "title_es": "Ingesta pasiva y radiografía forense",
+      "summary_es": "Ingesta en solo lectura, matriz I/O y efectos secundarios.",
+      "summary_en": "Read-only ingestion, I/O matrix and side effects.",
+      "activation_es": "análisis inicial de archivos, repositorios desconocidos o monolitos legacy.",
+      "directive_es": "solo lectura estricta. No propongas código de reemplazo ni dependencias.",
+      "directive_en": "READ-ONLY mode. No replacement code or dependencies.",
+      "outputs": [
+        {"label_es": "RESUMEN DE DOMINIO", "desc_es": "función operativa real, en un párrafo.", "label_en": "Domain summary"},
+        {"label_es": "MATRIZ DE ENTRADAS, SALIDAS Y ESTADO", "desc_es": "variables de entorno, parámetros, estado mutado y globales.", "label_en": "I/O matrix"},
+        {"label_es": "EFECTOS SECUNDARIOS", "desc_es": "persistencia, red, I/O e IPC.", "label_en": "Side effects"},
+        {"label_es": "EQUILIBRIOS ACCIDENTALES", "desc_es": "código duplicado o contradictorio que funciona por orden de evaluación. No lo \"limpies\": suele sostener comportamientos de negocio no documentados.", "label_en": "Accidental balances"},
+        {"label_es": "ZONAS ROJAS", "desc_es": "condiciones de carrera, desconexiones, nulos o saturación.", "label_en": "Red zones"}
+      ],
+      "environments_es": "Claude (Projects o Claude Code), DeepSeek R1 (razonamiento `<think>`), Copilot (`@workspace /znve-forensic`), Cursor en modo lectura.",
+      "example_es": "/znve-forensic --target=server/transfers/processor.ts Entrega la radiografía forense sin alterar nada."
+    },
+    {
+      "id": "harness",
+      "name": "/znve-harness",
+      "aliases": [],
+      "syntax": "/znve-harness --target=<archivo_legacy>",
+      "modes": [5],
+      "read_only": false,
+      "title_es": "Arnés de caracterización (Golden Master)",
+      "summary_es": "Suite Golden Master de caja negra sobre código intacto.",
+      "summary_en": "Black-box Golden Master suite on intact code.",
+      "activation_es": "antes de modernizar código legacy sin tests.",
+      "directive_es": "el archivo de producción no se modifica. El arnés vive aislado (`tests/characterization/` o `sandbox/`).",
+      "directive_en": "Production code is never modified; the harness lives in `tests/characterization/` or `sandbox/`.",
+      "outputs": [
+        {"label_es": "CONFIGURACIÓN DE AISLAMIENTO", "desc_es": "invocación del módulo original intacto (CLI, importación o sandbox).", "label_en": "Isolation setup"},
+        {"label_es": "BATERÍA DE INYECCIÓN", "desc_es": "casos estándar, límites, strings vacíos y datos corruptos.", "label_en": "Injection battery"},
+        {"label_es": "SNAPSHOTS GOLDEN MASTER", "desc_es": "salidas reales actuales, incluidos los comportamientos accidentales tolerados.", "label_en": "Snapshots"},
+        {"label_es": "COMANDO DE EJECUCIÓN", "desc_es": "orden de terminal que certifique 100 % de éxito contra el original.", "label_en": "Atomic run command"}
+      ],
+      "environments_es": "Claude Projects, Cursor, Copilot Chat, DeepSeek Reasoner.",
+      "example_es": "/znve-harness --target=legacy_calc.py Construye la batería Golden Master en tests/characterization/."
+    },
+    {
+      "id": "legacy-rescue",
+      "name": "/znve-legacy-rescue",
+      "aliases": [],
+      "syntax": "/znve-legacy-rescue",
+      "modes": [5],
+      "read_only": false,
+      "title_es": "Protocolo integral en 5 fases",
+      "summary_es": "Orquestación integral en 5 fases para código legacy.",
+      "summary_en": "End-to-end 5-phase legacy orchestration.",
+      "activation_es": "rescate de un monolito o módulo legacy sin tests.",
+      "directive_es": "orquesta el rescate de punta a punta y no avances de fase sin que la anterior esté verificada. En la primera respuesta entrega solo el reporte forense (fases 1 y 2) y el diseño del arnés (fase 3).",
+      "directive_en": "Full 5-phase orchestration; never advance a phase until the previous one is verified.",
+      "outputs": [],
+      "phases": [
+        {"label_es": "Fases 1 y 2 — Ingesta y reporte forense", "desc_es": "con `/znve-forensic`.", "short_es": "Ingesta y reporte forense", "short_en": "Forensic ingestion and report"},
+        {"label_es": "Fase 3 — Golden Master", "desc_es": "con `/znve-harness` sobre el código intacto; debe quedar 100 % en verde.", "short_es": "Golden Master", "short_en": "Golden Master"},
+        {"label_es": "Fase 4 — Shadow Run", "desc_es": "nuevo módulo aislado (`/znve-contract` + `/znve-execute`) ejecutado en sombra hasta confirmar `Salida(Nuevo) == Salida(Legacy)`.", "short_es": "Shadow Run", "short_en": "Shadow Run"},
+        {"label_es": "Fase 5 — Strangler Fig", "desc_es": "conmutación gradual sin downtime.", "short_es": "Strangler Fig", "short_en": "Strangler Fig"}
+      ],
+      "environments_es": "Claude Projects, Cursor Composer.",
+      "example_es": "/znve-legacy-rescue Inicia el rescate integral del monolito legacy_billing.py."
+    },
+    {
+      "id": "audit",
+      "name": "/znve-audit",
+      "aliases": [],
+      "syntax": "/znve-audit --target=<módulo>",
+      "modes": [6],
+      "read_only": true,
+      "title_es": "Auditoría forense de recursos y seguridad",
+      "summary_es": "Hardening de hilos, memoria, descriptores y seguridad.",
+      "summary_en": "Hardening of threads, memory, descriptors and security.",
+      "activation_es": "fugas de memoria, cuellos de botella, bloqueos de UI, logs ruidosos o puertos expuestos.",
+      "directive_es": "nada de parches cosméticos ni retardos arbitrarios; ataca la causa raíz y entrega la hoja de remediación para aprobación.",
+      "directive_en": "No cosmetic patches or arbitrary sleeps; fix the root cause.",
+      "outputs": [
+        {"label_es": "CONCURRENCIA E HILOS", "desc_es": "contención, bloqueos del UI Thread o procesos zombis.", "label_en": "Threading & concurrency"},
+        {"label_es": "SUPERFICIE DE RED Y SEGURIDAD", "desc_es": "timeouts, puertos expuestos y manejo de desconexión.", "label_en": "Surface & network"},
+        {"label_es": "CICLO DE VIDA Y RECURSOS", "desc_es": "handles no liberados, listeners huérfanos o buffers saturados.", "label_en": "Leaks & lifecycle"},
+        {"label_es": "HOJA DE REMEDIACIÓN", "desc_es": "acciones atómicas priorizadas por severidad.", "label_en": "Remediation plan"}
+      ],
+      "environments_es": "DeepSeek R1, Claude, Copilot, Ollama.",
+      "example_es": "/znve-audit --target=src/workers Certifica que el worker libera sockets y no mantiene la CPU despierta."
+    }
+  ],
+
+  "contract_rules": {
+    "stack": [
+      {"platform": "Escritorio (Windows / macOS / Linux)", "flag": "desktop", "stack": "Rust + Tauri v2 o WinUI 3 nativo", "persistence": "SQLite (WAL mode) / DuckDB"},
+      {"platform": "Web-App", "flag": "web", "stack": "Vite + TypeScript / Next.js App Router", "persistence": "IndexedDB (Dexie.js)"},
+      {"platform": "Híbrida (Mobile / Desktop)", "flag": "hybrid", "stack": "Tauri Mobile / Flutter / React Native Bare", "persistence": "MMKV / WatermelonDB"},
+      {"platform": "Android nativo", "flag": "mobile", "stack": "Kotlin + Jetpack Compose + Corrutinas", "persistence": "Room DB"},
+      {"platform": "macOS / iOS nativo", "flag": "mobile", "stack": "Swift 6 + SwiftUI", "persistence": "SwiftData"}
+    ],
+    "checklist": [
+      {"title_es": "Estructura invariable", "desc_es": "entradas, salidas, entidades y enums tipados."},
+      {"title_es": "Defensas de frontera", "desc_es": "errores explicitados, sin `any` ni `catch` genéricos."},
+      {"title_es": "Cero dependencias parásitas", "desc_es": "solo el SDK nativo o el runtime aprobado."},
+      {"title_es": "Filtro de diferimiento", "desc_es": "ideas secundarias movidas a `contracts/CONTRACT_BACKLOG.md`."}
+    ],
+    "stop_criterion": "Contrato v1 sólido y cerrado. Listo para /znve-execute.",
+    "delta_steps_es": [
+      "Audita las discrepancias entre `contracts/` y `src/`.",
+      "Clasifica los cambios en **Cubo A** (requerido ya, etapa activa) y **Cubo B** (diferido a `contracts/CONTRACT_BACKLOG.md`).",
+      "Muestra el diff del Cubo A y re-congela el contrato antes de modificar código."
+    ]
+  },
+
+  "default_format": {
+    "blocks": [
+      {"label_es": "BLOQUE 1: SYSTEM BLUEPRINT & CONTRATO", "desc_es": "límites, plataforma, Anti-Bloat Fence y contrato estricto (DTO/interfaz).", "short_es": "Blueprint y Contrato", "label_en": "BLOCK 1: SYSTEM BLUEPRINT & CONTRACT", "desc_en": "Scope, target platform, Anti-Bloat Fence, and immutable contract."},
+      {"label_es": "BLOQUE 2: RACIONAL DE INGENIERÍA", "desc_es": "2-3 viñetas que justifiquen la mínima huella y la ausencia de dependencias parásitas.", "short_es": "Racional", "label_en": "BLOCK 2: ENGINEERING RATIONALE", "desc_en": "2-3 bullets justifying minimal footprint and zero external packages."},
+      {"label_es": "BLOQUE 3: TAREAS ATÓMICAS DE IMPLEMENTACIÓN", "desc_es": "`TARGET_FILE` único, acción quirúrgica y restricciones aplicadas.", "short_es": "Tarea Atómica", "label_en": "BLOCK 3: ATOMIC IMPLEMENTATION", "desc_en": "Single `TARGET_FILE`, surgical changes, and platform restrictions."},
+      {"label_es": "BLOQUE 4: VERIFICACIÓN ATÓMICA", "desc_es": "comando de terminal determinista o prueba reproducible.", "short_es": "Verificación", "label_en": "BLOCK 4: ATOMIC VERIFICATION", "desc_en": "Terminal command or unit test to verify parity without resource leaks."}
+    ],
+    "conceptual_note_es": "Las preguntas conceptuales o no técnicas (por ejemplo, \"¿qué es un Golden Master?\") se responden de forma directa y breve, sin forzar los 4 bloques."
+  },
+
+  "chameleon": {
+    "intro_es": "Restricciones adicionales por stack. Se suman a los guardrails globales de ZNVE; no los reemplazan.",
+    "platforms": [
+      {"name": "Android", "priorities": "`WorkManager`, `LifecycleOwner`, `StateFlow` nativo.", "antipatterns": "`WakeLock` innecesarios, retener contextos de Activity, bloquear el hilo de UI.", "verification": "Android Studio Profiler (memoria/CPU), StrictMode activado en debug."},
+      {"name": "iOS / macOS (Swift)", "priorities": "SwiftUI sobre `@MainActor` solo para vistas; trabajo pesado en `Actors` de fondo; tareas diferidas con `BGTaskScheduler`; persistencia ligera con SwiftData o SQLite.", "antipatterns": "Bloquear el hilo principal; capturas fuertes de `self` en closures (usa `[weak self]`); tareas de fondo infinitas que provoquen la terminación por el Watchdog.", "verification": "`leaks` e Instruments; cero advertencias con `-strict-concurrency=complete`."},
+      {"name": "Windows Desktop (C# / WinUI / WPF / C++)", "priorities": "`IDisposable` en recursos no administrados; `async/await` puro; mutex de instancia única.", "antipatterns": "`.Result` o `.Wait()` bloqueantes; procesos zombis en segundo plano.", "verification": "analizadores de `IDisposable` (CA2000) y Visual Studio Diagnostic Tools."},
+      {"name": "Híbrido (Tauri / Flutter / React Native)", "priorities": "Payloads mínimos por el puente nativo/IPC.", "antipatterns": "Serializaciones JSON masivas por el puente; re-renders innecesarios.", "verification": ""},
+      {"name": "Web & Backend", "priorities": "APIs nativas (`fetch`, `crypto`, streams); proyecciones de campos; timeouts estrictos; límites de memoria por worker; apagado elegante (*graceful shutdown*).", "antipatterns": "Clientes HTTP sin timeout; consultas sin proyección; dependencias para lo que resuelve la plataforma.", "verification": "heap snapshots, `--inspect` en Node, pruebas de carga con límites de memoria."}
+    ]
+  },
+
+  "mcp": {
+    "server_file": "protocols/mcp/znve-mcp-server.ts",
+    "tools": [
+      {"name": "znve_help", "phase": "Ayuda", "summary_es": "Devuelve este manual completo o una sección: `commands`, `mcp_tools` o `modes`.", "params": [{"name": "topic", "type": "enum", "required": false, "desc_es": "`all` (por defecto), `commands`, `mcp_tools` o `modes`."}], "behavior_es": "Si el manual no existe, devuelve un catálogo corto de respaldo; cualquier otro error se informa."},
+      {"name": "znve_forensic_scan", "phase": "Ingesta", "summary_es": "Lee un archivo del workspace en modo estrictamente de solo lectura.", "params": [{"name": "file_path", "type": "string", "required": true, "desc_es": "Ruta del archivo, relativa a `ZNVE_WORKSPACE`."}], "behavior_es": "Devuelve el contenido intacto y su tamaño; nunca escribe en disco."},
+      {"name": "znve_validate_contract", "phase": "Contrato", "summary_es": "Valida que un DTO o interfaz cumpla el Anti-Bloat Fence y la proyección de datos.", "params": [{"name": "contract_code", "type": "string", "required": true, "desc_es": "Código de la interfaz, struct o DTO propuesto."}, {"name": "banned_libraries", "type": "string[]", "required": false, "desc_es": "Librerías vetadas por el Anti-Bloat Fence."}], "behavior_es": "Rechaza el contrato si detecta `SELECT *`, `.find({})` o una librería vetada."},
+      {"name": "znve_scaffold_harness", "phase": "Aislamiento", "summary_es": "Crea una suite Golden Master en un directorio aislado sin tocar producción.", "params": [{"name": "harness_directory", "type": "string", "required": true, "desc_es": "Directorio aislado; debe contener `test` o `sandbox`."}, {"name": "test_filename", "type": "string", "required": true, "desc_es": "Nombre del archivo de prueba."}, {"name": "harness_code", "type": "string", "required": true, "desc_es": "Código de la prueba de caja negra."}], "behavior_es": "Rechaza directorios que no sean de pruebas o sandbox."},
+      {"name": "znve_surgical_write", "phase": "Escritura", "summary_es": "Escribe un único `TARGET_FILE` tras aprobar el contrato.", "params": [{"name": "target_file", "type": "string", "required": true, "desc_es": "Ruta exacta del único archivo a escribir."}, {"name": "code_content", "type": "string", "required": true, "desc_es": "Contenido que satisface el contrato."}, {"name": "disposal_pattern", "type": "enum", "required": true, "desc_es": "`dispose`, `close`, `finally`, `autocloseable` o `not_applicable`."}], "behavior_es": "Aborta si hay un `catch` vacío o si se abren sockets o flujos con `not_applicable`."},
+      {"name": "znve_audit_resources", "phase": "Hardening", "summary_es": "Analiza un fragmento de código en busca de antipatrones de hilos, memoria y CPU.", "params": [{"name": "code_snippet", "type": "string", "required": true, "desc_es": "Fragmento de código a evaluar."}], "behavior_es": "Marca `.Result`/`.Wait()`, busy-waiting sin backoff y `WakeLock.acquire()`."}
+    ],
+    "config_example": "{\n  \"mcpServers\": {\n    \"znve-engine\": {\n      \"command\": \"node\",\n      \"args\": [\"<ruta>/znve-spec/protocols/mcp/dist/znve-mcp-server.js\"],\n      \"env\": {\n        \"ZNVE_WORKSPACE\": \"<ruta>/tu-proyecto\",\n        \"NODE_ENV\": \"production\"\n      }\n    }\n  }\n}"
+  },
+
+  "integrations": [
+    {"name": "Claude (claude.ai, Claude Code y Claude Projects)", "steps_es": ["claude.ai: sube `protocols/agents/claude/skills/znve.zip` en **Settings → Capabilities → Skills**.", "Claude Code: copia la carpeta `protocols/agents/claude/skills/znve/` a `~/.claude/skills/` o a `.claude/skills/` del proyecto.", "Claude Projects: pega `protocols/agents/claude-system-skills.md` en **Project Instructions** o en `CLAUDE.md`.", "Invocación: `/znve-contract`, `/znve contract` o `/znve -contract`."]},
+    {"name": "GitHub Copilot (VS Code, Visual Studio, JetBrains)", "steps_es": ["Usa `.github/copilot-instructions.md`: es la ruta que Copilot lee.", "En el chat: `@workspace /znve-*`."]},
+    {"name": "Cursor y Windsurf", "steps_es": ["Copia `protocols/agents/cursor-rules.md` a `.cursorrules` en la raíz del proyecto."]},
+    {"name": "DeepSeek (web, API o extensión)", "steps_es": ["Inyecta `protocols/agents/deepseek-directive.md` como mensaje con rol `system`.", "En R1 (Reasoner), las 4 fases de validación ocurren dentro de `<think>`."]},
+    {"name": "Ollama (modelos locales)", "steps_es": ["Compila el agente local con el `Modelfile`:", {"lang": "bash", "code": "ollama create znve-agent -f ./protocols/agents/ollama/Modelfile\nollama run znve-agent"}]},
+    {"name": "OpenRouter", "steps_es": ["Usa `protocols/agents/openrouter/system-prompt.md` como prompt de sistema y `response-schema.json` como `response_format`."]},
+    {"name": "Antigravity y clientes MCP (Cursor, Windsurf, Claude Desktop)", "steps_es": ["Instala el servidor MCP (compila, verifica las 6 herramientas y registra `znve-engine`):", {"lang": "bash", "code": "cd protocols/mcp\nnode install-antigravity.mjs --workspace \"<ruta>/tu-proyecto\""}, "O regístralo a mano en `mcp_config.json`:", {"lang": "json", "code": "@mcp.config_example"}]}
+  ],
+
+  "workflows": [
+    {"title_es": "Flujo A: Creación de módulo nuevo (Modo 1 - Greenfield)", "steps": [["Usuario", "Inyecta el requerimiento con /znve-contract"], ["Agente", "Retorna DTO tipado + esquema + Anti-Bloat Fence y se detiene"], ["Usuario", "Revisa y aprueba el contrato inmutable"], ["Usuario", "Dispara /znve-execute sobre el contrato aprobado"], ["Agente", "Genera TARGET_FILE con desecho de recursos y test atómico"], ["Terminal", "Ejecuta el comando de validación para certificar la paridad"]]},
+    {"title_es": "Flujo B: Crisis en producción (Modo 3 - Hotfix)", "steps": [["Usuario", "Pega el error o stack trace con /znve-triage"], ["Agente", "Identifica la causa raíz y delimita el radio de impacto (solo lectura)"], ["Usuario", "Autoriza la intervención y dispara /znve-hotfix"], ["Agente", "Modifica un único TARGET_FILE e incluye test de regresión"], ["Terminal", "Corre el test de regresión (100 % verde) antes de desplegar"]]},
+    {"title_es": "Flujo C: Rescate de monolito legacy (Modo 5 - Legacy Rescue)", "steps": [["Usuario", "Ejecuta /znve-forensic sobre el archivo monolítico (Zero-Touch)"], ["Agente", "Emite el reporte forense con contratos implícitos y zonas rojas"], ["Usuario", "Ejecuta /znve-harness"], ["Agente", "Despliega la suite Golden Master en tests/characterization/ (legacy intacto)"], ["Usuario", "Verifica que el test sobre el código original quede 100 % verde"], ["Usuario", "Ejecuta /znve-execute para el nuevo módulo en sandbox"], ["Agente", "Ejecuta en sombra validando Salida(Nuevo) == Salida(Legacy)"], ["Usuario", "Despliega el módulo nuevo gradualmente con Strangler Fig"]]}
+  ],
+
+  "targets": [
+    {"template": "claude_skill.md.tmpl", "output": "protocols/agents/claude/skills/znve/SKILL.md"},
+    {"template": "chameleon_layer.md.tmpl", "output": "protocols/agents/claude/skills/znve/references/chameleon-layer.md", "catalog": false},
+    {"template": "claude_project.md.tmpl", "output": "protocols/agents/claude-system-skills.md"},
+    {"template": "copilot_instructions.md.tmpl", "output": ".github/copilot-instructions.md"},
+    {"template": "copilot_instructions.md.tmpl", "output": "copilot-instructions.md"},
+    {"template": "copilot_instructions.md.tmpl", "output": "protocols/agents/copilot-instrucctions.md"},
+    {"template": "cursor_rules.md.tmpl", "output": "protocols/agents/cursor-rules.md"},
+    {"template": "deepseek_directive.md.tmpl", "output": "protocols/agents/deepseek-directive.md"},
+    {"template": "ollama_modelfile.tmpl", "output": "protocols/agents/ollama/Modelfile"},
+    {"template": "openrouter_system.md.tmpl", "output": "protocols/agents/openrouter/system-prompt.md"},
+    {"template": "antigravity_skill.md.tmpl", "output": "protocols/Antigravity/Skills/SKILL.md"},
+    {"template": "commands_manual.md.tmpl", "output": "protocols/COMMANDS.md"},
+    {"template": "antigravity_install.md.tmpl", "output": "protocols/Antigravity/Skills/INSTALL_ANTIGRAVITY.md", "catalog": false},
+    {"template": "antigravity_workspace.json.tmpl", "output": "protocols/Antigravity/Skills/.antigravity/antigravity.json", "catalog": false}
+  ],
+
+  "regions": [
+    {"output": "protocols/Antigravity/Skills/znve_skill.py", "block": "antigravity_py_constants"},
+    {"output": "protocols/mcp/znve-mcp-server.ts", "block": "mcp_ts_header"},
+    {"output": "protocols/mcp/znve-mcp-server.ts", "block": "mcp_ts_help_fallback", "name": "fallback"},
+    {"output": "README.md", "block": "readme_commands_md"},
+    {"output": "SPECIFICATION.md", "block": "spec_commands_md"},
+    {"output": "index.html", "block": "index_commands_html"}
+  ],
+
+  "mirrors": [
+    {"source": "protocols/Antigravity/Skills/znve_skill.py", "output": "protocols/Antigravity/Skills/.antigravity/skills/znve/znve_skill.py"}
+  ],
+
+  "bundles": [
+    {"output": "protocols/agents/claude/skills/znve.zip", "root": "protocols/agents/claude/skills", "folder": "znve"}
+  ]
+}

@@ -1,0 +1,52 @@
+# Instalación del Skill ZNVE en Antigravity
+
+{{generated_md}}
+
+Este documento explica cómo integrar el Skill **Zero-Noise Vibe Engineering (ZNVE v{{version}})** en Google Antigravity, por proyecto o de forma global.
+
+---
+
+## 1. Requisitos previos
+
+- Python 3.10 o superior.
+- Para usar la skill desde el SDK, el paquete de Antigravity en el entorno virtual activo:
+
+```bash
+pip install google-antigravity
+```
+
+## 2. Instalación en un proyecto (SDK)
+
+Desde la raíz del proyecto:
+
+```bash
+python <ruta>/znve-spec/protocols/Antigravity/Skills/Auto_Installer.py
+```
+
+- Copia `znve_skill.py` a `.antigravity/skills/znve/` y crea su `__init__.py`.
+- Registra la skill `{{name}}` (v{{version}}) en `.antigravity/antigravity.json` y retira el registro antiguo `zero_noise_vibe_engineering` si existe.
+- Si `antigravity.json` no es JSON válido, se detiene sin sobrescribirlo.
+
+## 3. Instalación global (Antigravity IDE)
+
+```bash
+python <ruta>/znve-spec/protocols/Antigravity/Skills/install_znve_global.py
+```
+
+- Copia `SKILL.md` a `~/.gemini/antigravity/skills/znve/`.
+- Registra el workflow `/znve-help` en `~/.gemini/config/global_workflows/`.
+- Escribe la regla ZNVE en `~/.gemini/GEMINI.md`. Si ya hay una de una versión anterior, la sustituye en lugar de añadir otra.
+
+## 4. Verificación
+
+1. Recarga la ventana de Antigravity IDE.
+2. Escribe `/skills`: debe aparecer `{{name}}`.
+3. Escribe `/znve-help`: debe imprimir el catálogo de ZNVE v{{version}}.
+
+## 5. Mantenimiento
+
+`SKILL.md`, este documento y el bloque de constantes de `znve_skill.py` los genera `znve-auto/builder.py` desde `znve-auto/master_spec.json`. Para cambiar un comando o la versión, edita la especificación y ejecuta:
+
+```bash
+python znve-auto/builder.py
+```

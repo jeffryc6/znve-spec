@@ -1,0 +1,48 @@
+# Manual de comandos y herramientas ZNVE v{{version}}
+
+{{generated_md}}
+
+> **Axioma 1:** "{{axiom_1_es}}"
+> **Axioma 2:** "{{axiom_2_es}}"
+
+Este documento recopila el catálogo maestro de comandos agénticos (`/znve-*`), las herramientas MCP (`znve_*`) y la forma de activarlos en cada asistente bajo el estándar Zero-Noise Vibe Engineering (ZNVE).
+
+---
+
+## 🧭 TABLA DE REFERENCIA RÁPIDA
+
+{{quick_reference_table_md}}
+
+---
+
+## 🎛️ SECCIÓN 1: COMANDOS DE BARRA (`/znve-*`) PARA ASISTENTES Y AGENTES
+
+Los comandos de barra son palabras clave que instruyen al modelo a adoptar un rol técnico cerrado, restringir su generación e imponer un formato de salida estándar. Formas de invocación equivalentes:
+
+{{invocation_md}}
+
+Sin comando, toda respuesta técnica sigue los 4 bloques: {{default_format_short}}.
+
+{{commands_manual_md}}
+
+---
+
+## 🛠️ SECCIÓN 2: HERRAMIENTAS MCP (`znve_*`) PARA AGENTES AUTÓNOMOS
+
+El servidor `protocols/mcp/znve-mcp-server.ts` expone estas herramientas por JSON-RPC (stdio). Las rutas se resuelven contra la variable `ZNVE_WORKSPACE`.
+
+{{mcp_tools_md}}
+
+---
+
+## 💻 SECCIÓN 3: CONFIGURACIÓN POR HERRAMIENTA E IA
+
+{{integrations_md}}
+
+---
+
+## 🔄 SECCIÓN 4: MODOS OPERATIVOS Y FLUJOS PASO A PASO
+
+{{modes_list_md}}
+
+{{workflows_md}}
