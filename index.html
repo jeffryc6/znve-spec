@@ -1033,8 +1033,8 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
             <h3 data-l="es">Skill global para Antigravity IDE</h3><h3 data-l="en" lang="en">Global skill for Antigravity IDE</h3>
             <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span>Python 3.10+</span></div>
 <pre id="cmd-ag"><code data-lang="sh">python znve-spec/protocols/Antigravity/Skills/install_znve_global.py</code></pre><button class="copy" data-copy="cmd-ag"></button></div>
-            <p class="muted" data-l="es">Instala la skill <code>znve</code>, el workflow <code>/znve-help</code> y la regla global en <code>~/.gemini</code>. Para un solo proyecto con el SDK: <code>Auto_Installer.py</code> desde la raíz del proyecto.</p>
-            <p class="muted" data-l="en" lang="en">Installs the <code>znve</code> skill, the <code>/znve-help</code> workflow and the global rule in <code>~/.gemini</code>. For a single project with the SDK: run <code>Auto_Installer.py</code> from the project root.</p>
+            <p class="muted" data-l="es">Instala la skill <code>znve</code> en <code>~/.gemini/config/skills/</code>, el workflow <code>/znve-help</code> y la regla global, y retira la copia antigua. Para un solo proyecto: <code>Auto_Installer.py</code> desde la raíz del proyecto (instala en <code>.agents/skills/znve/</code>).</p>
+            <p class="muted" data-l="en" lang="en">Installs the <code>znve</code> skill in <code>~/.gemini/config/skills/</code>, the <code>/znve-help</code> workflow and the global rule, and removes the old copy. For a single project: run <code>Auto_Installer.py</code> from the project root (installs into <code>.agents/skills/znve/</code>).</p>
           </div>
         </div>
       </div>
@@ -1064,11 +1064,11 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
       <div class="flow">
         <div class="step"><b>master_spec.json</b><small data-l="es">Versión, guardrails, modos y 10 comandos</small><small data-l="en" lang="en">Version, guardrails, modes and 10 commands</small></div>
         <div class="arrow">→</div>
-        <div class="step"><b>builder.py</b><small data-l="es">16 plantillas + bloques gestionados</small><small data-l="en" lang="en">16 templates + managed regions</small></div>
+        <div class="step"><b>builder.py</b><small data-l="es">15 plantillas + bloques gestionados</small><small data-l="en" lang="en">15 templates + managed regions</small></div>
         <div class="arrow">→</div>
         <div class="step"><b data-l="es">25 artefactos</b><b data-l="en" lang="en">25 artifacts</b><small data-l="es">Skills, directivas, manual, MCP, esta web</small><small data-l="en" lang="en">Skills, directives, manual, MCP, this site</small></div>
         <div class="arrow">→</div>
-        <div class="step"><b>test_sync.py</b><small data-l="es">19 pruebas de paridad</small><small data-l="en" lang="en">19 parity tests</small></div>
+        <div class="step"><b>test_sync.py</b><small data-l="es">20 pruebas de paridad</small><small data-l="en" lang="en">20 parity tests</small></div>
         <div class="arrow">→</div>
         <div class="step"><b>GitHub Actions</b><small data-l="es">Falla si algo se desvía</small><small data-l="en" lang="en">Fails on any drift</small></div>
       </div>

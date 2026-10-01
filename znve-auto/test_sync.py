@@ -207,12 +207,14 @@ class AntigravityPythonTests(unittest.TestCase):
         for c in self.spec["commands"]:
             self.assertIn(c["name"], self.skill.ZNVE_SYSTEM_INSTRUCTION)
 
-    def test_skill_fallback(self):
-        """Sin el SDK, get_znve_skill() devuelve la skill 'znve' con sus 6 herramientas."""
+    def test_skill_descriptor(self):
+        """get_znve_skill() describe la skill 'znve' con sus 6 herramientas sin importar el SDK."""
         skill = self.skill.get_znve_skill()
-        if isinstance(skill, dict):
-            self.assertEqual(skill["name"], "znve")
-            self.assertEqual(len(skill["tools"]), 6)
+        self.assertEqual(skill["name"], "znve")
+        self.assertEqual(skill["system_instructions"], self.skill.ZNVE_SYSTEM_INSTRUCTION)
+        self.assertEqual(len(skill["tools"]), 6)
+        for tool in skill["tools"]:
+            self.assertTrue(tool.__doc__, f"{tool.__name__} necesita docstring para el SDK")
 
     def test_no_legacy_skill_name(self):
         """Los artefactos de Antigravity usan 'znve', no el nombre largo antiguo."""
@@ -222,24 +224,45 @@ class AntigravityPythonTests(unittest.TestCase):
                 self.assertNotRegex(text, r"zero[-_]noise[-_]vibe[-_]engineering", rel)
 
     def test_workspace_installer_migrates(self):
-        """Auto_Installer copia la skill canónica y sustituye el registro antiguo."""
+        """Auto_Installer instala en .agents/skills/znve/ y retira la instalación de .antigravity/."""
         installer = load_module("znve_auto_installer", ANTIGRAVITY_DIR / "Auto_Installer.py")
         with tempfile.TemporaryDirectory() as tmp:
-            config = Path(tmp) / ".antigravity" / "antigravity.json"
-            config.parent.mkdir(parents=True)
-            config.write_text(json.dumps({"skills": {"zero_noise_vibe_engineering": {"protocol_version": "2.2.0"}}}), encoding="utf-8")
-            cwd = os.getcwd()
-            try:
-                os.chdir(tmp)
-                with contextlib.redirect_stdout(io.StringIO()):
-                    installer.run_installer()
-            finally:
-                os.chdir(cwd)
-            skills = json.loads(config.read_text(encoding="utf-8"))["skills"]
-            self.assertEqual(list(skills), ["znve"])
-            self.assertEqual(skills["znve"]["protocol_version"], self.spec["version"])
-            copied = Path(tmp) / ".antigravity" / "skills" / "znve" / "znve_skill.py"
-            self.assertEqual(copied.read_bytes(), (ANTIGRAVITY_DIR / "znve_skill.py").read_bytes())
+            root = Path(tmp)
+            legacy = root / ".antigravity"
+            (legacy / "skills" / "znve").mkdir(parents=True)
+            (legacy / "skills" / "znve" / "znve_skill.py").write_text("# antiguo\n", encoding="utf-8")
+            (legacy / "antigravity.json").write_text(json.dumps({"skills": {
+                "zero_noise_vibe_engineering": {"protocol_version": "2.2.0"},
+                "znve": {"protocol_version": "2.3.0"},
+                "otra": {"enabled": True},
+            }}), encoding="utf-8")
+            with contextlib.redirect_stdout(io.StringIO()):
+                target = installer.run_installer(root)
+
+            self.assertEqual(target, (root / ".agents" / "skills" / "znve").resolve())
+            self.assertEqual((target / "SKILL.md").read_bytes(), (ANTIGRAVITY_DIR / "SKILL.md").read_bytes())
+            self.assertEqual(
+                (target / "scripts" / "znve_skill.py").read_bytes(), (ANTIGRAVITY_DIR / "znve_skill.py").read_bytes()
+            )
+            self.assertFalse((legacy / "skills").exists())
+            skills = json.loads((legacy / "antigravity.json").read_text(encoding="utf-8"))["skills"]
+            self.assertEqual(list(skills), ["otra"])
+
+    def test_global_installer_paths(self):
+        """install_znve_global escribe en ~/.gemini/config/skills/znve y retira la copia legacy."""
+        installer = load_module("znve_global_installer_paths", ANTIGRAVITY_DIR / "install_znve_global.py")
+        with tempfile.TemporaryDirectory() as tmp:
+            home = Path(tmp)
+            legacy = home / ".gemini" / "antigravity" / "skills" / "znve"
+            legacy.mkdir(parents=True)
+            (legacy / "SKILL.md").write_text("---\nname: zero-noise-vibe-engineering\n---\n", encoding="utf-8")
+            with contextlib.redirect_stdout(io.StringIO()):
+                installer.install(home)
+            installed = home / ".gemini" / "config" / "skills" / "znve" / "SKILL.md"
+            self.assertEqual(installed.read_text(encoding="utf-8"), (ANTIGRAVITY_DIR / "SKILL.md").read_text(encoding="utf-8"))
+            self.assertFalse(legacy.exists())
+            self.assertTrue((home / ".gemini" / "config" / "global_workflows" / "znve-help.md").exists())
+            self.assertEqual((home / ".gemini" / "GEMINI.md").read_text(encoding="utf-8").count("znve:start"), 1)
 
     def test_global_rule_is_replaced(self):
         """install_znve_global sustituye la regla de GEMINI.md en vez de duplicarla."""

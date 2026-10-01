@@ -393,7 +393,6 @@
     {"template": "antigravity_skill.md.tmpl", "output": "protocols/Antigravity/Skills/SKILL.md"},
     {"template": "commands_manual.md.tmpl", "output": "protocols/COMMANDS.md"},
     {"template": "antigravity_install.md.tmpl", "output": "protocols/Antigravity/Skills/INSTALL_ANTIGRAVITY.md", "catalog": false},
-    {"template": "antigravity_workspace.json.tmpl", "output": "protocols/Antigravity/Skills/.antigravity/antigravity.json", "catalog": false},
     {"template": "gemini_skill.md.tmpl", "output": "protocols/agents/gemini/skills/znve/SKILL.md"},
     {"template": "chameleon_layer.md.tmpl", "output": "protocols/agents/gemini/skills/znve/references/chameleon-layer.md", "catalog": false},
     {"template": "gemini_install.md.tmpl", "output": "protocols/agents/gemini/INSTALL_GEMINI.md"}
@@ -409,7 +408,8 @@
   ],
 
   "mirrors": [
-    {"source": "protocols/Antigravity/Skills/znve_skill.py", "output": "protocols/Antigravity/Skills/.antigravity/skills/znve/znve_skill.py"}
+    {"source": "protocols/Antigravity/Skills/SKILL.md", "output": "protocols/Antigravity/Skills/.agents/skills/znve/SKILL.md"},
+    {"source": "protocols/Antigravity/Skills/znve_skill.py", "output": "protocols/Antigravity/Skills/.agents/skills/znve/scripts/znve_skill.py"}
   ],
 
   "bundles": [

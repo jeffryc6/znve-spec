@@ -12,6 +12,7 @@ El contenido sale de dos archivos generados por znve-auto/builder.py:
 """
 
 import re
+import shutil
 import sys
 from pathlib import Path
 
@@ -58,22 +59,37 @@ def upsert_rule(current: str) -> str:
     return f"{current}{separator}\n{GLOBAL_RULE_MD}"
 
 
-def install():
+def remove_legacy_skill(legacy_dir: Path) -> None:
+    """Retira la copia en la ruta legacy para que no compita con la actual."""
+    if not legacy_dir.is_dir():
+        return
+    extra = [p.name for p in legacy_dir.iterdir() if p.name != "SKILL.md"]
+    if extra:
+        print(f"[!] {legacy_dir} contiene archivos ajenos ({', '.join(extra)}); revísalo y bórralo a mano.")
+        return
+    shutil.rmtree(legacy_dir)
+    print(f"[ok] Copia antigua eliminada: {legacy_dir}")
+
+
+def install(home: Path | None = None) -> None:
     if not SKILL_MD.exists():
         raise SystemExit(f"[!] Falta {SKILL_MD}. Genera los artefactos con: python znve-auto/builder.py")
 
-    home = Path.home()
-    global_skills_dir = home / ".gemini" / "antigravity" / "skills" / "znve"
+    home = home or Path.home()
+    # Ruta global actual de Antigravity (IDE y 2.0); ~/.gemini/antigravity/skills/ queda como legacy.
+    global_skills_dir = home / ".gemini" / "config" / "skills" / ZNVE_NAME
+    legacy_skills_dir = home / ".gemini" / "antigravity" / "skills" / ZNVE_NAME
     global_workflows_dir = home / ".gemini" / "config" / "global_workflows"
     global_gemini_rule = home / ".gemini" / "GEMINI.md"
 
-    print(f"[*] Configurando Antigravity IDE de forma global (ZNVE v{ZNVE_VERSION})...")
+    print(f"[*] Configurando Antigravity de forma global (ZNVE v{ZNVE_VERSION})...")
 
     # A. Skill global
     global_skills_dir.mkdir(parents=True, exist_ok=True)
     skill_file = global_skills_dir / "SKILL.md"
     skill_file.write_text(SKILL_MD.read_text(encoding="utf-8"), encoding="utf-8")
     print(f"[ok] Skill global instalada en: {skill_file}")
+    remove_legacy_skill(legacy_skills_dir)
 
     # B. Workflow global (/znve-help)
     global_workflows_dir.mkdir(parents=True, exist_ok=True)

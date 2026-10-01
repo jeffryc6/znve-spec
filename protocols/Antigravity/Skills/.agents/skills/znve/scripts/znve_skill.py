@@ -3,7 +3,8 @@ ZNVE (Zero-Noise Vibe Engineering) Skill for Google Antigravity SDK.
 Axiom 1: "Heavy intelligence in the design; near-zero footprint in execution."
 Axiom 2: "AI does not invent architecture; it executes deterministic contracts."
 
-Módulo autocontenido: Auto_Installer.py lo copia tal cual a cada workspace.
+Módulo autocontenido: Auto_Installer.py lo copia tal cual a .agents/skills/znve/scripts/
+de cada workspace.
 El bloque entre los marcadores znve:generated lo escribe znve-auto/builder.py
 desde znve-auto/master_spec.json; el resto se mantiene a mano.
 """
@@ -296,42 +297,40 @@ def znve_audit_resources(code_snippet: str) -> Dict[str, Any]:
 # INTEGRACIÓN CON ANTIGRAVITY SDK
 # ==============================================================================
 
-def get_znve_skill():
-    """
-    Empaqueta el skill y las herramientas para ser registradas en un Agente Antigravity.
-    Compatible con google.antigravity.types y Skill definitions del SDK.
-    """
-    try:
-        # Intentar importación nativa del SDK de Antigravity si está instalado
-        from google.antigravity import Skill, Tool  # type: ignore
+# El SDK convierte en herramientas las funciones Python a partir de sus type hints y docstrings.
+ZNVE_TOOLS = [
+    znve_help,
+    znve_forensic_scan,
+    znve_validate_contract,
+    znve_scaffold_harness,
+    znve_surgical_write,
+    znve_audit_resources,
+]
 
-        tools = [
-            Tool.from_callable(znve_help),
-            Tool.from_callable(znve_forensic_scan),
-            Tool.from_callable(znve_validate_contract),
-            Tool.from_callable(znve_scaffold_harness),
-            Tool.from_surgical(znve_surgical_write) if hasattr(Tool, "from_surgical") else Tool.from_callable(znve_surgical_write),
-            Tool.from_callable(znve_audit_resources),
-        ]
 
-        return Skill(
-            name=ZNVE_NAME,
-            description=f"Aplica el protocolo ZNVE v{ZNVE_VERSION} para arquitectura basada en contratos, rescate legacy, auditoría de recursos y generación quirúrgica.",
-            system_instruction=ZNVE_SYSTEM_INSTRUCTION,
-            tools=tools
-        )
-    except (ImportError, AttributeError):
-        # Modo compatible desacoplado (Diccionario canónico si el SDK aún no se importa)
-        return {
-            "name": ZNVE_NAME,
-            "version": ZNVE_VERSION,
-            "system_instruction": ZNVE_SYSTEM_INSTRUCTION,
-            "tools": [
-                znve_help,
-                znve_forensic_scan,
-                znve_validate_contract,
-                znve_scaffold_harness,
-                znve_surgical_write,
-                znve_audit_resources
-            ]
-        }
+def get_znve_skill() -> Dict[str, Any]:
+    """
+    Describe la skill sin depender del SDK: nombre, versión, instrucción de sistema
+    y las 6 funciones que actúan como herramientas.
+    """
+    return {
+        "name": ZNVE_NAME,
+        "version": ZNVE_VERSION,
+        "system_instructions": ZNVE_SYSTEM_INSTRUCTION,
+        "tools": list(ZNVE_TOOLS),
+    }
+
+
+def get_znve_config(**overrides: Any):
+    """
+    Devuelve un LocalAgentConfig del Antigravity SDK con la instrucción de sistema ZNVE
+    y sus 6 herramientas. Los argumentos extra (api_key, mcp_servers, policies...) se
+    pasan tal cual a LocalAgentConfig.
+    """
+    from google.antigravity import LocalAgentConfig
+
+    return LocalAgentConfig(
+        system_instructions=ZNVE_SYSTEM_INSTRUCTION,
+        tools=list(ZNVE_TOOLS),
+        **overrides,
+    )

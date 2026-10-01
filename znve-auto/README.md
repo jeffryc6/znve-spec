@@ -46,7 +46,6 @@ No edites los archivos generados: llevan un aviso en la cabecera y el CI falla s
 | `antigravity_skill.md.tmpl` | `protocols/Antigravity/Skills/SKILL.md` |
 | `commands_manual.md.tmpl` | `protocols/COMMANDS.md` (manual que sirve `znve_help` del MCP) |
 | `antigravity_install.md.tmpl` | `protocols/Antigravity/Skills/INSTALL_ANTIGRAVITY.md` |
-| `antigravity_workspace.json.tmpl` | `protocols/Antigravity/Skills/.antigravity/antigravity.json` |
 | `gemini_skill.md.tmpl` | `protocols/agents/gemini/skills/znve/SKILL.md` (app de Gemini y Gemini CLI) |
 | `chameleon_layer.md.tmpl` | `protocols/agents/gemini/skills/znve/references/chameleon-layer.md` |
 | `gemini_install.md.tmpl` | `protocols/agents/gemini/INSTALL_GEMINI.md` |
@@ -54,7 +53,7 @@ No edites los archivos generados: llevan un aviso en la cabecera y el CI falla s
 Además de las plantillas hay dos tipos de artefacto:
 
 - **Bloques gestionados (`regions`).** En `protocols/Antigravity/Skills/znve_skill.py`, el builder solo reescribe lo que hay entre `# >>> znve:generated` y `# <<< znve:generated`: nombre, versión, instrucción de sistema, catálogo de `/znve-help` y modos. El resto del módulo (las herramientas) se mantiene a mano. `Auto_Installer.py` e `install_znve_global.py` importan esas constantes, así que no llevan copias propias. En `protocols/mcp/znve-mcp-server.ts` el bloque es la cabecera (versión de ZNVE y axiomas), dentro del comentario `/** ... */`.
-- **Copias (`mirrors`).** `.antigravity/skills/znve/znve_skill.py` es una copia exacta del módulo canónico, igual a la que deja `Auto_Installer.py` en cada proyecto.
+- **Copias (`mirrors`).** `protocols/Antigravity/Skills/.agents/skills/znve/` contiene `SKILL.md` y `scripts/znve_skill.py`, copias exactas de los originales: es el mismo árbol que deja `Auto_Installer.py` en cada proyecto.
 
 Las plantillas que empiezan por `_` son fragmentos compartidos: se incluyen con `{{> _nombre.md.tmpl}}`. Los bloques calculados desde la especificación se insertan con `{{clave}}`; la lista completa está en `build_context()` de `builder.py`.
 
@@ -67,6 +66,6 @@ Las plantillas que empiezan por `_` son fragmentos compartidos: se incluyen con 
 - Que las skills de Claude y Gemini cumplan las reglas de subida (claves del frontmatter, nombre en minúsculas con guiones, descripción de hasta 1024 caracteres) y que sus enlaces a `references/` apunten a archivos generados.
 - Que las herramientas MCP documentadas sean las que expone `protocols/mcp/znve-mcp-server.ts` y que `protocols/COMMANDS.md` conserve las secciones que filtra `znve_help`.
 - Que el enum de escenarios de `protocols/agents/openrouter/response-schema.json` coincida con la especificación.
-- Que `znve_skill.py` exponga la versión y el catálogo de la especificación, que la skill se llame `znve` y tenga 6 herramientas, que `Auto_Installer.py` sustituya el registro antiguo `zero_noise_vibe_engineering` y que `install_znve_global.py` reemplace la regla de `GEMINI.md` sin duplicarla.
+- Que `znve_skill.py` exponga la versión y el catálogo de la especificación, que la skill se llame `znve` y tenga 6 herramientas, que `get_znve_skill()` entregue las 6 herramientas con docstring, que `Auto_Installer.py` instale en `.agents/skills/znve/` y retire la instalación de `.antigravity/`, que `install_znve_global.py` instale en `~/.gemini/config/skills/znve/` y retire la copia legacy, y que reemplace la regla de `GEMINI.md` sin duplicarla.
 
 Al final avisa, sin fallar, de los archivos mantenidos a mano que citan otra versión de ZNVE.
