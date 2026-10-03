@@ -1,0 +1,3 @@
+# Cachés de Python (cualquier carpeta)
+__pycache__/
+*.py[cod]

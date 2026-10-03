@@ -1,0 +1,6 @@
+# Todo el texto del repositorio usa LF, también en checkouts de Windows (core.autocrlf).
+# znve-auto/builder.py genera los artefactos con LF y el CI compara byte a byte.
+* text=auto eol=lf
+
+# Binarios: sin conversión de finales de línea ni diff de texto.
+*.zip binary
