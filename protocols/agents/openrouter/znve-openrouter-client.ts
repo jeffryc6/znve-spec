@@ -88,5 +88,12 @@ export async function executeZnveTask({
     throw new Error("[ZNVE_OR_EMPTY] No se recibió contenido del proveedor.");
   }
 
-  return structured ? JSON.parse(output) : output;
+  if (!structured) return output;
+  try {
+    return JSON.parse(output);
+  } catch (err) {
+    throw new Error(`[ZNVE_OR_SCHEMA] La respuesta no es JSON válido para znve_execution_envelope: ${(err as Error).message}`, {
+      cause: err,
+    });
+  }
 }

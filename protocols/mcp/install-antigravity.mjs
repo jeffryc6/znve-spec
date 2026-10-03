@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 const HERE = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(HERE, "../..");
 const SERVER_JS = path.join(HERE, "dist", "znve-mcp-server.js");
-const EXPECTED_TOOLS = 6;
+const SPEC_PATH = path.join(REPO_ROOT, "znve-auto", "master_spec.json");
 
 // Rutas conocidas del config de Antigravity (la primera existente gana; la última es la documentada por defecto).
 const CONFIG_CANDIDATES = [
@@ -62,6 +62,15 @@ function run(command) {
   // Cadena única + shell: npm es npm.cmd en Windows y no se puede lanzar sin shell.
   const res = spawnSync(command, { cwd: HERE, stdio: "inherit", shell: true });
   if (res.status !== 0) fail(`'${command}' terminó con código ${res.status}`);
+}
+
+// Las herramientas que debe exponer el servidor salen de la fuente única de verdad.
+function expectedTools() {
+  try {
+    return JSON.parse(fs.readFileSync(SPEC_PATH, "utf-8")).mcp.tools.map((t) => t.name).sort();
+  } catch (err) {
+    fail(`No se pudo leer la lista de herramientas de ${SPEC_PATH} (${err.message}).`);
+  }
 }
 
 function resolveConfigPath(explicit) {
@@ -110,9 +119,13 @@ function smokeTest(workspace) {
     });
     let buffer = "";
     let stderr = "";
+    let done = false;
     const timer = setTimeout(() => finish(new Error(`timeout sin respuesta a tools/list. stderr:\n${stderr}`)), 15000);
 
+    // Solo cuenta el primer desenlace: el 'exit' que provoca child.kill() llega después y se ignora.
     function finish(err, value) {
+      if (done) return;
+      done = true;
       clearTimeout(timer);
       child.kill();
       err ? reject(err) : resolve(value);
@@ -134,6 +147,9 @@ function smokeTest(workspace) {
           msg = JSON.parse(line);
         } catch {
           return finish(new Error(`stdout contaminado con texto no JSON-RPC: ${line}`));
+        }
+        if (msg.error) {
+          return finish(new Error(`el servidor respondió con error a la petición ${msg.id}: ${JSON.stringify(msg.error)}`));
         }
         if (msg.id === 1) {
           send({ method: "notifications/initialized" });
@@ -176,7 +192,10 @@ async function main() {
 
   log("Verificando handshake MCP (initialize + tools/list)...");
   const tools = await smokeTest(opts.workspace).catch((err) => fail(`Smoke test fallido: ${err.message}`));
-  if (tools.length < EXPECTED_TOOLS) fail(`Se esperaban ${EXPECTED_TOOLS} herramientas y el servidor expone ${tools.length}: ${tools.join(", ")}`);
+  const expected = expectedTools();
+  if (JSON.stringify([...tools].sort()) !== JSON.stringify(expected)) {
+    fail(`El servidor expone [${tools.join(", ")}] y la especificación declara [${expected.join(", ")}].`);
+  }
   log(`OK: ${tools.length} herramientas -> ${tools.join(", ")}`);
 
   const json = readConfig(configPath);

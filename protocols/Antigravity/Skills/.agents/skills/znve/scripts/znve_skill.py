@@ -9,7 +9,10 @@ El bloque entre los marcadores znve:generated lo escribe znve-auto/builder.py
 desde znve-auto/master_spec.json; el resto se mantiene a mano.
 """
 
+import os
 import re
+import shutil
+import tempfile
 from pathlib import Path
 from typing import Dict, Any, List, Optional
 
@@ -50,7 +53,7 @@ ESCENARIO 4: MANTENIMIENTO MODERNO Y UPGRADES
 ESCENARIO 5: RESCATE DE MONOLITOS LEGACY
 - `/znve-forensic`: Solo lectura estricta. No propongas código de reemplazo ni dependencias. Salida: 1) RESUMEN DE DOMINIO; 2) MATRIZ DE ENTRADAS, SALIDAS Y ESTADO; 3) EFECTOS SECUNDARIOS; 4) EQUILIBRIOS ACCIDENTALES; 5) ZONAS ROJAS.
 - `/znve-harness`: El archivo de producción no se modifica. El arnés vive aislado (`tests/characterization/` o `sandbox/`). Salida: 1) CONFIGURACIÓN DE AISLAMIENTO; 2) BATERÍA DE INYECCIÓN; 3) SNAPSHOTS GOLDEN MASTER; 4) COMANDO DE EJECUCIÓN.
-- `/znve-legacy-rescue`: Orquesta el rescate de punta a punta y no avances de fase sin que la anterior esté verificada. En la primera respuesta entrega solo el reporte forense (fases 1 y 2) y el diseño del arnés (fase 3). Fases: Ingesta y reporte forense -> Golden Master -> Shadow Run -> Strangler Fig.
+- `/znve-legacy-rescue`: Orquesta el rescate de punta a punta y no avances de fase sin que la anterior esté verificada. En la primera respuesta entrega solo el reporte forense (fases 1 y 2) y el diseño del arnés (fase 3). Fases: Ingesta pasiva -> Reporte forense -> Golden Master -> Shadow Run -> Strangler Fig.
 
 ESCENARIO 6: AUDITORÍA Y HARDENING
 - `/znve-audit`: SOLO LECTURA. Nada de parches cosméticos ni retardos arbitrarios; ataca la causa raíz y entrega la hoja de remediación para aprobación. Salida: 1) CONCURRENCIA E HILOS; 2) SUPERFICIE DE RED Y SEGURIDAD; 3) CICLO DE VIDA Y RECURSOS; 4) HOJA DE REMEDIACIÓN.
@@ -93,6 +96,129 @@ ZNVE_DEFAULT_FORMAT_SHORT = '[1] Blueprint y Contrato -> [2] Racional -> [3] Tar
 
 
 # ==============================================================================
+# CONTENCIÓN DE RUTAS
+# ==============================================================================
+
+# Únicos directorios (primer segmento bajo el workspace) donde znve_scaffold_harness puede escribir.
+HARNESS_ROOTS = ("tests", "sandbox")
+
+
+def _workspace_root() -> Path:
+    """Raíz contra la que se resuelven las rutas: ZNVE_WORKSPACE o, si no está definida, el cwd."""
+    return Path(os.environ.get("ZNVE_WORKSPACE") or os.getcwd()).resolve()
+
+
+def _is_inside(root: Path, target: Path) -> bool:
+    return target == root or root in target.parents
+
+
+def _resolve_in_workspace(raw: str) -> Path:
+    """Ruta dentro del workspace; ValueError si escapa, también a través de enlaces o junctions."""
+    root = _workspace_root()
+    candidate = Path(os.path.abspath(root / raw))
+    if not _is_inside(root, candidate) or not _is_inside(root, candidate.resolve()):
+        raise ValueError(f"'{raw}' queda fuera de ZNVE_WORKSPACE.")
+    return candidate
+
+
+def _rejected(message: str) -> Dict[str, Any]:
+    return {"status": "REJECTED", "message": message}
+
+
+# Directorios en los que ninguna herramienta escribe, a cualquier profundidad.
+PROTECTED_DIRS = (".git", "node_modules")
+MAX_SCAN_BYTES = 1024 * 1024
+
+
+def _write_denied(destination: Path) -> Optional[str]:
+    """Motivo de rechazo si la ruta (pedida o real) cae dentro de un directorio protegido."""
+    root = _workspace_root()
+    for path in (destination, destination.resolve()):
+        blocked = next((p for p in path.relative_to(root).parts if p.lower() in PROTECTED_DIRS), None)
+        if blocked:
+            return f"Escritura denegada dentro de '{blocked}/': '{destination.relative_to(root)}'."
+    return None
+
+
+def _atomic_write(destination: Path, content: str) -> None:
+    """Temporal en el mismo directorio + os.replace: el archivo nunca queda a medio escribir."""
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp = tempfile.mkstemp(prefix=f".{destination.name}.", suffix=".znve-tmp", dir=destination.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as fh:
+            fh.write(content)
+        if destination.exists():
+            shutil.copymode(destination, temp)
+        os.replace(temp, destination)
+    except BaseException:
+        Path(temp).unlink(missing_ok=True)
+        raise
+
+
+# ==============================================================================
+# DETECTORES (misma semántica que protocols/mcp/znve-mcp-server.ts)
+# ==============================================================================
+
+# catch vacío o con solo comentarios (con o sin binding) y .catch(() => {}) de promesas.
+_SILENT_CATCH = (
+    re.compile(r"\bcatch\s*(?:\([^)]*\))?\s*\{(?:\s|//[^\n]*|/\*[\s\S]*?\*/)*\}"),
+    re.compile(r"\.catch\(\s*(?:\(\s*\w*\s*\)|\w+)\s*=>\s*\{(?:\s|//[^\n]*|/\*[\s\S]*?\*/)*\}\s*\)"),
+)
+_EXCEPT = re.compile(r"^([ \t]*)except\b[^:]*:(.*)$")
+_BLIND_QUERY = (re.compile(r"\bselect\s+\*", re.IGNORECASE), re.compile(r"\.find\(\s*\{\s*\}\s*\)"))
+_BLOCKING_TASK = re.compile(r"\.Result\b(?!\s*\()|\.Wait\s*\(|\.GetAwaiter\(\)\s*\.GetResult\(\)")
+_WAKELOCK = re.compile(r"wakelock\w*\.acquire\s*\(", re.IGNORECASE)
+_BUSY_WAIT = re.compile(r"\bThread\.sleep\b|while\s*\(\s*true\s*\)\s*\{\s*\}|while\s+True\s*:\s*pass\b")
+_DB_MUTATION = re.compile(
+    r"\b(?:INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|MERGE\s+INTO|DROP\s+TABLE|TRUNCATE\s+TABLE)\b"
+    r"|\.(?:insert|update|delete|replace)(?:One|Many)\s*\(|\.bulkWrite\s*\(",
+    re.IGNORECASE,
+)
+
+
+def _silent_error_blocks(code: str) -> int:
+    """Número de catch/except que solo descartan el error."""
+    count = sum(len(pattern.findall(code)) for pattern in _SILENT_CATCH)
+    lines = code.splitlines()
+    for i, line in enumerate(lines):
+        match = _EXCEPT.match(line)
+        if not match:
+            continue
+        inline = re.sub(r"#.*$", "", match.group(2)).strip()
+        body = [inline] if inline else []
+        for following in ([] if inline else lines[i + 1:]):
+            statement = re.sub(r"#.*$", "", following)
+            if not statement.strip():
+                continue
+            if len(following) - len(following.lstrip()) <= len(match.group(1)):
+                break
+            body.append(statement.strip())
+        if body and all(s in ("pass", "...") for s in body):
+            count += 1
+    return count
+
+
+def _imports_library(code: str, lib: str) -> bool:
+    """True si el código importa la librería (JS/TS, Python, C#). Coincidencia por módulo, no por substring."""
+    name = re.escape(lib)
+    sub = r"(?:[/.][\w.\-/]*)?"
+    patterns = (
+        rf"\bimport\s+(?:[^'\";]*?\bfrom\s*)?['\"]{name}{sub}['\"]",
+        rf"\b(?:require|import)\s*\(\s*['\"]{name}{sub}['\"]\s*\)",
+        rf"^\s*import\s+{name}(?:\.[\w.]*)?\s*(?:[,;]|\bas\b|$)",
+        rf"^\s*from\s+{name}(?:\.[\w.]*)?\s+import\b",
+        rf"^\s*using\s+(?:static\s+)?{name}(?:\.[\w.]*)?\s*;",
+    )
+    return any(re.search(p, code, re.IGNORECASE | re.MULTILINE) for p in patterns)
+
+
+def _busy_waits(code: str) -> bool:
+    return bool(_BUSY_WAIT.search(code)) or (
+        bool(re.search(r"\bsetTimeout\b", code)) and bool(re.search(r"\bwhile\b", code))
+    )
+
+
+# ==============================================================================
 # HERRAMIENTAS DETERMINISTAS (TOOLKIT ZNVE)
 # ==============================================================================
 
@@ -114,32 +240,41 @@ def znve_help(topic: str = "all") -> str:
 
 def znve_forensic_scan(file_path: str) -> Dict[str, Any]:
     """
-    Inspección estricta de solo lectura (Zero-Touch) de un archivo para extraer
-    su grafo de dependencias, efectos secundarios y zonas rojas sin alterar el disco.
+    Inspección estricta de solo lectura (Zero-Touch) de un archivo de texto para extraer
+    sus efectos secundarios y zonas rojas sin alterar el disco. Rechaza directorios,
+    binarios y archivos de más de 1 MiB.
 
     Args:
-        file_path: Ruta relativa o absoluta del archivo a inspeccionar.
+        file_path: Ruta del archivo, relativa a ZNVE_WORKSPACE (o al cwd) o absoluta dentro de él.
     """
-    target = Path(file_path)
-    if not target.exists() or not target.is_file():
-        return {
-            "status": "ERROR",
-            "message": f"El archivo '{file_path}' no existe o no es accesible."
-        }
+    try:
+        target = _resolve_in_workspace(file_path)
+    except ValueError as exc:
+        return _rejected(str(exc))
+    if not target.exists():
+        return {"status": "ERROR", "message": f"No existe '{file_path}' en ZNVE_WORKSPACE."}
+    if not target.is_file():
+        return _rejected(f"'{file_path}' no es un archivo.")
+    size = target.stat().st_size
+    if size > MAX_SCAN_BYTES:
+        return _rejected(f"'{file_path}' pesa {size} bytes y supera el tope de {MAX_SCAN_BYTES} bytes.")
 
     try:
-        content = target.read_text(encoding="utf-8", errors="replace")
-    except Exception as exc:
-        return {"status": "ERROR", "message": f"Fallo de lectura: {str(exc)}"}
+        raw = target.read_bytes()
+    except OSError as exc:
+        return {"status": "ERROR", "message": f"Fallo de lectura: {exc}"}
+    if b"\x00" in raw:
+        return _rejected(f"'{file_path}' es binario; znve_forensic_scan solo lee texto.")
+    content = raw.decode("utf-8", errors="replace")
 
     # Detección determinista de efectos secundarios
     has_fs = bool(re.search(r"\b(open|readFile|writeFile|fs\.|std::fs|Path\.)", content))
     has_net = bool(re.search(r"\b(fetch|http|socket|requests|urllib|curl)", content, re.IGNORECASE))
-    has_db = bool(re.search(r"\b(SELECT|INSERT|UPDATE|DELETE|find|aggregate|db\.)", content, re.IGNORECASE))
+    has_db = bool(_DB_MUTATION.search(content))
 
     # Detección de zonas rojas operativas
-    empty_catches = len(re.findall(r"except\s*:\s*(?:pass|\.\.\.)|catch\s*\([^)]*\)\s*\{\s*\}", content))
-    blocking_calls = len(re.findall(r"(\.Result|\.Wait\(\)|Thread\.sleep|time\.sleep)", content))
+    empty_catches = _silent_error_blocks(content)
+    blocking_calls = len(_BLOCKING_TASK.findall(content)) + len(re.findall(r"\b(?:Thread|time)\.sleep\b", content))
 
     return {
         "status": "SUCCESS",
@@ -171,13 +306,13 @@ def znve_validate_contract(contract_code: str, banned_libraries: Optional[List[s
     banned = banned_libraries or ["lodash", "axios", "moment", "requests", "jquery"]
 
     for lib in banned:
-        if re.search(rf"\b(import|require|using|from)\s+['\"].*{re.escape(lib)}.*['\"]", contract_code):
+        if _imports_library(contract_code, lib):
             violations.append(f"Anti-Bloat Fence: Librería externa prohibida '{lib}' detectada.")
 
-    if re.search(r"SELECT\s+\*\s+FROM", contract_code, re.IGNORECASE):
+    if _BLIND_QUERY[0].search(contract_code):
         violations.append("Cláusula 2.4: Prohibida la consulta ciega 'SELECT *'. Debe proyectar campos específicos.")
 
-    if re.search(r"\.find\(\s*\{\s*\}\s*\)", contract_code):
+    if _BLIND_QUERY[1].search(contract_code):
         violations.append("Cláusula 2.4: Prohibido 'find({})' sin proyección ni filtros indexados.")
 
     if violations:
@@ -200,22 +335,30 @@ def znve_scaffold_harness(harness_directory: str, test_filename: str, harness_co
     asegurando que el código original de producción no sea modificado.
 
     Args:
-        harness_directory: Directorio de aislamiento (debe contener 'test', 'tests' o 'sandbox').
-        test_filename: Nombre del archivo de pruebas.
+        harness_directory: Directorio de aislamiento bajo 'tests/' o 'sandbox/' en la raíz del workspace.
+        test_filename: Nombre del archivo de pruebas, sin rutas.
         harness_code: Código del test de caja negra.
     """
-    normalized_dir = harness_directory.lower().replace("\\", "/")
-    if not any(token in normalized_dir for token in ["test", "tests", "sandbox", "characterization"]):
-        return {
-            "status": "REJECTED",
-            "message": "El arnés debe residir obligatoriamente en un directorio de aislamiento ('tests/', 'characterization/' o 'sandbox/')."
-        }
+    if test_filename != Path(test_filename).name or re.search(r"[\\/:]|^\.+$", test_filename):
+        return _rejected(f"'test_filename' debe ser un nombre de archivo sin rutas: '{test_filename}'.")
+    try:
+        target_path = _resolve_in_workspace(os.path.join(harness_directory, test_filename))
+    except ValueError as exc:
+        return _rejected(str(exc))
 
-    target_dir = Path(harness_directory)
-    target_dir.mkdir(parents=True, exist_ok=True)
-    target_path = target_dir / test_filename
+    # Se comprueba la ruta escrita y la real: un enlace dentro de tests/ tampoco puede salir de tests/.
+    root = _workspace_root()
+    for path in (target_path, target_path.resolve()):
+        parts = path.relative_to(root).parts
+        if len(parts) < 2 or parts[0].lower() not in HARNESS_ROOTS:
+            return _rejected(
+                "El arnés debe residir bajo 'tests/' o 'sandbox/' en la raíz de ZNVE_WORKSPACE."
+            )
+    denied = _write_denied(target_path)
+    if denied:
+        return _rejected(denied)
 
-    target_path.write_text(harness_code, encoding="utf-8")
+    _atomic_write(target_path, harness_code)
 
     return {
         "status": "SUCCESS",
@@ -227,10 +370,11 @@ def znve_scaffold_harness(harness_directory: str, test_filename: str, harness_co
 def znve_surgical_write(target_file: str, code_content: str, disposal_pattern: str) -> Dict[str, Any]:
     """
     Escribe el cambio en disco de forma atómica sobre un único TARGET_FILE, verificando
-    previamente la ausencia de bloques catch vacíos y la política de liberación de recursos.
+    previamente que ningún catch/except silencie errores y la política de liberación de recursos.
+    Rechaza rutas fuera de ZNVE_WORKSPACE o dentro de .git/ y node_modules/.
 
     Args:
-        target_file: Ruta exacta del único archivo modificado.
+        target_file: Ruta exacta del único archivo modificado, dentro de ZNVE_WORKSPACE (o del cwd).
         code_content: Código fuente que satisface el contrato aprobado.
         disposal_pattern: Mecanismo de desecho ('dispose', 'close', 'finally', 'autocloseable', 'not_applicable').
     """
@@ -242,7 +386,7 @@ def znve_surgical_write(target_file: str, code_content: str, disposal_pattern: s
         }
 
     # Prohibición de enmascaramiento de excepciones
-    if re.search(r"except\s*:\s*(?:pass|\.\.\.)|catch\s*\([^)]*\)\s*\{\s*\}", code_content):
+    if _silent_error_blocks(code_content):
         return {
             "status": "REJECTED",
             "message": "Cláusula 2.5: Prohibido escribir bloques catch/except vacíos que enmascaren fallos de fondo."
@@ -256,9 +400,14 @@ def znve_surgical_write(target_file: str, code_content: str, disposal_pattern: s
             "message": "Cláusula 2.3: Se detectó apertura de recursos I/O pero el disposal_pattern fue declarado como 'not_applicable'."
         }
 
-    destination = Path(target_file)
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    destination.write_text(code_content, encoding="utf-8")
+    try:
+        destination = _resolve_in_workspace(target_file)
+    except ValueError as exc:
+        return _rejected(str(exc))
+    denied = _write_denied(destination)
+    if denied:
+        return _rejected(denied)
+    _atomic_write(destination, code_content)
 
     return {
         "status": "SUCCESS",
@@ -277,13 +426,13 @@ def znve_audit_resources(code_snippet: str) -> Dict[str, Any]:
     """
     findings = []
 
-    if re.search(r"(\.Result|\.GetAwaiter\(\)\.GetResult\(\)|\.Wait\(\))", code_snippet):
+    if _BLOCKING_TASK.search(code_snippet):
         findings.append("Alerta Concurrencia: Bloqueo sincrónico del despachador de interfaz detectado (.Result / .Wait()).")
 
-    if re.search(r"\bWakeLock\.acquire\b", code_snippet):
+    if _WAKELOCK.search(code_snippet):
         findings.append("Alerta Batería: WakeLock detectado sin liberación asegurada.")
 
-    if re.search(r"while\s*\(\s*true\s*\)\s*\{\s*\}|while\s+True:\s+pass", code_snippet):
+    if _busy_waits(code_snippet):
         findings.append("Alerta CPU: Bucle infinito sin jitter ni tiempo de reposo (busy-waiting).")
 
     return {

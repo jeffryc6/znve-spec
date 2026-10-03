@@ -1,0 +1,6 @@
+{
+  "name": "znve-openrouter-client",
+  "private": true,
+  "description": "Cliente mínimo de OpenRouter para ZNVE (sin dependencias). Marca la carpeta como ES module para import.meta.",
+  "type": "module"
+}

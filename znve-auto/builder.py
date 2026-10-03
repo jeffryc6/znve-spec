@@ -152,6 +152,7 @@ def contract_rules_md(spec: dict, indent: str = "") -> str:
         f"{indent}  - **{s['platform']}** (`{s['flag']}`): {s['stack']} · persistencia: {s['persistence']}."
         for s in rules["stack"]
     ]
+    out.append(f"{indent}- **Excepciones al Anti-Bloat Fence:** {rules['exception_rule_es']}")
     out.append(f"{indent}- **Lista de chequeo de solidez:**")
     out += [
         f"{indent}  {i}. **{c['title_es']}:** {c['desc_es']}" for i, c in enumerate(rules["checklist"], 1)
@@ -384,6 +385,19 @@ def antigravity_py_constants(spec: dict) -> str:
     ])
 
 
+def mcp_ts_tool_docs(spec: dict) -> str:
+    """Descripciones de las herramientas y sus parámetros para el servidor MCP (tools/list)."""
+    docs = {
+        t["name"]: {
+            "description": f"{t['summary_es']} {t['behavior_es']}",
+            "params": {p["name"]: p["desc_es"] for p in t["params"]},
+        }
+        for t in spec["mcp"]["tools"]
+    }
+    body = json.dumps(docs, ensure_ascii=False, indent=2)
+    return f"const TOOL_DOCS: Record<string, {{ description: string; params: Record<string, string> }}> = {body};"
+
+
 def readme_commands_md(spec: dict) -> str:
     rows = [
         "| Command / Comando | Mode / Modo | Purpose | Propósito |",
@@ -467,6 +481,7 @@ def build_context(spec: dict) -> dict:
             + ", ".join(c["name"] for c in spec["commands"]) + ".",
             ensure_ascii=False,
         ) + ";",
+        "mcp_ts_tool_docs": mcp_ts_tool_docs(spec),
         "readme_commands_md": readme_commands_md(spec),
         "spec_commands_md": spec_commands_md(spec),
         "index_commands_html": index_commands_html(spec),
@@ -539,6 +554,11 @@ def render_targets(spec: dict) -> dict:
     return outputs
 
 
+def bundle_ignored(rel: str) -> bool:
+    """Cachés y archivos ocultos (__pycache__, .DS_Store, .git...) nunca entran en un paquete."""
+    return any(part == "__pycache__" or part.startswith(".") or part.endswith(".pyc") for part in rel.split("/"))
+
+
 def bundle_members(bundle: dict, rendered: dict) -> dict:
     """Archivos del paquete: los generados dentro de la carpeta más los que existan a mano en disco."""
     prefix = f"{bundle['root']}/{bundle['folder']}/"
@@ -546,7 +566,7 @@ def bundle_members(bundle: dict, rendered: dict) -> dict:
     folder = REPO_ROOT / bundle["root"] / bundle["folder"]
     if folder.exists():
         for path in folder.rglob("*"):
-            if path.is_file():
+            if path.is_file() and not bundle_ignored(path.relative_to(folder).as_posix()):
                 rel = path.relative_to(REPO_ROOT).as_posix()
                 members[rel[len(bundle["root"]) + 1:]] = path.read_bytes()
     for rel, content in rendered.items():

@@ -37,7 +37,7 @@ Your role is to act as a surgical compiler executing deterministic contracts wit
 ### SCENARIO 5: LEGACY MONOLITH RESCUE
 - `/znve-forensic`: READ-ONLY mode. No replacement code or dependencies. Output: 1) Domain summary; 2) I/O matrix; 3) Side effects; 4) Accidental balances; 5) Red zones.
 - `/znve-harness`: Production code is never modified; the harness lives in `tests/characterization/` or `sandbox/`. Output: 1) Isolation setup; 2) Injection battery; 3) Snapshots; 4) Atomic run command.
-- `/znve-legacy-rescue`: Full 5-phase orchestration; never advance a phase until the previous one is verified. Phases: Forensic ingestion and report -> Golden Master -> Shadow Run -> Strangler Fig.
+- `/znve-legacy-rescue`: Full 5-phase orchestration; never advance a phase until the previous one is verified. Phases: Passive ingestion -> Forensic report -> Golden Master -> Shadow Run -> Strangler Fig.
 
 ### SCENARIO 6: AUDIT & HARDENING
 - `/znve-audit`: No cosmetic patches or arbitrary sleeps; fix the root cause. Output: 1) Threading & concurrency; 2) Surface & network; 3) Leaks & lifecycle; 4) Remediation plan.

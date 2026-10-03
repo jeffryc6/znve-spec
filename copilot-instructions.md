@@ -54,7 +54,7 @@ Al recibir instrucciones con prefijo `/`, asume el comportamiento correspondient
 ### ESCENARIO 5: RESCATE DE MONOLITOS LEGACY
 - `/znve-forensic`: Solo lectura estricta. No propongas código de reemplazo ni dependencias. Salida: 1) RESUMEN DE DOMINIO; 2) MATRIZ DE ENTRADAS, SALIDAS Y ESTADO; 3) EFECTOS SECUNDARIOS; 4) EQUILIBRIOS ACCIDENTALES; 5) ZONAS ROJAS.
 - `/znve-harness`: El archivo de producción no se modifica. El arnés vive aislado (`tests/characterization/` o `sandbox/`). Salida: 1) CONFIGURACIÓN DE AISLAMIENTO; 2) BATERÍA DE INYECCIÓN; 3) SNAPSHOTS GOLDEN MASTER; 4) COMANDO DE EJECUCIÓN.
-- `/znve-legacy-rescue`: Orquesta el rescate de punta a punta y no avances de fase sin que la anterior esté verificada. En la primera respuesta entrega solo el reporte forense (fases 1 y 2) y el diseño del arnés (fase 3). Fases: Ingesta y reporte forense -> Golden Master -> Shadow Run -> Strangler Fig.
+- `/znve-legacy-rescue`: Orquesta el rescate de punta a punta y no avances de fase sin que la anterior esté verificada. En la primera respuesta entrega solo el reporte forense (fases 1 y 2) y el diseño del arnés (fase 3). Fases: Ingesta pasiva -> Reporte forense -> Golden Master -> Shadow Run -> Strangler Fig.
 
 ### ESCENARIO 6: AUDITORÍA Y HARDENING
 - `/znve-audit`: SOLO LECTURA. Nada de parches cosméticos ni retardos arbitrarios; ataca la causa raíz y entrega la hoja de remediación para aprobación. Salida: 1) CONCURRENCIA E HILOS; 2) SUPERFICIE DE RED Y SEGURIDAD; 3) CICLO DE VIDA Y RECURSOS; 4) HOJA DE REMEDIACIÓN.

@@ -88,14 +88,16 @@ Toda respuesta técnica se estructura en 4 bloques:
   4. `ANTI-BLOAT FENCE` — campos descartados, abstracciones innecesarias y paquetes prohibidos.
 - **Stack por plataforma (`--platform`):**
   - **Escritorio (Windows / macOS / Linux)** (`desktop`): Rust + Tauri v2 o WinUI 3 nativo · persistencia: SQLite (WAL mode) / DuckDB.
-  - **Web-App** (`web`): Vite + TypeScript / Next.js App Router · persistencia: IndexedDB (Dexie.js).
-  - **Híbrida (Mobile / Desktop)** (`hybrid`): Tauri Mobile / Flutter / React Native Bare · persistencia: MMKV / WatermelonDB.
+  - **macOS nativo** (`desktop`): Swift 6 + SwiftUI · persistencia: SwiftData.
+  - **Web-App** (`web`): Vite + TypeScript / Next.js App Router · persistencia: IndexedDB nativo (Dexie.js solo como excepción justificada).
+  - **Híbrida (Mobile / Desktop)** (`hybrid`): Tauri Mobile / Flutter / React Native Bare · persistencia: almacenamiento nativo de la plataforma (MMKV o WatermelonDB solo como excepción justificada).
   - **Android nativo** (`mobile`): Kotlin + Jetpack Compose + Corrutinas · persistencia: Room DB.
-  - **macOS / iOS nativo** (`mobile`): Swift 6 + SwiftUI · persistencia: SwiftData.
+  - **iOS / iPadOS nativo** (`mobile`): Swift 6 + SwiftUI · persistencia: SwiftData.
+- **Excepciones al Anti-Bloat Fence:** una librería de terceros (como las marcadas *excepción justificada* en el stack) solo entra si el SDK nativo no ofrece la capacidad, y el contrato lo justifica en la Anti-Bloat Fence: qué resuelve, su peso y la alternativa nativa descartada.
 - **Lista de chequeo de solidez:**
   1. **Estructura invariable:** entradas, salidas, entidades y enums tipados.
   2. **Defensas de frontera:** errores explicitados, sin `any` ni `catch` genéricos.
-  3. **Cero dependencias parásitas:** solo el SDK nativo o el runtime aprobado.
+  3. **Cero dependencias parásitas:** solo el SDK nativo, el runtime aprobado o una excepción justificada en la Anti-Bloat Fence.
   4. **Filtro de diferimiento:** ideas secundarias movidas a `contracts/CONTRACT_BACKLOG.md`.
 - **Criterio de parada:** al cumplirse los 4 puntos, emite "Contrato v1 sólido y cerrado. Listo para /znve-execute." y detén la generación.
 - **Modo `--delta` (In-Flight):**
@@ -218,10 +220,11 @@ Toda respuesta técnica se estructura en 4 bloques:
 - **Restricción:** Orquesta el rescate de punta a punta y no avances de fase sin que la anterior esté verificada. En la primera respuesta entrega solo el reporte forense (fases 1 y 2) y el diseño del arnés (fase 3).
 - **Entornos recomendados:** Claude Projects, Cursor Composer.
 - **Fases:**
-  1. **Fases 1 y 2 — Ingesta y reporte forense:** con `/znve-forensic`.
-  2. **Fase 3 — Golden Master:** con `/znve-harness` sobre el código intacto; debe quedar 100 % en verde.
-  3. **Fase 4 — Shadow Run:** nuevo módulo aislado (`/znve-contract` + `/znve-execute`) ejecutado en sombra hasta confirmar `Salida(Nuevo) == Salida(Legacy)`.
-  4. **Fase 5 — Strangler Fig:** conmutación gradual sin downtime.
+  1. **Fase 1 — Ingesta pasiva:** con `/znve-forensic` en solo lectura: puntos de entrada, estado global e I/O, sin proponer código.
+  2. **Fase 2 — Reporte forense:** con `/znve-forensic`: contratos implícitos, efectos secundarios, equilibrios accidentales y zonas rojas.
+  3. **Fase 3 — Golden Master:** con `/znve-harness` sobre el código intacto; debe quedar 100 % en verde.
+  4. **Fase 4 — Shadow Run:** nuevo módulo aislado (`/znve-contract` + `/znve-execute`) ejecutado en sombra hasta confirmar `Salida(Nuevo) == Salida(Legacy)`.
+  5. **Fase 5 — Strangler Fig:** conmutación gradual sin downtime.
 - **Ejemplo:**
 
 ```text
@@ -254,18 +257,18 @@ El servidor `protocols/mcp/znve-mcp-server.ts` expone estas herramientas por JSO
 ### 1. `znve_help`
 
 - **Fase:** Ayuda
-- **Qué hace:** Devuelve este manual completo o una sección: `commands`, `mcp_tools` o `modes`.
+- **Qué hace:** Devuelve el manual `protocols/COMMANDS.md` completo o una sección: `commands`, `mcp_tools` o `modes`.
 - **Parámetros:**
   - `topic` (enum, opcional): `all` (por defecto), `commands`, `mcp_tools` o `modes`.
-- **Comportamiento:** Si el manual no existe, devuelve un catálogo corto de respaldo; cualquier otro error se informa.
+- **Comportamiento:** Un `topic` desconocido es un error. Si el manual no existe, devuelve un catálogo corto de respaldo; cualquier otro error se informa.
 
 ### 2. `znve_forensic_scan`
 
 - **Fase:** Ingesta
 - **Qué hace:** Lee un archivo del workspace en modo estrictamente de solo lectura.
 - **Parámetros:**
-  - `file_path` (string, obligatorio): Ruta del archivo, relativa a `ZNVE_WORKSPACE`.
-- **Comportamiento:** Devuelve el contenido intacto y su tamaño; nunca escribe en disco.
+  - `file_path` (string, obligatorio): Ruta del archivo, relativa a `ZNVE_WORKSPACE` (o absoluta dentro de él).
+- **Comportamiento:** Rechaza rutas fuera de `ZNVE_WORKSPACE` (también a través de enlaces), directorios, binarios y archivos de más de 1 MiB. Devuelve el contenido intacto y su tamaño en bytes; nunca escribe en disco.
 
 ### 3. `znve_validate_contract`
 
@@ -274,27 +277,27 @@ El servidor `protocols/mcp/znve-mcp-server.ts` expone estas herramientas por JSO
 - **Parámetros:**
   - `contract_code` (string, obligatorio): Código de la interfaz, struct o DTO propuesto.
   - `banned_libraries` (string[], opcional): Librerías vetadas por el Anti-Bloat Fence.
-- **Comportamiento:** Rechaza el contrato si detecta `SELECT *`, `.find({})` o una librería vetada.
+- **Comportamiento:** Rechaza el contrato si detecta `SELECT *` o `.find({})` (sin distinguir mayúsculas ni espacios) o la importación de una librería vetada (`import`, `require`, `from … import` o `using`).
 
 ### 4. `znve_scaffold_harness`
 
 - **Fase:** Aislamiento
 - **Qué hace:** Crea una suite Golden Master en un directorio aislado sin tocar producción.
 - **Parámetros:**
-  - `harness_directory` (string, obligatorio): Directorio aislado; debe contener `test` o `sandbox`.
-  - `test_filename` (string, obligatorio): Nombre del archivo de prueba.
+  - `harness_directory` (string, obligatorio): Directorio aislado bajo `tests/` o `sandbox/` en la raíz de `ZNVE_WORKSPACE`.
+  - `test_filename` (string, obligatorio): Nombre del archivo de prueba, sin rutas.
   - `harness_code` (string, obligatorio): Código de la prueba de caja negra.
-- **Comportamiento:** Rechaza directorios que no sean de pruebas o sandbox.
+- **Comportamiento:** Rechaza directorios fuera de `tests/` o `sandbox/`, nombres de archivo con rutas y cualquier escape del workspace.
 
 ### 5. `znve_surgical_write`
 
 - **Fase:** Escritura
 - **Qué hace:** Escribe un único `TARGET_FILE` tras aprobar el contrato.
 - **Parámetros:**
-  - `target_file` (string, obligatorio): Ruta exacta del único archivo a escribir.
+  - `target_file` (string, obligatorio): Ruta exacta del único archivo a escribir, dentro de `ZNVE_WORKSPACE`.
   - `code_content` (string, obligatorio): Contenido que satisface el contrato.
   - `disposal_pattern` (enum, obligatorio): `dispose`, `close`, `finally`, `autocloseable` o `not_applicable`.
-- **Comportamiento:** Aborta si hay un `catch` vacío o si se abren sockets o flujos con `not_applicable`.
+- **Comportamiento:** Rechaza rutas fuera de `ZNVE_WORKSPACE` o dentro de `.git/` y `node_modules/`, y aborta si un `catch`/`except` silencia el error o si se abren sockets o flujos con `not_applicable`. Escribe de forma atómica (archivo temporal y renombrado).
 
 ### 6. `znve_audit_resources`
 
@@ -302,7 +305,7 @@ El servidor `protocols/mcp/znve-mcp-server.ts` expone estas herramientas por JSO
 - **Qué hace:** Analiza un fragmento de código en busca de antipatrones de hilos, memoria y CPU.
 - **Parámetros:**
   - `code_snippet` (string, obligatorio): Fragmento de código a evaluar.
-- **Comportamiento:** Marca `.Result`/`.Wait()`, busy-waiting sin backoff y `WakeLock.acquire()`.
+- **Comportamiento:** Marca `.Result`, `.Wait()` y `.GetAwaiter().GetResult()` (riesgo `HIGH`), `WakeLock.acquire()` (`HIGH`) y busy-waiting sin backoff (`MEDIUM`). `risk_level` es el mayor riesgo encontrado, o `CLEAN`.
 
 ---
 
@@ -318,7 +321,7 @@ El servidor `protocols/mcp/znve-mcp-server.ts` expone estas herramientas por JSO
 ### 2. GitHub Copilot (VS Code, Visual Studio, JetBrains)
 
 - Usa `.github/copilot-instructions.md`: es la ruta que Copilot lee.
-- En el chat: `@workspace /znve-*`.
+- En el chat escribe `/znve-contract …` como texto normal: Copilot aplica las instrucciones del repositorio (no son slash commands nativos de Copilot).
 
 ### 3. Cursor y Windsurf
 
@@ -349,16 +352,16 @@ ollama run znve-agent
 
 - Usa `protocols/agents/openrouter/system-prompt.md` como prompt de sistema y `response-schema.json` como `response_format`.
 
-### 8. Antigravity y clientes MCP (Cursor, Windsurf, Claude Desktop)
+### 8. Antigravity y otros clientes MCP (Claude Desktop, Cursor, Windsurf)
 
-- Instala el servidor MCP (compila, verifica las 6 herramientas y registra `znve-engine`):
+- Antigravity: el instalador compila el servidor, verifica sus herramientas y registra `znve-engine`:
 
 ```bash
 cd protocols/mcp
 node install-antigravity.mjs --workspace "<ruta>/tu-proyecto"
 ```
 
-- O regístralo a mano en `mcp_config.json`:
+- Registro manual: compila con `npm ci && npm run build` y añade este bloque `mcpServers` al archivo de configuración de tu cliente:
 
 ```json
 {
@@ -374,6 +377,11 @@ node install-antigravity.mjs --workspace "<ruta>/tu-proyecto"
   }
 }
 ```
+
+- Antigravity: `~/.gemini/antigravity/mcp_config.json` (o **Manage MCP Servers → View raw config**).
+- Claude Desktop: `claude_desktop_config.json` (**Settings → Developer → Edit Config**).
+- Cursor: `.cursor/mcp.json` en el proyecto o `~/.cursor/mcp.json` global.
+- Windsurf: `~/.codeium/windsurf/mcp_config.json`.
 
 ---
 

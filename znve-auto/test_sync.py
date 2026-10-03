@@ -24,6 +24,7 @@ import tempfile
 import unittest
 import zipfile
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import builder  # noqa: E402
@@ -34,6 +35,9 @@ ZNVE_VERSION_REF = re.compile(r"ZNVE[^\n\d]{0,40}?v?(\d+\.\d+\.\d+)")
 SKILL_KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compatibility"}
 MCP_SERVER = REPO / "protocols" / "mcp" / "znve-mcp-server.ts"
 OPENROUTER_SCHEMA = REPO / "protocols" / "agents" / "openrouter" / "response-schema.json"
+# Directiva global de DeepSeek Harness: se mantiene a mano (un AGENTS.md global compite
+# por presupuesto de render y debe seguir siendo conciso), así que se verifica, no se genera.
+DEEPSEEK_AGENTS = REPO / "protocols" / "agents" / "deepseek" / "AGENTS.md"
 SKILL_FILES = (
     "protocols/agents/claude/skills/znve/SKILL.md",
     "protocols/agents/gemini/skills/znve/SKILL.md",
@@ -154,6 +158,13 @@ class ArtifactTests(unittest.TestCase):
             self.assertEqual(names, expected)
             self.assertIn(f"{bundle['folder']}/SKILL.md", names)
 
+    def test_bundle_ignores_caches(self):
+        """Las cachés y los archivos ocultos no entran en znve.zip."""
+        for rel in ("__pycache__/x.cpython-314.pyc", ".DS_Store", "references/.cache/a.md", "scripts/x.pyc"):
+            self.assertTrue(builder.bundle_ignored(rel), rel)
+        for rel in ("SKILL.md", "references/chameleon-layer.md"):
+            self.assertFalse(builder.bundle_ignored(rel), rel)
+
 
 class ExternalContractTests(unittest.TestCase):
     """Contratos que viven fuera de las plantillas pero dependen de la especificación."""
@@ -162,6 +173,27 @@ class ExternalContractTests(unittest.TestCase):
     def setUpClass(cls):
         cls.spec = builder.load_spec()
         cls.server = MCP_SERVER.read_text(encoding="utf-8")
+        cls.agents = DEEPSEEK_AGENTS.read_text(encoding="utf-8") if DEEPSEEK_AGENTS.exists() else ""
+
+    @unittest.skipUnless(DEEPSEEK_AGENTS.exists(), f"{DEEPSEEK_AGENTS.name} de DSH no está en este checkout")
+    def test_deepseek_agents_cites_spec_version(self):
+        """La directiva global de DSH cita la versión de la especificación y solo esa."""
+        refs = set(re.findall(r"ZNVE[^\n\d]{0,40}?v?(\d+\.\d+\.\d+)", self.agents))
+        self.assertTrue(refs, f"{DEEPSEEK_AGENTS.name} no cita ninguna versión de ZNVE")
+        self.assertEqual(
+            refs,
+            {self.spec["version"]},
+            f"cita {sorted(refs - {self.spec['version']})} en vez de {self.spec['version']}",
+        )
+
+    @unittest.skipUnless(DEEPSEEK_AGENTS.exists(), f"{DEEPSEEK_AGENTS.name} de DSH no está en este checkout")
+    def test_deepseek_agents_lists_all_commands(self):
+        """La directiva global de DSH expone los 10 comandos de la especificación."""
+        self.assertEqual(len(self.spec["commands"]), 10, "la especificación ya no declara 10 comandos")
+        for c in self.spec["commands"]:
+            self.assertIn(c["name"], self.agents, f"{c['name']} falta en {DEEPSEEK_AGENTS.name}")
+        for alias in ("/znve-help", "/znve-contract", "/znve-execute"):
+            self.assertIn(alias, self.agents, f"falta la forma de invocación {alias}")
 
     def test_mcp_tools_match_server(self):
         """Las herramientas MCP documentadas son las que expone el servidor."""
@@ -277,6 +309,140 @@ class AntigravityPythonTests(unittest.TestCase):
         self.assertTrue(once.startswith("Mis reglas.") and once.rstrip().endswith("Otra regla."))
         self.assertEqual(installer.upsert_rule(once), once)
         self.assertEqual(installer.upsert_rule("").count("znve:start"), 1)
+
+
+class SkillToolBehaviorTests(unittest.TestCase):
+    """Las herramientas de znve_skill.py cumplen las barandillas que anuncian.
+
+    Las rutas relativas se resuelven contra ZNVE_WORKSPACE. El cwd del test es otro
+    directorio temporal, así que nada se escribe fuera del temporal aunque falle una barandilla.
+    """
+
+    MAX_SCAN_BYTES = 1024 * 1024
+
+    @classmethod
+    def setUpClass(cls):
+        cls.skill = load_module("znve_skill_behavior", ANTIGRAVITY_DIR / "znve_skill.py")
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.tmp = Path(self._tmp.name).resolve()
+        self.ws = self.tmp / "ws"
+        self.outside = self.tmp / "outside"
+        for folder in (self.ws, self.outside, self.tmp / "cwd", self.ws / ".git"):
+            folder.mkdir(parents=True)
+        (self.outside / "secret.txt").write_text("TOP-SECRET", encoding="utf-8")
+        (self.ws / "prod.py").write_text("X = 1\n", encoding="utf-8")
+        (self.ws / ".git" / "config").write_text("[core]\n", encoding="utf-8")
+        self._cwd = os.getcwd()
+        os.chdir(self.tmp / "cwd")
+        self._env = mock.patch.dict(os.environ, {"ZNVE_WORKSPACE": str(self.ws)})
+        self._env.start()
+
+    def tearDown(self):
+        self._env.stop()
+        os.chdir(self._cwd)
+        self._tmp.cleanup()
+
+    def assertRejected(self, result: dict, msg: str = ""):
+        self.assertNotEqual(result["status"], "SUCCESS", msg or result)
+
+    # --- Contención de rutas (P1) ---------------------------------------------
+
+    def test_forensic_reads_inside_workspace(self):
+        result = self.skill.znve_forensic_scan("prod.py")
+        self.assertEqual(result["status"], "SUCCESS", result)
+
+    def test_forensic_rejects_escape(self):
+        for target in ("../outside/secret.txt", str(self.outside / "secret.txt")):
+            self.assertRejected(self.skill.znve_forensic_scan(target), target)
+
+    def test_harness_rejects_filename_escape(self):
+        result = self.skill.znve_scaffold_harness("tests/characterization", "../../prod.py", "OVERWRITTEN")
+        self.assertRejected(result)
+        self.assertEqual((self.ws / "prod.py").read_text(encoding="utf-8"), "X = 1\n")
+
+    def test_harness_rejects_non_test_directories(self):
+        for folder in ("latest", "src/tests", "../outside/tests"):
+            self.assertRejected(self.skill.znve_scaffold_harness(folder, "h.py", "pass\n"), folder)
+        self.assertFalse((self.outside / "tests").exists())
+
+    def test_harness_writes_under_tests(self):
+        result = self.skill.znve_scaffold_harness("tests/characterization", "test_legacy.py", "pass\n")
+        self.assertEqual(result["status"], "SUCCESS", result)
+        self.assertTrue((self.ws / "tests" / "characterization" / "test_legacy.py").is_file())
+
+    def test_write_rejects_escape(self):
+        result = self.skill.znve_surgical_write("../outside/pwned.txt", "x", "not_applicable")
+        self.assertRejected(result)
+        self.assertFalse((self.outside / "pwned.txt").exists())
+
+    def test_write_rejects_protected_folders(self):
+        for target in (".git/config", "node_modules/pkg/index.js"):
+            self.assertRejected(self.skill.znve_surgical_write(target, "x", "not_applicable"), target)
+        self.assertEqual((self.ws / ".git" / "config").read_text(encoding="utf-8"), "[core]\n")
+
+    def test_write_inside_workspace(self):
+        result = self.skill.znve_surgical_write("app/ok.py", "X = 2\n", "not_applicable")
+        self.assertEqual(result["status"], "SUCCESS", result)
+        self.assertEqual((self.ws / "app" / "ok.py").read_text(encoding="utf-8"), "X = 2\n")
+        self.assertEqual(sorted(p.name for p in (self.ws / "app").iterdir()), ["ok.py"])
+
+    # --- Barandillas de análisis (P2) -----------------------------------------
+
+    def test_write_rejects_silenced_errors(self):
+        silenced = (
+            "try { f(); } catch (e) {}",
+            "try { f(); } catch {}",
+            "try { f(); } catch (e) {\n  // se ignora\n}",
+            "try { f(); } catch (e) { /* nada */ }",
+            "try:\n    f()\nexcept:\n    pass\n",
+            "try:\n    f()\nexcept Exception:\n    pass\n",
+            "try:\n    f()\nexcept (ValueError, KeyError) as e:\n    ...\n",
+            "load().catch(() => {});",
+        )
+        for code in silenced:
+            self.assertRejected(self.skill.znve_surgical_write("app/silenced.txt", code, "finally"), code)
+
+    def test_validate_detects_banned_imports(self):
+        for code in (
+            "import _ from 'lodash';",
+            "const _ = require('lodash');",
+            'const axios = require("axios");',
+            "import requests",
+            "from requests import get",
+            "using Lodash;",
+        ):
+            self.assertEqual(self.skill.znve_validate_contract(code, ["lodash", "axios", "requests"])["status"], "REJECTED", code)
+
+    def test_validate_detects_blind_queries(self):
+        for code in ("q = 'select * from users'", "q = 'SELECT   * FROM users'", "db.users.find({ })"):
+            self.assertEqual(self.skill.znve_validate_contract(code, ["lodash"])["status"], "REJECTED", code)
+
+    def test_write_accepts_handled_errors(self):
+        code = "try:\n    f()\nexcept ValueError as exc:\n    raise RuntimeError('f falló') from exc\n"
+        self.assertEqual(self.skill.znve_surgical_write("app/handled.py", code, "finally")["status"], "SUCCESS")
+
+    def test_validate_ignores_substrings(self):
+        result = self.skill.znve_validate_contract("class Ratio:\n    radio: int\n", ["io", "rat"])
+        self.assertEqual(result["status"], "APPROVED", result)
+
+    def test_audit_result_property_is_not_blocking(self):
+        self.assertTrue(self.skill.znve_audit_resources("var a = api.ResultSet; y.ResultCode = 0;")["clean"])
+        for code in ("var r = task.Result;", "task.GetAwaiter().GetResult();", "mWakeLock.acquire();"):
+            self.assertFalse(self.skill.znve_audit_resources(code)["clean"], code)
+
+    def test_forensic_database_detection(self):
+        (self.ws / "arrays.js").write_text("const n = items.find((x) => x.ok);\ndelete cache.key;\n", encoding="utf-8")
+        (self.ws / "repo.sql").write_text("DELETE FROM sessions WHERE expires_at < now();\n", encoding="utf-8")
+        self.assertFalse(self.skill.znve_forensic_scan("arrays.js")["side_effects"]["database_mutations"])
+        self.assertTrue(self.skill.znve_forensic_scan("repo.sql")["side_effects"]["database_mutations"])
+
+    def test_forensic_rejects_large_and_binary_files(self):
+        (self.ws / "big.txt").write_bytes(b"a" * (self.MAX_SCAN_BYTES + 1))
+        (self.ws / "bin.dat").write_bytes(b"PK\x00\x03\x04")
+        for target in ("big.txt", "bin.dat", "."):
+            self.assertRejected(self.skill.znve_forensic_scan(target), target)
 
 
 def stale_hand_maintained(spec: dict) -> list[str]:

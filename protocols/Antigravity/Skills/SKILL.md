@@ -85,14 +85,16 @@ Toda respuesta técnica se estructura en 4 bloques:
   4. `ANTI-BLOAT FENCE` — campos descartados, abstracciones innecesarias y paquetes prohibidos.
 - **Stack por plataforma (`--platform`):**
   - **Escritorio (Windows / macOS / Linux)** (`desktop`): Rust + Tauri v2 o WinUI 3 nativo · persistencia: SQLite (WAL mode) / DuckDB.
-  - **Web-App** (`web`): Vite + TypeScript / Next.js App Router · persistencia: IndexedDB (Dexie.js).
-  - **Híbrida (Mobile / Desktop)** (`hybrid`): Tauri Mobile / Flutter / React Native Bare · persistencia: MMKV / WatermelonDB.
+  - **macOS nativo** (`desktop`): Swift 6 + SwiftUI · persistencia: SwiftData.
+  - **Web-App** (`web`): Vite + TypeScript / Next.js App Router · persistencia: IndexedDB nativo (Dexie.js solo como excepción justificada).
+  - **Híbrida (Mobile / Desktop)** (`hybrid`): Tauri Mobile / Flutter / React Native Bare · persistencia: almacenamiento nativo de la plataforma (MMKV o WatermelonDB solo como excepción justificada).
   - **Android nativo** (`mobile`): Kotlin + Jetpack Compose + Corrutinas · persistencia: Room DB.
-  - **macOS / iOS nativo** (`mobile`): Swift 6 + SwiftUI · persistencia: SwiftData.
+  - **iOS / iPadOS nativo** (`mobile`): Swift 6 + SwiftUI · persistencia: SwiftData.
+- **Excepciones al Anti-Bloat Fence:** una librería de terceros (como las marcadas *excepción justificada* en el stack) solo entra si el SDK nativo no ofrece la capacidad, y el contrato lo justifica en la Anti-Bloat Fence: qué resuelve, su peso y la alternativa nativa descartada.
 - **Lista de chequeo de solidez:**
   1. **Estructura invariable:** entradas, salidas, entidades y enums tipados.
   2. **Defensas de frontera:** errores explicitados, sin `any` ni `catch` genéricos.
-  3. **Cero dependencias parásitas:** solo el SDK nativo o el runtime aprobado.
+  3. **Cero dependencias parásitas:** solo el SDK nativo, el runtime aprobado o una excepción justificada en la Anti-Bloat Fence.
   4. **Filtro de diferimiento:** ideas secundarias movidas a `contracts/CONTRACT_BACKLOG.md`.
 - **Criterio de parada:** al cumplirse los 4 puntos, emite "Contrato v1 sólido y cerrado. Listo para /znve-execute." y detén la generación.
 - **Modo `--delta` (In-Flight):**
@@ -176,10 +178,11 @@ Toda respuesta técnica se estructura en 4 bloques:
 - **Activación:** rescate de un monolito o módulo legacy sin tests.
 - **Directiva:** orquesta el rescate de punta a punta y no avances de fase sin que la anterior esté verificada. En la primera respuesta entrega solo el reporte forense (fases 1 y 2) y el diseño del arnés (fase 3).
 - **Fases:**
-  1. **Fases 1 y 2 — Ingesta y reporte forense:** con `/znve-forensic`.
-  2. **Fase 3 — Golden Master:** con `/znve-harness` sobre el código intacto; debe quedar 100 % en verde.
-  3. **Fase 4 — Shadow Run:** nuevo módulo aislado (`/znve-contract` + `/znve-execute`) ejecutado en sombra hasta confirmar `Salida(Nuevo) == Salida(Legacy)`.
-  4. **Fase 5 — Strangler Fig:** conmutación gradual sin downtime.
+  1. **Fase 1 — Ingesta pasiva:** con `/znve-forensic` en solo lectura: puntos de entrada, estado global e I/O, sin proponer código.
+  2. **Fase 2 — Reporte forense:** con `/znve-forensic`: contratos implícitos, efectos secundarios, equilibrios accidentales y zonas rojas.
+  3. **Fase 3 — Golden Master:** con `/znve-harness` sobre el código intacto; debe quedar 100 % en verde.
+  4. **Fase 4 — Shadow Run:** nuevo módulo aislado (`/znve-contract` + `/znve-execute`) ejecutado en sombra hasta confirmar `Salida(Nuevo) == Salida(Legacy)`.
+  5. **Fase 5 — Strangler Fig:** conmutación gradual sin downtime.
 
 ---
 
