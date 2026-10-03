@@ -73,17 +73,20 @@ Las directivas de los asistentes traducen los 5 pilares en 7 guardrails que el a
 Al activar `/znve-contract`, la IA evalúa el tipo de aplicación y sugiere el stack con cero peso parásito:
 
 * **Escritorio (Windows / macOS / Linux), `desktop`:** Rust + Tauri v2 o WinUI 3 nativo | Persistencia: SQLite (WAL mode) / DuckDB.
-* **Web-App, `web`:** Vite + TypeScript / Next.js App Router | Persistencia: IndexedDB (Dexie.js).
-* **Híbrida (Mobile / Desktop), `hybrid`:** Tauri Mobile / Flutter / React Native Bare | Persistencia: MMKV / WatermelonDB.
+* **macOS Nativo, `desktop`:** Swift 6 + SwiftUI | Persistencia: SwiftData.
+* **Web-App, `web`:** Vite + TypeScript / Next.js App Router | Persistencia: IndexedDB nativo (Dexie.js solo como excepción justificada).
+* **Híbrida (Mobile / Desktop), `hybrid`:** Tauri Mobile / Flutter / React Native Bare | Persistencia: almacenamiento nativo de la plataforma (MMKV o WatermelonDB solo como excepción justificada).
 * **Android Nativo, `mobile`:** Kotlin + Jetpack Compose + Corrutinas | Persistencia: Room DB.
-* **macOS / iOS Nativo, `mobile`:** Swift 6 + SwiftUI | Persistencia: SwiftData.
+* **iOS / iPadOS Nativo, `mobile`:** Swift 6 + SwiftUI | Persistencia: SwiftData.
+
+**Excepciones al Anti-Bloat Fence:** una librería de terceros solo entra si el SDK nativo no ofrece la capacidad, y el contrato lo justifica en la Anti-Bloat Fence: qué resuelve, su peso y la alternativa nativa descartada.
 
 ### 3.2 Lista de Chequeo de Solidez y Criterio de Parada
 Para evitar sugerencias infinitas de la IA, el contrato debe cumplir 4 puntos antes de programar:
 
 1. `[x]` **Estructura Invariable:** Entradas, salidas, entidades y Enums tipados.
 2. `[x]` **Defensas de Frontera:** Excepciones y errores explicitados (sin `any` ni `catch` genéricos).
-3. `[x]` **Cero Dependencias Parásitas:** Uso exclusivo del SDK nativo o runtime aprobado.
+3. `[x]` **Cero Dependencias Parásitas:** Uso exclusivo del SDK nativo, el runtime aprobado o una excepción justificada en la Anti-Bloat Fence.
 4. `[x]` **Filtro de Diferimiento:** Ideas secundarias movidas a `contracts/CONTRACT_BACKLOG.md`.
 
 > **🛑 CRITERIO DE PARADA OBLIGATORIO (STOP CRITERION):**
@@ -163,11 +166,13 @@ El servidor de referencia (`protocols/mcp/znve-mcp-server.ts`, transporte stdio)
 | Herramienta | Fase | Garantía |
 |---|---|---|
 | `znve_help` | Ayuda | Sirve el manual `protocols/COMMANDS.md`, completo o por tema. |
-| `znve_forensic_scan` | Ingesta | Lectura sin escritura en disco. |
-| `znve_validate_contract` | Contrato | Rechaza `SELECT *`, `.find({})` y librerías vetadas. |
-| `znve_scaffold_harness` | Aislamiento | Solo escribe en directorios de prueba o sandbox. |
-| `znve_surgical_write` | Escritura | Rechaza `catch` vacíos y recursos abiertos sin patrón de desecho. |
-| `znve_audit_resources` | Hardening | Detecta bloqueos síncronos, busy-waiting y `WakeLock` sin liberar. |
+| `znve_forensic_scan` | Ingesta | Lectura de texto (hasta 1 MiB) sin escritura en disco. |
+| `znve_validate_contract` | Contrato | Rechaza `SELECT *`, `.find({})` y la importación de librerías vetadas. |
+| `znve_scaffold_harness` | Aislamiento | Solo escribe bajo `tests/` o `sandbox/`. |
+| `znve_surgical_write` | Escritura | Escritura atómica; rechaza `catch`/`except` que silencian errores, `.git/`, `node_modules/` y recursos abiertos sin patrón de desecho. |
+| `znve_audit_resources` | Hardening | Detecta bloqueos síncronos, busy-waiting y `WakeLock.acquire()`. |
+
+Ninguna herramienta lee ni escribe fuera de `ZNVE_WORKSPACE`, tampoco a través de enlaces simbólicos.
 
 ---
 

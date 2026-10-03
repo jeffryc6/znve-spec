@@ -52,7 +52,11 @@ No edites los archivos generados: llevan un aviso en la cabecera y el CI falla s
 
 Además de las plantillas hay dos tipos de artefacto:
 
-- **Bloques gestionados (`regions`).** En `protocols/Antigravity/Skills/znve_skill.py`, el builder solo reescribe lo que hay entre `# >>> znve:generated` y `# <<< znve:generated`: nombre, versión, instrucción de sistema, catálogo de `/znve-help` y modos. El resto del módulo (las herramientas) se mantiene a mano. `Auto_Installer.py` e `install_znve_global.py` importan esas constantes, así que no llevan copias propias. En `protocols/mcp/znve-mcp-server.ts` el bloque es la cabecera (versión de ZNVE y axiomas), dentro del comentario `/** ... */`.
+- **Bloques gestionados (`regions`).** En un archivo escrito a mano, el builder solo reescribe lo que hay entre `>>> znve:generated[:nombre]` y `<<< znve:generated[:nombre]`; el resto se mantiene a mano.
+  - `protocols/Antigravity/Skills/znve_skill.py`: nombre, versión, instrucción de sistema, catálogo de `/znve-help` y modos. Las herramientas se mantienen a mano. `Auto_Installer.py` e `install_znve_global.py` importan esas constantes, así que no llevan copias propias.
+  - `protocols/mcp/znve-mcp-server.ts`: tres bloques. La cabecera (versión de ZNVE y axiomas, dentro de `/** ... */`), `fallback` (catálogo corto de `znve_help` si falta el manual) y `tools` (`TOOL_DOCS`: descripciones de las herramientas y de sus parámetros, desde `mcp.tools`).
+  - `README.md`, `SPECIFICATION.md` e `index.html`: el catálogo de comandos.
+- **Paquetes (`bundles`).** `znve.zip` reúne la carpeta de la skill de Claude, reproducible byte a byte. Las cachés y los archivos ocultos (`__pycache__`, `*.pyc`, `.DS_Store`) nunca entran.
 - **Copias (`mirrors`).** `protocols/Antigravity/Skills/.agents/skills/znve/` contiene `SKILL.md` y `scripts/znve_skill.py`, copias exactas de los originales: es el mismo árbol que deja `Auto_Installer.py` en cada proyecto.
 
 Las plantillas que empiezan por `_` son fragmentos compartidos: se incluyen con `{{> _nombre.md.tmpl}}`. Los bloques calculados desde la especificación se insertan con `{{clave}}`; la lista completa está en `build_context()` de `builder.py`.
@@ -66,6 +70,17 @@ Las plantillas que empiezan por `_` son fragmentos compartidos: se incluyen con 
 - Que las skills de Claude y Gemini cumplan las reglas de subida (claves del frontmatter, nombre en minúsculas con guiones, descripción de hasta 1024 caracteres) y que sus enlaces a `references/` apunten a archivos generados.
 - Que las herramientas MCP documentadas sean las que expone `protocols/mcp/znve-mcp-server.ts` y que `protocols/COMMANDS.md` conserve las secciones que filtra `znve_help`.
 - Que el enum de escenarios de `protocols/agents/openrouter/response-schema.json` coincida con la especificación.
+- Que la directiva global de DeepSeek Harness (`protocols/agents/deepseek/AGENTS.md`) cite la versión de la especificación y los 10 comandos. Si el archivo no está en el checkout, esos tests se omiten.
+- Que las herramientas de `znve_skill.py` cumplan sus barandillas: contención en `ZNVE_WORKSPACE` (o el cwd), arnés solo bajo `tests/` o `sandbox/`, escritura atómica y sin `.git/` ni `node_modules/`, detección de `catch`/`except` que silencian errores, importaciones vetadas, consultas ciegas y bloqueos.
+- Que `znve.zip` excluya las cachés y los archivos ocultos.
 - Que `znve_skill.py` exponga la versión y el catálogo de la especificación, que la skill se llame `znve` y tenga 6 herramientas, que `get_znve_skill()` entregue las 6 herramientas con docstring, que `Auto_Installer.py` instale en `.agents/skills/znve/` y retire la instalación de `.antigravity/`, que `install_znve_global.py` instale en `~/.gemini/config/skills/znve/` y retire la copia legacy, y que reemplace la regla de `GEMINI.md` sin duplicarla.
 
 Al final avisa, sin fallar, de los archivos mantenidos a mano que citan otra versión de ZNVE.
+
+El comportamiento del servidor MCP se prueba aparte, con su propia suite (`node:test`, sin dependencias). Arranca el servidor por stdio contra un workspace temporal y cubre contención de rutas, validación de argumentos, barandillas, anotaciones y que `tools/list` coincida con `mcp.tools`:
+
+```bash
+cd protocols/mcp && npm ci && npm test
+```
+
+El workflow de CI ejecuta las dos suites y, además, `npm run check:openrouter` (type-check del cliente de OpenRouter).

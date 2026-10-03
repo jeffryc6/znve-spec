@@ -73,7 +73,7 @@ Envía este prompt a tu asistente de IA:
 /znve-contract --platform=[desktop|web|mobile|hybrid]
 Bajo ZNVE Modo 1 (Greenfield), vamos a iniciar el desarrollo del módulo [NOMBRE_DEL_MÓDULO].
 
-1. Delimita el Anti-Bloat Fence: Prohibido instalar librerías de terceros; usaremos exclusivamente las APIs nativas del runtime/SDK.
+1. Delimita el Anti-Bloat Fence: por defecto, solo APIs nativas del runtime/SDK. Una librería de terceros solo entra como excepción justificada (el SDK nativo no ofrece la capacidad; documenta qué resuelve, su peso y la alternativa nativa descartada).
 2. Recomienda el stack para la plataforma y diseña el contrato DTO y la interfaz de datos inmutable en `contracts/[modulo].contract.ts`.
 3. Aplica la lista de chequeo de solidez y, si se cumple, emite el criterio de parada.
 4. No escribas código de implementación todavía. Espera mi aprobación del contrato.
@@ -83,7 +83,7 @@ Bajo ZNVE Modo 1 (Greenfield), vamos a iniciar el desarrollo del módulo [NOMBRE
 Aprueba el contrato solo si cumple la **lista de chequeo de solidez**:
 - [ ] **Estructura invariable:** entradas, salidas, entidades y enums tipados.
 - [ ] **Defensas de frontera:** tipos de error explícitos (enums o uniones discriminadas), sin `any` ni `catch` genéricos.
-- [ ] **Cero dependencias parásitas:** solo el SDK nativo o el runtime aprobado.
+- [ ] **Cero dependencias parásitas:** solo el SDK nativo, el runtime aprobado o una excepción justificada en la Anti-Bloat Fence.
 - [ ] **Filtro de diferimiento:** ideas secundarias movidas a `contracts/CONTRACT_BACKLOG.md`.
 
 Con los 4 puntos cumplidos, la IA debe responder *"Contrato v1 sólido y cerrado. Listo para /znve-execute."* y dejar de proponer cambios.
@@ -121,6 +121,6 @@ Toda consulta técnica sin comando debe responderse con la siguiente estructura:
 
 - [ ] ZNVE instalado en el asistente y `/znve-help` responde con el catálogo.
 - [ ] Directorio `contracts/` creado con DTOs/interfaces aprobados y `CONTRACT_BACKLOG.md` para lo diferido.
-- [ ] Cero dependencias externas agregadas a `package.json` / `requirements.txt` / `Cargo.toml`.
+- [ ] Cero dependencias externas agregadas a `package.json` / `requirements.txt` / `Cargo.toml`, salvo excepciones justificadas en la Anti-Bloat Fence.
 - [ ] Pruebas unitarias de frontera ejecutadas y en verde.
 - [ ] Cero logs de confirmación rutinaria (`"OK"`, `"Success"`) en el código de producción.

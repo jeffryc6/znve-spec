@@ -85,7 +85,7 @@ El protocolo define dos procedimientos de alta precisión:
 ### FASE A.3: HOTFIX ATÓMICO POR CONTRATO BOUNDED
 * **Objetivo:** Corregir el defecto interviniendo el menor número de líneas posibles. Se ejecuta con `/znve-hotfix --incident=<ID>`.
 * **Acciones Obligatorias del Agente:**
-  1. Delimitar un único archivo objetivo (`TARGET_FILE`), preferentemente en la frontera del adaptador. Si el cambio requiere tocar más de dos archivos, el diseño del hotfix es incorrecto y debe aislarse mejor.
+  1. Delimitar un único archivo objetivo (`TARGET_FILE`), preferentemente en la frontera del adaptador, más su test de regresión (Fase A.4). Si la corrección exige tocar otro archivo de producción, el diseño del hotfix es incorrecto y debe aislarse mejor.
   2. Aplicar la corrección respetando las invariantes del módulo:
      - Manejo explícito de excepciones sin bloques `catch` vacíos.
      - Garantizar la liberación de recursos en cláusula `finally` / `dispose`.

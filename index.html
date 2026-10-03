@@ -799,10 +799,10 @@ def test_golden_master():  # ✓ must pass 100% against the intact code
       <h3 data-l="es">Stack recomendado con <code>--platform</code></h3>
       <h3 data-l="en" lang="en">Recommended stack with <code>--platform</code></h3>
       <div class="grid tight">
-        <div class="card"><span class="tag">desktop</span><p>Rust + Tauri v2 <span data-l="es">o</span><span data-l="en" lang="en">or</span> WinUI 3 · SQLite (WAL) / DuckDB</p></div>
+        <div class="card"><span class="tag">desktop</span><p>Rust + Tauri v2 <span data-l="es">o</span><span data-l="en" lang="en">or</span> WinUI 3 · SQLite (WAL) / DuckDB · macOS: Swift 6 + SwiftUI + SwiftData</p></div>
         <div class="card"><span class="tag">web</span><p>Vite + TypeScript / Next.js · IndexedDB</p></div>
-        <div class="card"><span class="tag">hybrid</span><p>Tauri Mobile / Flutter / React Native · MMKV</p></div>
-        <div class="card"><span class="tag">mobile</span><p>Kotlin + Compose + Room · Swift 6 + SwiftUI + SwiftData</p></div>
+        <div class="card"><span class="tag">hybrid</span><p>Tauri Mobile / Flutter / React Native · <span data-l="es">almacenamiento nativo</span><span data-l="en" lang="en">native storage</span></p></div>
+        <div class="card"><span class="tag">mobile</span><p>Kotlin + Compose + Room · iOS: Swift 6 + SwiftUI + SwiftData</p></div>
       </div>
     </section>
 
@@ -998,8 +998,8 @@ gemini skills list</code></pre><button class="copy" data-copy="cmd-gemini"></but
         <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span data-l="es">desde la raíz de tu proyecto</span><span data-l="en" lang="en">from your project root</span></div>
 <pre id="cmd-copilot"><code data-lang="sh">mkdir -p .github
 curl -fsSL https://raw.githubusercontent.com/jeffryc6/znve-spec/main/.github/copilot-instructions.md -o .github/copilot-instructions.md</code></pre><button class="copy" data-copy="cmd-copilot"></button></div>
-        <p class="muted" data-l="es">Copilot lee ese archivo automáticamente en VS Code, Visual Studio y JetBrains. En el chat: <code>@workspace /znve-contract …</code></p>
-        <p class="muted" data-l="en" lang="en">Copilot reads that file automatically in VS Code, Visual Studio and JetBrains. In chat: <code>@workspace /znve-contract …</code></p>
+        <p class="muted" data-l="es">Copilot lee ese archivo automáticamente en VS Code, Visual Studio y JetBrains. En el chat escribe <code>/znve-contract …</code> como texto normal (no es un slash command nativo de Copilot).</p>
+        <p class="muted" data-l="en" lang="en">Copilot reads that file automatically in VS Code, Visual Studio and JetBrains. In chat, type <code>/znve-contract …</code> as plain text (it is not a native Copilot slash command).</p>
       </div>
 
       <div role="tabpanel" id="ipanel-cursor" aria-labelledby="itab-cursor" hidden>
@@ -1252,32 +1252,45 @@ git push                         # CI + GitHub Pages</code></pre><button class="
       const ctx = canvas.getContext('2d');
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       const LINK = 140, POINTER = 180;
-      let width = 0, height = 0, nodes = [], pulses = [], lastPulse = 0;
+      // 30 fps bastan para un fondo decorativo y reducen a la mitad el cálculo O(n²) de enlaces.
+      const FRAME_MS = 1000 / 30;
+      let width = 0, height = 0, nodes = [], pulses = [], lastPulse = 0, lastFrame = 0, resizeTimer = 0;
       const pointer = { x: -9999, y: -9999 };
 
       function resize() {
+        const widthChanged = window.innerWidth !== width;
         width = window.innerWidth;
         height = window.innerHeight;
         canvas.width = width * dpr;
         canvas.height = height * dpr;
         ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        // En móvil la barra de direcciones cambia solo el alto al hacer scroll: se conservan los nodos.
+        if (!widthChanged && nodes.length) return;
         const count = Math.round(Math.min(70, Math.max(28, (width * height) / 22000)));
         nodes = Array.from({ length: count }, () => ({
           x: Math.random() * width,
           y: Math.random() * height,
-          vx: (Math.random() - 0.5) * 0.6,
-          vy: (Math.random() - 0.5) * 0.6,
+          vx: (Math.random() - 0.5) * 1.2,
+          vy: (Math.random() - 0.5) * 1.2,
           r: Math.random() * 1.8 + 1,
           hub: Math.random() < 0.12
         }));
         pulses = [];
       }
 
-      window.addEventListener('resize', resize);
+      window.addEventListener('resize', () => {
+        clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(resize, 150);
+      });
       window.addEventListener('pointermove', (e) => { pointer.x = e.clientX; pointer.y = e.clientY; }, { passive: true });
       document.addEventListener('pointerleave', () => { pointer.x = pointer.y = -9999; });
 
       function frame(t) {
+        if (t - lastFrame < FRAME_MS) {
+          requestAnimationFrame(frame);
+          return;
+        }
+        lastFrame = t;
         ctx.clearRect(0, 0, width, height);
         const edges = [];
 
@@ -1312,8 +1325,8 @@ git push                         # CI + GitHub Pages</code></pre><button class="
             ctx.moveTo(n.x, n.y);
             ctx.lineTo(pointer.x, pointer.y);
             ctx.stroke();
-            n.x += (pointer.x - n.x) * 0.002;
-            n.y += (pointer.y - n.y) * 0.002;
+            n.x += (pointer.x - n.x) * 0.004;
+            n.y += (pointer.y - n.y) * 0.004;
           }
         }
 
@@ -1331,7 +1344,7 @@ git push                         # CI + GitHub Pages</code></pre><button class="
         }
         ctx.fillStyle = '#3fb950';
         pulses = pulses.filter((s) => {
-          s.p += 0.02;
+          s.p += 0.04;
           if (s.p >= 1) return false;
           const x = s.a.x + (s.b.x - s.a.x) * s.p;
           const y = s.a.y + (s.b.y - s.a.y) * s.p;

@@ -36,7 +36,7 @@ Qué hace, en orden (aborta en el primer fallo):
 
 1. `npm ci` (o `npm install` si no hay lockfile).
 2. `npm run build`, que genera `dist/znve-mcp-server.js`.
-3. **Smoke test MCP real**: arranca el servidor desde un cwd ajeno y envía `initialize` → `notifications/initialized` → `tools/list`. Exige las 6 herramientas y que stdout no tenga ruido fuera de JSON-RPC.
+3. **Smoke test MCP real**: arranca el servidor desde un cwd ajeno y envía `initialize` → `notifications/initialized` → `tools/list`. Exige exactamente las 6 herramientas que declara `znve-auto/master_spec.json` y que stdout no tenga ruido fuera de JSON-RPC.
 4. Localiza el `mcp_config.json` de Antigravity. Usa el primero que exista:
    - `~/.gemini/antigravity-ide/mcp_config.json`
    - `~/.gemini/antigravity/mcp_config.json` (se crea si no existe ninguno)
@@ -130,6 +130,7 @@ python protocols/mcp/antigravity_sdk_example.py
 | `Cannot find module .../dist/...` | Falta el build: `npm run build`. |
 | `znve_help` devuelve `[ZNVE_HELP_FALLBACK]` | No encuentra `protocols/COMMANDS.md`. No muevas `dist/` fuera del repo. |
 | Los archivos "no existen" | Revisa `ZNVE_WORKSPACE`. El log de arranque (stderr) imprime `[znve-mcp] listo (stdio). Workspace: …`. |
+| `… queda fuera de ZNVE_WORKSPACE` | Barandilla, no fallo: las herramientas solo leen y escriben dentro del workspace (también a través de enlaces), y `znve_scaffold_harness` solo bajo `tests/` o `sandbox/`. Apunta `ZNVE_WORKSPACE` al proyecto correcto. |
 | Cambiaste el `.ts` | `npm run build` y **Refresh** en Manage MCP Servers. |
 
 > Regla stdio: **stdout está reservado para JSON-RPC.** Cualquier `console.log` en el servidor rompe el protocolo. Usa `process.stderr.write`.

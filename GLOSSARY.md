@@ -32,7 +32,7 @@ Términos formales de Zero-Noise Vibe Engineering (ZNVE v2.3.0) en español e in
 
 * **Archivo Objetivo / Target File (`TARGET_FILE`):** directiva que confina la intervención de la IA a una única ruta de archivo por tarea atómica, para impedir mutaciones en cascada.
 
-* **Barrera Anti-Sobrepeso / Anti-Bloat Fence:** restricción que veta paquetes externos, métodos redundantes o dependencias cuando el runtime, el SDK nativo o la biblioteca estándar resuelven el problema.
+* **Barrera Anti-Sobrepeso / Anti-Bloat Fence:** restricción que veta paquetes externos, métodos redundantes o dependencias cuando el runtime, el SDK nativo o la biblioteca estándar resuelven el problema. Una librería de terceros solo entra como excepción justificada en el propio contrato: qué resuelve, su peso y la alternativa nativa descartada.
 
 * **Guardrail / Guardrail:** regla operativa que el agente aplica en cada respuesta. ZNVE traduce sus 5 pilares en 7 guardrails (ver [SPECIFICATION.md §2.6](SPECIFICATION.md)).
 
@@ -128,7 +128,7 @@ Términos formales de Zero-Noise Vibe Engineering (ZNVE v2.3.0) en español e in
 
 * **`ZNVE_WORKSPACE`:** variable de entorno que fija la raíz del proyecto contra la que el servidor MCP resuelve las rutas.
 
-* **Skill `znve` / `znve` Skill:** paquete instalable que enseña ZNVE a Claude (claude.ai y Claude Code) y a Antigravity.
+* **Skill `znve` / `znve` Skill:** paquete instalable que enseña ZNVE a Claude (claude.ai y Claude Code), a Gemini (app y Gemini CLI) y a Antigravity.
 
 ---
 

@@ -178,9 +178,13 @@ python znve-auto/builder.py
 python znve-auto/test_sync.py
 ```
 
-The first command regenerates every artifact; the second certifies parity and runs in CI on every push and pull request. Details in [znve-auto/README.md](znve-auto/README.md).
+```bash
+cd protocols/mcp && npm ci && npm test
+```
 
-El primero regenera todos los artefactos; el segundo certifica la paridad y se ejecuta en el CI en cada push y pull request. Detalles en [znve-auto/README.md](znve-auto/README.md).
+The first command regenerates every artifact; the second certifies parity; the third builds the MCP server and runs its regression suite. All of them run in CI on every push and pull request. Details in [znve-auto/README.md](znve-auto/README.md).
+
+El primero regenera todos los artefactos; el segundo certifica la paridad; el tercero compila el servidor MCP y ejecuta su suite de regresión. Todos se ejecutan en el CI en cada push y pull request. Detalles en [znve-auto/README.md](znve-auto/README.md).
 
 ---
 

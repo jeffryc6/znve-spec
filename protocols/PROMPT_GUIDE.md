@@ -51,7 +51,7 @@ Iniciaremos el diseño del módulo [NOMBRE_DEL_MÓDULO] para una aplicación tip
 
 RESTRICCIONES ABSOLUTAS:
 1. Poda de Contexto: Prohibido escribir código de implementación en src/.
-2. Anti-Bloat Fence: Prohibido agregar librerías externas que no pertenezcan al SDK nativo o runtime base salvo justificación de peso cero.
+2. Anti-Bloat Fence: Prohibido agregar librerías externas que no pertenezcan al SDK nativo o runtime base, salvo excepción justificada (el SDK nativo no ofrece la capacidad; documenta qué resuelve, su peso y la alternativa nativa descartada).
 
 REQUERIMIENTO DE EJECUCIÓN:
 1. Recomienda el stack técnico optimizado (Tooling, Persistencia/BD y UI si aplica) para la plataforma [TIPO_DE_APP].
@@ -59,7 +59,7 @@ REQUERIMIENTO DE EJECUCIÓN:
 3. Aplica la Lista de Chequeo de Solidez:
    [ ] Estructura invariable (Entradas, salidas, entidades y Enums tipados).
    [ ] Defensas de frontera (Tipos de error explicitados, sin 'any').
-   [ ] Cero dependencias parásitas (Solo primitivos y SDKs autorizados).
+   [ ] Cero dependencias parásitas (Solo primitivos, SDKs autorizados o excepciones justificadas).
    [ ] Filtro de diferimiento (Ideas secundarias a contracts/CONTRACT_BACKLOG.md).
 4. Si la lista se cumple al 100%, emite el Criterio de Parada Obligatorio: "Contrato v1 sólido y cerrado. Listo para /znve-execute." y DETÉN la generación.
 ```
