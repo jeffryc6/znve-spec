@@ -4,7 +4,7 @@ Conecta un agente del Antigravity SDK al servidor ZNVE por stdio, siguiendo
 examples/getting_started/mcp_tools.py del repositorio oficial.
 
 Requisitos:
-  1. cd protocols/mcp && npm ci && npm run build
+  1. cd integrations/mcp-server && npm ci && npm run build
   2. pip install google-antigravity
   3. python antigravity_sdk_example.py
 """

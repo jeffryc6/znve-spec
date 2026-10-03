@@ -14,7 +14,7 @@ Ambos archivos se copian desde esta carpeta (los genera znve-auto/builder.py).
 También retira la instalación antigua en .antigravity/ si existe.
 
 Uso (desde la raíz del proyecto donde se quiere instalar):
-    python <ruta>/znve-spec/protocols/Antigravity/Skills/Auto_Installer.py
+    python <ruta>/znve-spec/integrations/antigravity/Auto_Installer.py
 """
 
 import json

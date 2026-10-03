@@ -1,5 +1,5 @@
 <p align="right">
-  <a href="https://translate.google.com/translate?sl=es&tl=en&u=https://github.com/jeffryc6/znve-spec/blob/main/protocols/agents/claude/skills/GUIA_CREAR_SKILL.md">
+  <a href="https://translate.google.com/translate?sl=es&tl=en&u=https://github.com/jeffryc6/znve-spec/blob/main/integrations/claude/skills/GUIA_CREAR_SKILL.md">
     <img src="https://img.shields.io/badge/Translate_to-English-blue?style=flat-square&logo=googletranslate" alt="Translate to English">
   </a>
 </p>

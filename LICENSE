@@ -13,11 +13,12 @@ su ubicación:
    - /rfcs
    - /case-studies
 
-2. PROTOCOLOS: CC BY 4.0 Y MIT (LICENCIA DUAL)
-   - /protocols (protocolos, manual de comandos, directivas de agentes, skills
-     de Claude y Antigravity, servidor MCP e instaladores)
+2. PROTOCOLOS E INTEGRACIONES: CC BY 4.0 Y MIT (LICENCIA DUAL)
+   - /protocols (protocolos y manual de comandos)
+   - /integrations (directivas de agentes, skills de Claude, Gemini y
+     Antigravity, integración de DeepSeek, servidor MCP e instaladores)
 
-   Todo el contenido de /protocols se ofrece a la vez bajo CC BY 4.0 y bajo la
+   Todo el contenido de /protocols y de /integrations se ofrece a la vez bajo CC BY 4.0 y bajo la
    Licencia MIT. Quien lo use puede acogerse a cualquiera de las dos, según le
    convenga: CC BY 4.0 para citarlo o adaptarlo como texto, o MIT para
    integrarlo como directiva, configuración o código en su proyecto.
@@ -25,7 +26,6 @@ su ubicación:
 3. CÓDIGO Y HERRAMIENTAS DEL REPOSITORIO: MIT
    - /znve-auto (especificación maestra, compilador, plantillas y pruebas)
    - /.github (instrucciones de Copilot y flujos de CI)
-   - copilot-instructions.md
    - index.html
 
 ------------------------------------------------------------------------------

@@ -252,7 +252,7 @@ Toda respuesta técnica se estructura en 4 bloques:
 
 ## 🛠️ SECCIÓN 2: HERRAMIENTAS MCP (`znve_*`) PARA AGENTES AUTÓNOMOS
 
-El servidor `protocols/mcp/znve-mcp-server.ts` expone estas herramientas por JSON-RPC (stdio). Las rutas se resuelven contra la variable `ZNVE_WORKSPACE`.
+El servidor `integrations/mcp-server/znve-mcp-server.ts` expone estas herramientas por JSON-RPC (stdio). Las rutas se resuelven contra la variable `ZNVE_WORKSPACE`.
 
 ### 1. `znve_help`
 
@@ -313,9 +313,9 @@ El servidor `protocols/mcp/znve-mcp-server.ts` expone estas herramientas por JSO
 
 ### 1. Claude (claude.ai, Claude Code y Claude Projects)
 
-- claude.ai: sube `protocols/agents/claude/skills/znve.zip` en **Settings → Capabilities → Skills**.
-- Claude Code: copia la carpeta `protocols/agents/claude/skills/znve/` a `~/.claude/skills/` o a `.claude/skills/` del proyecto.
-- Claude Projects: pega `protocols/agents/claude-system-skills.md` en **Project Instructions** o en `CLAUDE.md`.
+- claude.ai: sube `integrations/claude/skills/znve.zip` en **Settings → Capabilities → Skills**.
+- Claude Code: copia la carpeta `integrations/claude/skills/znve/` a `~/.claude/skills/` o a `.claude/skills/` del proyecto.
+- Claude Projects: pega `integrations/claude/project-instructions.md` en **Project Instructions** o en `CLAUDE.md`.
 - Invocación: `/znve-contract`, `/znve contract` o `/znve -contract`.
 
 ### 2. GitHub Copilot (VS Code, Visual Studio, JetBrains)
@@ -325,11 +325,11 @@ El servidor `protocols/mcp/znve-mcp-server.ts` expone estas herramientas por JSO
 
 ### 3. Cursor y Windsurf
 
-- Copia `protocols/agents/cursor-rules.md` a `.cursorrules` en la raíz del proyecto.
+- Copia `integrations/cursor/cursorrules.md` a `.cursorrules` en la raíz del proyecto.
 
 ### 4. DeepSeek (web, API o extensión)
 
-- Inyecta `protocols/agents/deepseek-directive.md` como mensaje con rol `system`.
+- Inyecta `integrations/deepseek/directive.md` como mensaje con rol `system`.
 - En R1 (Reasoner), las 4 fases de validación ocurren dentro de `<think>`.
 
 ### 5. Ollama (modelos locales)
@@ -337,27 +337,27 @@ El servidor `protocols/mcp/znve-mcp-server.ts` expone estas herramientas por JSO
 - Compila el agente local con el `Modelfile`:
 
 ```bash
-ollama create znve-agent -f ./protocols/agents/ollama/Modelfile
+ollama create znve-agent -f ./integrations/ollama/Modelfile
 ollama run znve-agent
 ```
 
 ### 6. Gemini (app web/Mac y Gemini CLI)
 
-- App de Gemini: en **Settings → Skills → Upload**, sube la carpeta `protocols/agents/gemini/skills/znve/`.
-- Gemini CLI: `gemini skills install https://github.com/jeffryc6/znve-spec.git --path protocols/agents/gemini/skills/znve`, o copia la carpeta a `~/.gemini/skills/` o a `.gemini/skills/` del proyecto.
+- App de Gemini: en **Settings → Skills → Upload**, sube la carpeta `integrations/gemini/skills/znve/`.
+- Gemini CLI: `gemini skills install https://github.com/jeffryc6/znve-spec.git --path integrations/gemini/skills/znve`, o copia la carpeta a `~/.gemini/skills/` o a `.gemini/skills/` del proyecto.
 - Invocación: `znve-contract …` sin barra en Gemini CLI (la CLI reserva `/`); en la app también vale `/znve-contract …`.
-- Guía completa: `protocols/agents/gemini/INSTALL_GEMINI.md`.
+- Guía completa: `integrations/gemini/INSTALL_GEMINI.md`.
 
 ### 7. OpenRouter
 
-- Usa `protocols/agents/openrouter/system-prompt.md` como prompt de sistema y `response-schema.json` como `response_format`.
+- Usa `integrations/openrouter/system-prompt.md` como prompt de sistema y `response-schema.json` como `response_format`.
 
 ### 8. Antigravity y otros clientes MCP (Claude Desktop, Cursor, Windsurf)
 
 - Antigravity: el instalador compila el servidor, verifica sus herramientas y registra `znve-engine`:
 
 ```bash
-cd protocols/mcp
+cd integrations/mcp-server
 node install-antigravity.mjs --workspace "<ruta>/tu-proyecto"
 ```
 
@@ -368,7 +368,7 @@ node install-antigravity.mjs --workspace "<ruta>/tu-proyecto"
   "mcpServers": {
     "znve-engine": {
       "command": "node",
-      "args": ["<ruta>/znve-spec/protocols/mcp/dist/znve-mcp-server.js"],
+      "args": ["<ruta>/znve-spec/integrations/mcp-server/dist/znve-mcp-server.js"],
       "env": {
         "ZNVE_WORKSPACE": "<ruta>/tu-proyecto",
         "NODE_ENV": "production"

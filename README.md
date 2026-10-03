@@ -6,7 +6,7 @@
 [![Code License: MIT](https://img.shields.io/badge/Code%20License-MIT-green.svg)](LICENSE)
 [![Standard: ZNVE v2.3.0](https://img.shields.io/badge/Standard-ZNVE%20v2.3.0-purple.svg)](SPECIFICATION.md)
 [![Glossary](https://img.shields.io/badge/Glossary-ES%20%2F%20EN-lightgrey.svg)](GLOSSARY.md)
-[![MCP Server](https://img.shields.io/badge/MCP%20Server-6%20tools-orange.svg)](protocols/mcp/)
+[![MCP Server](https://img.shields.io/badge/MCP%20Server-6%20tools-orange.svg)](integrations/mcp-server/)
 [![Parity Check](https://github.com/jeffryc6/znve-spec/actions/workflows/znve-parity.yml/badge.svg)](.github/workflows/znve-parity.yml)
 
 ---
@@ -98,16 +98,16 @@ Full manual with output formats, MCP tools and per-assistant setup / Manual comp
 
 | Assistant / Asistente | Setup / Instalación |
 | :--- | :--- |
-| **Claude (claude.ai)** | Upload / Sube [`znve.zip`](protocols/agents/claude/skills/znve.zip) in *Settings → Capabilities → Skills* |
-| **Claude Code** | Copy / Copia [`protocols/agents/claude/skills/znve/`](protocols/agents/claude/skills/znve/) to `~/.claude/skills/` |
-| **Claude Projects** | Paste / Pega [`claude-system-skills.md`](protocols/agents/claude-system-skills.md) in *Project Instructions* |
-| **Gemini (app & CLI)** | Upload / Sube [`gemini/skills/znve/`](protocols/agents/gemini/skills/znve/) in *Settings → Skills* · CLI: `gemini skills install` ([`INSTALL_GEMINI.md`](protocols/agents/gemini/INSTALL_GEMINI.md)) |
+| **Claude (claude.ai)** | Upload / Sube [`znve.zip`](integrations/claude/skills/znve.zip) in *Settings → Capabilities → Skills* |
+| **Claude Code** | Copy / Copia [`integrations/claude/skills/znve/`](integrations/claude/skills/znve/) to `~/.claude/skills/` |
+| **Claude Projects** | Paste / Pega [`project-instructions.md`](integrations/claude/project-instructions.md) in *Project Instructions* |
+| **Gemini (app & CLI)** | Upload / Sube [`gemini/skills/znve/`](integrations/gemini/skills/znve/) in *Settings → Skills* · CLI: `gemini skills install` ([`INSTALL_GEMINI.md`](integrations/gemini/INSTALL_GEMINI.md)) |
 | **GitHub Copilot** | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) (already in place / ya incluido) |
-| **Cursor / Windsurf** | Copy / Copia [`cursor-rules.md`](protocols/agents/cursor-rules.md) as / como `.cursorrules` |
-| **DeepSeek** | [`deepseek-directive.md`](protocols/agents/deepseek-directive.md) as the `system` message / como mensaje `system` |
-| **Ollama** | `ollama create znve-agent -f ./protocols/agents/ollama/Modelfile` |
-| **OpenRouter** | [`system-prompt.md`](protocols/agents/openrouter/system-prompt.md) + [`response-schema.json`](protocols/agents/openrouter/response-schema.json) |
-| **Antigravity** | [`INSTALL_ANTIGRAVITY.md`](protocols/Antigravity/Skills/INSTALL_ANTIGRAVITY.md) (skill) · [`ANTIGRAVITY_INSTALL.md`](protocols/mcp/ANTIGRAVITY_INSTALL.md) (MCP) |
+| **Cursor / Windsurf** | Copy / Copia [`cursorrules.md`](integrations/cursor/cursorrules.md) as / como `.cursorrules` |
+| **DeepSeek** | [`directive.md`](integrations/deepseek/directive.md) as the `system` message / como mensaje `system` |
+| **Ollama** | `ollama create znve-agent -f ./integrations/ollama/Modelfile` |
+| **OpenRouter** | [`system-prompt.md`](integrations/openrouter/system-prompt.md) + [`response-schema.json`](integrations/openrouter/response-schema.json) |
+| **Antigravity** | [`INSTALL_ANTIGRAVITY.md`](integrations/antigravity/INSTALL_ANTIGRAVITY.md) (skill) · [`ANTIGRAVITY_INSTALL.md`](integrations/mcp-server/ANTIGRAVITY_INSTALL.md) (MCP) |
 
 ### English
 1. **Install ZNVE** in your assistant using the table above.
@@ -140,18 +140,16 @@ znve-spec/
 │   ├── ZNVE_LEGACY_PROTOCOL.md        <-- 5-phase legacy rescue protocol
 │   ├── GREENFIELD_STARTER.md          <-- Day 0 quickstart
 │   ├── PROMPT_GUIDE.md                <-- Prompt templates per command
-│   ├── COMMANDS.md                    <-- Full command & MCP manual (generated)
-│   ├── agents/
-│   │   ├── claude/skills/znve/        <-- Claude skill + znve.zip (generated)
-│   │   ├── claude-system-skills.md    <-- Claude Projects / CLAUDE.md (generated)
-│   │   ├── gemini/skills/znve/        <-- Gemini app & Gemini CLI skill (generated)
-│   │   ├── copilot-instrucctions.md   <-- Copilot mirror (generated)
-│   │   ├── cursor-rules.md            <-- Cursor / Windsurf rules (generated)
-│   │   ├── deepseek-directive.md      <-- DeepSeek V3 / R1 (generated)
-│   │   ├── ollama/Modelfile           <-- Ollama local agent (generated)
-│   │   └── openrouter/                <-- System prompt (generated), JSON schema & client
-│   ├── Antigravity/Skills/            <-- Antigravity skill, SDK module & installers
-│   └── mcp/                           <-- stdio MCP server (6 tools) & Antigravity installer
+│   └── COMMANDS.md                    <-- Full command & MCP manual (generated)
+├── integrations/                      <-- One folder per assistant (index: integrations/README.md)
+│   ├── claude/                        <-- Skill + znve.zip, Claude Projects / CLAUDE.md (generated)
+│   ├── gemini/                        <-- Gemini app & Gemini CLI skill (generated)
+│   ├── antigravity/                   <-- Antigravity skill, SDK module & installers
+│   ├── cursor/cursorrules.md          <-- Cursor / Windsurf rules (generated)
+│   ├── deepseek/                      <-- directive.md (generated) & harness/ (DeepSeek Harness)
+│   ├── ollama/Modelfile               <-- Ollama local agent (generated)
+│   ├── openrouter/                    <-- System prompt (generated), JSON schema & client
+│   └── mcp-server/                    <-- stdio MCP server (6 tools) & Antigravity installer
 ├── rfcs/                              <-- Request for Comments
 ├── znve-auto/                         <-- Single source of truth: spec, builder & parity tests
 ├── CONTRIBUTING.md                    <-- Contribution guidelines
@@ -179,7 +177,7 @@ python znve-auto/test_sync.py
 ```
 
 ```bash
-cd protocols/mcp && npm ci && npm test
+cd integrations/mcp-server && npm ci && npm test
 ```
 
 The first command regenerates every artifact; the second certifies parity; the third builds the MCP server and runs its regression suite. All of them run in CI on every push and pull request. Details in [znve-auto/README.md](znve-auto/README.md).
@@ -191,8 +189,8 @@ El primero regenera todos los artefactos; el segundo certifica la paridad; el te
 ## 📜 Dual License / Licenciamiento Dual
 
 - **Specification & documentation / Especificación y documentación** (`SPECIFICATION.md`, `README.md`, `GLOSSARY.md`, `CONTRIBUTING.md`, `rfcs/`, `case-studies/`): [CC BY 4.0](LICENSE).
-- **Protocols / Protocolos** (`protocols/`: protocols, command manual, agent directives, skills, MCP server / protocolos, manual de comandos, directivas, skills, servidor MCP): [CC BY 4.0 **and** MIT](LICENSE). Both licenses apply together; use whichever fits / Ambas licencias a la vez; elige la que te convenga.
-- **Repository tooling / Herramientas del repositorio** (`znve-auto/`, `.github/`, `copilot-instructions.md`, `index.html`): [MIT](LICENSE).
+- **Protocols & integrations / Protocolos e integraciones** (`protocols/`, `integrations/`: protocols, command manual, agent directives, skills, MCP server / protocolos, manual de comandos, directivas, skills, servidor MCP): [CC BY 4.0 **and** MIT](LICENSE). Both licenses apply together; use whichever fits / Ambas licencias a la vez; elige la que te convenga.
+- **Repository tooling / Herramientas del repositorio** (`znve-auto/`, `.github/`, `index.html`): [MIT](LICENSE).
 
 ---
 

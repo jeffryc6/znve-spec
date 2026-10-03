@@ -14,7 +14,7 @@
     "build": "tsc",
     "start": "node dist/znve-mcp-server.js",
     "test": "tsc && node --test test/server.test.mjs",
-    "check:openrouter": "tsc --noEmit --strict --target es2022 --module nodenext --moduleResolution nodenext --skipLibCheck --typeRoots ./node_modules/@types --types node ../agents/openrouter/znve-openrouter-client.ts",
+    "check:openrouter": "tsc --noEmit --strict --target es2022 --module nodenext --moduleResolution nodenext --skipLibCheck --typeRoots ./node_modules/@types --types node ../openrouter/znve-openrouter-client.ts",
     "install:antigravity": "node install-antigravity.mjs",
     "uninstall:antigravity": "node install-antigravity.mjs --uninstall"
   },

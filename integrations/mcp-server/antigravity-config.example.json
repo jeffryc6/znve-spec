@@ -2,7 +2,7 @@
   "mcpServers": {
     "znve-engine": {
       "command": "node",
-      "args": ["D:/ruta/absoluta/a/znve-spec/protocols/mcp/dist/znve-mcp-server.js"],
+      "args": ["D:/ruta/absoluta/a/znve-spec/integrations/mcp-server/dist/znve-mcp-server.js"],
       "env": {
         "ZNVE_WORKSPACE": "D:/ruta/absoluta/a/tu-proyecto",
         "NODE_ENV": "production"

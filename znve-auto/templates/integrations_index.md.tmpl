@@ -1,0 +1,22 @@
+{{generated_md}}
+
+# Integraciones de ZNVE v{{version}}
+
+Una carpeta por asistente. Las directivas, skills y guías se generan desde `znve-auto/master_spec.json`; el código (servidor MCP, cliente de OpenRouter, instaladores) y la integración de DeepSeek Harness se mantienen a mano.
+
+| Carpeta | Asistente | Qué usar |
+|---|---|---|
+| [`claude/`](claude/) | Claude (claude.ai, Claude Code y Claude Projects) | `skills/znve/`, `skills/znve.zip` o `project-instructions.md` |
+| [`gemini/`](gemini/) | Gemini (app y Gemini CLI) | `skills/znve/` y `INSTALL_GEMINI.md` |
+| [`antigravity/`](antigravity/) | Google Antigravity (IDE, CLI y SDK) | `SKILL.md`, `INSTALL_ANTIGRAVITY.md` e instaladores |
+| [`cursor/`](cursor/) | Cursor y Windsurf | `cursorrules.md` |
+| [`deepseek/`](deepseek/) | DeepSeek (web, API y DeepSeek Harness) | `directive.md` y `harness/` |
+| [`ollama/`](ollama/) | Ollama (modelos locales) | `Modelfile` |
+| [`openrouter/`](openrouter/) | OpenRouter | `system-prompt.md`, `response-schema.json` y el cliente |
+| [`mcp-server/`](mcp-server/) | Antigravity y otros clientes MCP | `znve-mcp-server.ts` e `install-antigravity.mjs` |
+
+GitHub Copilot lee [`.github/copilot-instructions.md`](../.github/copilot-instructions.md) en la raíz del repositorio.
+
+## Instalación por asistente
+
+{{integrations_md}}

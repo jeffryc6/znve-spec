@@ -5,7 +5,7 @@
 La skill sigue el formato abierto Agent Skills: una carpeta con `SKILL.md` en la raíz (frontmatter `name` y `description`) y recursos opcionales. La misma carpeta sirve para la app de Gemini (web y Mac) y para Gemini CLI.
 
 ```text
-protocols/agents/gemini/skills/znve/
+integrations/gemini/skills/znve/
 ├── SKILL.md                      <-- instrucciones y catálogo de comandos
 └── references/
     └── chameleon-layer.md        <-- prioridades y antipatrones por plataforma
@@ -20,7 +20,7 @@ Referencias: [Skills en la app de Gemini](https://support.google.com/gemini/answ
 Requisitos de Google: cuenta personal de Google, mayor de 18 años y la **actividad de Keep** (Keep Activity) activada.
 
 1. Abre **Settings → Skills** en [gemini.google.com](https://gemini.google.com).
-2. Pulsa **Upload** y selecciona la **carpeta** `protocols/agents/gemini/skills/znve/` completa. Subir solo `SKILL.md` también funciona, pero sin la Capa Camaleónica.
+2. Pulsa **Upload** y selecciona la **carpeta** `integrations/gemini/skills/znve/` completa. Subir solo `SKILL.md` también funciona, pero sin la Capa Camaleónica.
 3. Comprueba que la skill `znve` aparece activada en la página de Skills.
 4. Abre un chat nuevo y prueba: `znve-help`.
 
@@ -36,7 +36,7 @@ Notas:
 ### Opción A: instalar desde el repositorio
 
 ```bash
-gemini skills install https://github.com/jeffryc6/znve-spec.git --path protocols/agents/gemini/skills/znve
+gemini skills install https://github.com/jeffryc6/znve-spec.git --path integrations/gemini/skills/znve
 ```
 
 Añade `--scope workspace` para instalarla solo en el proyecto actual.
@@ -46,7 +46,7 @@ Añade `--scope workspace` para instalarla solo en el proyecto actual.
 Dentro de una sesión de `gemini`:
 
 ```text
-/skills link ./protocols/agents/gemini/skills/znve --scope user
+/skills link ./integrations/gemini/skills/znve --scope user
 /skills reload
 ```
 

@@ -22,7 +22,7 @@ pip install google-antigravity
 Desde la raíz del proyecto:
 
 ```bash
-python <ruta>/znve-spec/protocols/Antigravity/Skills/Auto_Installer.py
+python <ruta>/znve-spec/integrations/antigravity/Auto_Installer.py
 ```
 
 Crea la skill en la ruta de workspace que lee Antigravity (IDE, Antigravity 2.0 y CLI):
@@ -38,7 +38,7 @@ Si el proyecto tiene una instalación antigua en `.antigravity/skills/znve/`, la
 ## 3. Instalación global
 
 ```bash
-python <ruta>/znve-spec/protocols/Antigravity/Skills/install_znve_global.py
+python <ruta>/znve-spec/integrations/antigravity/install_znve_global.py
 ```
 
 - Copia `SKILL.md` a `~/.gemini/config/skills/{{name}}/`, la ruta global de Antigravity IDE y Antigravity 2.0.
@@ -65,7 +65,7 @@ async def main():
 asyncio.run(main())
 ```
 
-`get_znve_config(**kwargs)` pasa los argumentos extra (`api_key`, `mcp_servers`, `policies`...) a `LocalAgentConfig`. Ejemplo ejecutable: `agent.py`. Para añadir el servidor MCP de ZNVE, consulta `protocols/mcp/ANTIGRAVITY_INSTALL.md`.
+`get_znve_config(**kwargs)` pasa los argumentos extra (`api_key`, `mcp_servers`, `policies`...) a `LocalAgentConfig`. Ejemplo ejecutable: `agent.py`. Para añadir el servidor MCP de ZNVE, consulta `integrations/mcp-server/ANTIGRAVITY_INSTALL.md`.
 
 ## 5. Verificación
 

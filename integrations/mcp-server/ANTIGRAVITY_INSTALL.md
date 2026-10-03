@@ -8,7 +8,7 @@ Referencias: [Model Context Protocol](https://modelcontextprotocol.io) ·
 [Antigravity SDK: MCP](https://antigravity.google/docs/sdk/mcp/#model-context-protocol-mcp-integration) ·
 [mcp_tools.py](https://github.com/google-antigravity/antigravity-sdk-python/blob/main/examples/getting_started/mcp_tools.py)
 
-Este documento cubre el **servidor MCP**. Para instalar la **skill** `znve` (instrucciones de sistema y comandos `/znve-*`) en Antigravity, consulta [INSTALL_ANTIGRAVITY.md](../Antigravity/Skills/INSTALL_ANTIGRAVITY.md). Ambas piezas se complementan: la skill le enseña la metodología al agente y el servidor MCP le da las barandillas físicas.
+Este documento cubre el **servidor MCP**. Para instalar la **skill** `znve` (instrucciones de sistema y comandos `/znve-*`) en Antigravity, consulta [INSTALL_ANTIGRAVITY.md](../antigravity/INSTALL_ANTIGRAVITY.md). Ambas piezas se complementan: la skill le enseña la metodología al agente y el servidor MCP le da las barandillas físicas.
 
 ---
 
@@ -16,7 +16,7 @@ Este documento cubre el **servidor MCP**. Para instalar la **skill** `znve` (ins
 
 | Causa | Efecto | Corrección |
 |---|---|---|
-| El config apuntaba a `protocols/mcp/znve-mcp-server.js`, que no existe. `tsc` compila a `dist/`. | Node falla al arrancar y Antigravity muestra el servidor sin herramientas. | `args` → `.../protocols/mcp/dist/znve-mcp-server.js` |
+| El config apuntaba a `integrations/mcp-server/znve-mcp-server.js`, que no existe. `tsc` compila a `dist/`. | Node falla al arrancar y Antigravity muestra el servidor sin herramientas. | `args` → `.../integrations/mcp-server/dist/znve-mcp-server.js` |
 | El `.ts` nunca se compilaba (no había `node_modules/` ni `dist/`). | No existía ningún JS que ejecutar. | El auto-installer ejecuta `npm ci` + `npm run build`. |
 | Las rutas se resolvían contra `process.cwd()`. Antigravity lanza el proceso con un cwd arbitrario. | `znve_help` devolvía el fallback y `znve_forensic_scan` no encontraba los archivos. | Nueva variable `ZNVE_WORKSPACE`. `COMMANDS.md` se busca relativo al propio servidor. |
 | `"command": "node"` depende del `PATH` del IDE. | Con nvm, fnm o Volta el IDE no encuentra `node`. | El installer escribe la ruta absoluta de `node`. |
@@ -28,7 +28,7 @@ Este documento cubre el **servidor MCP**. Para instalar la **skill** `znve` (ins
 Requisitos: **Node.js ≥ 18** y **npm**.
 
 ```bash
-cd protocols/mcp
+cd integrations/mcp-server
 node install-antigravity.mjs --workspace "D:/ruta/a/tu-proyecto"
 ```
 
@@ -63,7 +63,7 @@ Atajos npm: `npm run install:antigravity` · `npm run uninstall:antigravity`.
 Pega esto en el chat del agente de Antigravity con el repo `znve-spec` abierto:
 
 > Instala el servidor MCP de ZNVE. Ejecuta en la terminal:
-> `cd protocols/mcp && node install-antigravity.mjs --workspace "<RUTA_ABSOLUTA_DE_MI_PROYECTO>"`.
+> `cd integrations/mcp-server && node install-antigravity.mjs --workspace "<RUTA_ABSOLUTA_DE_MI_PROYECTO>"`.
 > Si el comando termina con `[znve-install] Listo`, pídeme que refresque **Manage MCP Servers**.
 > Si falla, muéstrame la línea `ERROR:` y no edites `mcp_config.json` a mano.
 
@@ -72,7 +72,7 @@ Pega esto en el chat del agente de Antigravity con el repo `znve-spec` abierto:
 ## 2. Instalación manual (IDE)
 
 ```bash
-cd protocols/mcp
+cd integrations/mcp-server
 npm ci
 npm run build
 ```
@@ -84,7 +84,7 @@ Añade esto dentro de `mcpServers` en `mcp_config.json`. También puedes abrirlo
   "mcpServers": {
     "znve-engine": {
       "command": "C:/Program Files/nodejs/node.exe",
-      "args": ["D:/ruta/a/znve-spec/protocols/mcp/dist/znve-mcp-server.js"],
+      "args": ["D:/ruta/a/znve-spec/integrations/mcp-server/dist/znve-mcp-server.js"],
       "env": {
         "ZNVE_WORKSPACE": "D:/ruta/a/tu-proyecto",
         "NODE_ENV": "production"
@@ -106,7 +106,7 @@ El SDK no lee `mcp_config.json`. Los servidores se declaran con `types.McpStdioS
 znve = types.McpStdioServer(
     name="znve-engine",
     command="node",
-    args=["/ruta/a/znve-spec/protocols/mcp/dist/znve-mcp-server.js"],
+    args=["/ruta/a/znve-spec/integrations/mcp-server/dist/znve-mcp-server.js"],
     env={"ZNVE_WORKSPACE": "/ruta/a/tu-proyecto"},
 )
 config = LocalAgentConfig(mcp_servers=[znve], policies=[...])
@@ -117,7 +117,7 @@ Ejemplo completo con políticas (solo lectura por defecto, escritura denegada):
 
 ```bash
 pip install google-antigravity
-python protocols/mcp/antigravity_sdk_example.py
+python integrations/mcp-server/antigravity_sdk_example.py
 ```
 
 ---

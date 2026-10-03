@@ -27,10 +27,11 @@ import { fileURLToPath } from "node:url";
 const WORKSPACE_ROOT = path.resolve(process.env.ZNVE_WORKSPACE || process.cwd());
 const SERVER_DIR = path.dirname(fileURLToPath(import.meta.url));
 
-// Fuente única de verdad del manual: relativo al servidor (fuente o dist/) o al workspace como respaldo.
+// Fuente única de verdad del manual: relativo al servidor (fuente en integrations/mcp-server/ o
+// compilado en dist/) o al workspace como respaldo.
 const MANUAL_CANDIDATES = [
-  path.resolve(SERVER_DIR, "../COMMANDS.md"),
-  path.resolve(SERVER_DIR, "../../COMMANDS.md"),
+  path.resolve(SERVER_DIR, "../../protocols/COMMANDS.md"),
+  path.resolve(SERVER_DIR, "../../../protocols/COMMANDS.md"),
   path.resolve(WORKSPACE_ROOT, "protocols/COMMANDS.md"),
 ];
 

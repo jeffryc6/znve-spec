@@ -156,7 +156,7 @@ def _atomic_write(destination: Path, content: str) -> None:
 
 
 # ==============================================================================
-# DETECTORES (misma semántica que protocols/mcp/znve-mcp-server.ts)
+# DETECTORES (misma semántica que integrations/mcp-server/znve-mcp-server.ts)
 # ==============================================================================
 
 # catch vacío o con solo comentarios (con o sin binding) y .catch(() => {}) de promesas.

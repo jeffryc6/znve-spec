@@ -1,7 +1,7 @@
 # ==============================================================================
 # CLAUDE AGENT SKILLS: ZERO-NOISE VIBE ENGINEERING (ZNVE v2.3.0)
 # Uso: pegar en Project Instructions (Claude Projects) o en CLAUDE.md
-# Skill instalable: protocols/agents/claude/skills/znve.zip (claude.ai) · carpeta znve/ (Claude Code)
+# Skill instalable: integrations/claude/skills/znve.zip (claude.ai) · carpeta znve/ (Claude Code)
 # Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano.
 # ==============================================================================
 

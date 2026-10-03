@@ -161,7 +161,7 @@ Las preguntas conceptuales se responden de forma directa, sin forzar los 4 bloqu
 
 ## 8. HERRAMIENTAS MCP (`znve_*`)
 
-El servidor de referencia (`protocols/mcp/znve-mcp-server.ts`, transporte stdio) convierte las cláusulas en barandillas físicas para agentes autónomos. Las rutas se resuelven contra `ZNVE_WORKSPACE`.
+El servidor de referencia (`integrations/mcp-server/znve-mcp-server.ts`, transporte stdio) convierte las cláusulas en barandillas físicas para agentes autónomos. Las rutas se resuelven contra `ZNVE_WORKSPACE`.
 
 | Herramienta | Fase | Garantía |
 |---|---|---|

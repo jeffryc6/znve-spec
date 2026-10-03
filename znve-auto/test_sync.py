@@ -33,16 +33,16 @@ REPO = builder.REPO_ROOT
 SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 ZNVE_VERSION_REF = re.compile(r"ZNVE[^\n\d]{0,40}?v?(\d+\.\d+\.\d+)")
 SKILL_KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compatibility"}
-MCP_SERVER = REPO / "protocols" / "mcp" / "znve-mcp-server.ts"
-OPENROUTER_SCHEMA = REPO / "protocols" / "agents" / "openrouter" / "response-schema.json"
+MCP_SERVER = REPO / "integrations" / "mcp-server" / "znve-mcp-server.ts"
+OPENROUTER_SCHEMA = REPO / "integrations" / "openrouter" / "response-schema.json"
 # Directiva global de DeepSeek Harness: se mantiene a mano (un AGENTS.md global compite
 # por presupuesto de render y debe seguir siendo conciso), así que se verifica, no se genera.
-DEEPSEEK_AGENTS = REPO / "protocols" / "agents" / "deepseek" / "AGENTS.md"
+DEEPSEEK_AGENTS = REPO / "integrations" / "deepseek" / "harness" / "AGENTS.md"
 SKILL_FILES = (
-    "protocols/agents/claude/skills/znve/SKILL.md",
-    "protocols/agents/gemini/skills/znve/SKILL.md",
+    "integrations/claude/skills/znve/SKILL.md",
+    "integrations/gemini/skills/znve/SKILL.md",
 )
-ANTIGRAVITY_DIR = REPO / "protocols" / "Antigravity" / "Skills"
+ANTIGRAVITY_DIR = REPO / "integrations" / "antigravity"
 HAND_MAINTAINED_SKIP = {".git", "node_modules", "dist", "znve-auto"}
 
 
@@ -252,7 +252,7 @@ class AntigravityPythonTests(unittest.TestCase):
         """Los artefactos de Antigravity usan 'znve', no el nombre largo antiguo."""
         rendered = builder.render_targets(self.spec)
         for rel, text in rendered.items():
-            if rel.startswith("protocols/Antigravity/") and not rel.endswith(".md"):
+            if rel.startswith("integrations/antigravity/") and not rel.endswith(".md"):
                 self.assertNotRegex(text, r"zero[-_]noise[-_]vibe[-_]engineering", rel)
 
     def test_workspace_installer_migrates(self):
