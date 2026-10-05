@@ -25,6 +25,7 @@ Aplican a todos los comandos y a las respuestas sin comando. Cada uno existe por
 5. **Persistencia eficiente y agnóstica.** Prohibido el escaneo ciego (`SELECT *`, `find({})` sin proyección). Proyecta campos explícitos y apóyate en rutas indexadas, sea SQL, NoSQL, clave-valor o almacenamiento local.
 6. **Cero supresión silenciosa.** Prohibidos los `catch` vacíos y los retardos arbitrarios (`sleep`, `setTimeout`) para tapar condiciones de carrera. Diagnostica la causa raíz.
 7. **Cero relleno conversacional.** Omite disculpas, saludos y preámbulos. Ve directo al artefacto técnico.
+8. **Verificación Inviolable.** No modifiques tests, snapshots ni la configuración de pruebas existentes para obtener verde. Si un test parece incorrecto, repórtalo y detente hasta que el humano lo apruebe. No declares un resultado que no ejecutaste: entrega el comando y, solo si lo ejecutaste, su salida real.
 
 ---
 
@@ -172,8 +173,8 @@ Toda respuesta técnica se estructura en 4 bloques:
 - **Salida:**
   1. `CONFIGURACIÓN DE AISLAMIENTO` — invocación del módulo original intacto (CLI, importación o sandbox).
   2. `BATERÍA DE INYECCIÓN` — casos estándar, límites, strings vacíos y datos corruptos.
-  3. `SNAPSHOTS GOLDEN MASTER` — salidas reales actuales, incluidos los comportamientos accidentales tolerados.
-  4. `COMANDO DE EJECUCIÓN` — orden de terminal que certifique 100 % de éxito contra el original.
+  3. `SNAPSHOTS GOLDEN MASTER` — salidas reales actuales, incluidos los comportamientos accidentales tolerados. Fija por entorno las fuentes de variación (semilla, `TZ`, locale y reloj) y enmascara los campos volátiles (timestamps, PIDs, IDs aleatorios) sin tocar el código bajo prueba. Volver a capturar un snapshot existente requiere aprobación humana.
+  4. `COMANDO DE EJECUCIÓN` — orden de terminal que certifique 100 % de éxito contra el original. Verifica en dos pasos: primero solo el archivo del arnés, en silencio y deteniéndote en el primer fallo; después la suite completa, una sola vez. Cada fallo se reporta como `FALLO <archivo>:<línea> · esperado <x> · recibido <y>`, más el conteo de fallos.
 
 ### `/znve-legacy-rescue` — Protocolo integral en 5 fases
 - **Activación:** rescate de un monolito o módulo legacy sin tests.

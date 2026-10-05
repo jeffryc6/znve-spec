@@ -285,6 +285,16 @@ describe("znve_scaffold_harness", () => {
     assert.ok(!exists(outside, "tests", "h.txt"));
   });
 
+  test("solo crea: no sobrescribe un arnés o snapshot existente y no deja temporales", async () => {
+    const args = { harness_directory: "tests/sin-sobrescribir", test_filename: "golden.snap", harness_code: "ORIGINAL\n" };
+    assert.equal((await call("znve_scaffold_harness", args)).isError, false);
+    const again = await call("znve_scaffold_harness", { ...args, harness_code: "CAMBIADO\n" });
+    assert.equal(again.isError, true);
+    const folder = path.join(ws, "tests", "sin-sobrescribir");
+    assert.equal(fs.readFileSync(path.join(folder, "golden.snap"), "utf-8"), "ORIGINAL\n");
+    assert.deepEqual(fs.readdirSync(folder), ["golden.snap"]);
+  });
+
   test("exige los tres argumentos", async () => {
     assert.equal((await call("znve_scaffold_harness", { harness_directory: "tests" })).isError, true);
   });

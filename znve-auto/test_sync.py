@@ -91,6 +91,19 @@ class SpecTests(unittest.TestCase):
         ids = [s["id"] for s in self.spec["scenarios"]]
         self.assertEqual(ids, list(range(7)))
 
+    def test_guardrail_count_in_docs(self):
+        """Los documentos escritos a mano citan el número real de guardrails."""
+        total = len(self.spec["guardrails"])
+        quoted = {
+            "SPECIFICATION.md": r"en (\d+) guardrails|Aplica los (\d+) guardrails",
+            "GLOSSARY.md": r"en (\d+) guardrails",
+            "index.html": r"(\d+) reglas que el agente|(\d+) rules the agent",
+        }
+        for rel, pattern in quoted.items():
+            found = [int(n) for groups in re.findall(pattern, (REPO / rel).read_text(encoding="utf-8")) for n in groups if n]
+            self.assertTrue(found, f"{rel} ya no cita el número de guardrails")
+            self.assertEqual(set(found), {total}, f"{rel} cita {sorted(set(found))} y la especificación tiene {total}")
+
     def test_default_format(self):
         """La respuesta por defecto tiene exactamente 4 bloques."""
         self.assertEqual(len(self.spec["default_format"]["blocks"]), 4)
@@ -117,6 +130,33 @@ class ArtifactTests(unittest.TestCase):
             text = self.rendered[target["output"]]
             for c in self.spec["commands"]:
                 self.assertIn(c["name"], text, f"{c['name']} falta en {target['output']}")
+
+    def test_inviolable_verification_everywhere(self):
+        """Cada directiva de agente lleva el guardrail de Verificación Inviolable (en español o en inglés)."""
+        guard = next(g for g in self.spec["guardrails"] if g["title_es"] == "Verificación Inviolable")
+        first = self.spec["guardrails"][0]
+        checked = 0
+        for target in self.spec["targets"]:
+            text = self.rendered[target["output"]]
+            if first["text_es"] not in text and first["text_en"] not in text:
+                continue  # no es una directiva con guardrails (manual, instaladores, referencias)
+            checked += 1
+            self.assertTrue(
+                guard["text_es"] in text or guard["text_en"] in text,
+                f"{target['output']} no incluye el guardrail de Verificación Inviolable",
+            )
+        self.assertGreaterEqual(checked, 8, "se esperaban al menos 8 directivas con guardrails")
+
+    def test_harness_output_is_deterministic_and_verified(self):
+        """El comando harness fija el determinismo del Golden Master y la verificación en dos pasos."""
+        harness = next(c for c in self.spec["commands"] if c["id"] == "harness")
+        outputs = {o["label_es"]: o["desc_es"] for o in harness["outputs"]}
+        snapshots = outputs["SNAPSHOTS GOLDEN MASTER"]
+        for needle in ("semilla", "`TZ`", "locale", "reloj", "volátiles", "aprobación humana"):
+            self.assertIn(needle, snapshots)
+        run = outputs["COMANDO DE EJECUCIÓN"]
+        for needle in ("dos pasos", "primer fallo", "FALLO <archivo>:<línea>", "conteo de fallos"):
+            self.assertIn(needle, run)
 
     def test_single_version(self):
         """Ningún artefacto generado cita una versión de ZNVE distinta de la especificación."""
@@ -360,6 +400,16 @@ class SkillToolBehaviorTests(unittest.TestCase):
         result = self.skill.znve_scaffold_harness("tests/characterization", "test_legacy.py", "pass\n")
         self.assertEqual(result["status"], "SUCCESS", result)
         self.assertTrue((self.ws / "tests" / "characterization" / "test_legacy.py").is_file())
+
+    def test_harness_never_overwrites(self):
+        """Aplica la Verificación Inviolable por código: un arnés o snapshot existente no se sobrescribe."""
+        first = self.skill.znve_scaffold_harness("tests/characterization", "test_legacy.py", "ORIGINAL\n")
+        self.assertEqual(first["status"], "SUCCESS", first)
+        again = self.skill.znve_scaffold_harness("tests/characterization", "test_legacy.py", "CAMBIADO\n")
+        self.assertRejected(again)
+        folder = self.ws / "tests" / "characterization"
+        self.assertEqual((folder / "test_legacy.py").read_text(encoding="utf-8"), "ORIGINAL\n")
+        self.assertEqual([p.name for p in folder.iterdir()], ["test_legacy.py"], "sin temporales residuales")
 
     def test_write_rejects_escape(self):
         result = self.skill.znve_surgical_write("../outside/pwned.txt", "x", "not_applicable")

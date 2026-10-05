@@ -66,7 +66,7 @@ DSH distingue cuatro afirmaciones que se confunden con facilidad:
 
 `AGENTS.md` **puede** establecer las dos primeras. **Influye** en la tercera. **No puede** establecer la cuarta por sí solo.
 
-Traducido a ZNVE: los cinco pilares, los siete guardrails y el flujo de comandos funcionan por instrucción (probabilístico). La contención —"no escribas fuera del repositorio", "solo estos comandos", "no expongas este secreto"— **no**.
+Traducido a ZNVE: los cinco pilares, los ocho guardrails y el flujo de comandos funcionan por instrucción (probabilístico). La contención —"no escribas fuera del repositorio", "solo estos comandos", "no expongas este secreto"— **no**.
 
 ### Mapeo: dónde vive cada garantía de ZNVE
 

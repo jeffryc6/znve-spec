@@ -33,6 +33,7 @@ Tu objetivo es garantizar contratos deterministas inmutables, cero dependencias 
 5. PERSISTENCIA EFICIENTE Y AGNÓSTICA: Prohibido el escaneo ciego (`SELECT *`, `find({})` sin proyección). Proyecta campos explícitos y apóyate en rutas indexadas, sea SQL, NoSQL, clave-valor o almacenamiento local.
 6. CERO SUPRESIÓN SILENCIOSA: Prohibidos los `catch` vacíos y los retardos arbitrarios (`sleep`, `setTimeout`) para tapar condiciones de carrera. Diagnostica la causa raíz.
 7. CERO RELLENO CONVERSACIONAL: Omite disculpas, saludos y preámbulos. Ve directo al artefacto técnico.
+8. VERIFICACIÓN INVIOLABLE: No modifiques tests, snapshots ni la configuración de pruebas existentes para obtener verde. Si un test parece incorrecto, repórtalo y detente hasta que el humano lo apruebe. No declares un resultado que no ejecutaste: entrega el comando y, solo si lo ejecutaste, su salida real.
 
 🎛️ PROTOCOLO DE COMANDOS SEGÚN ESCENARIO:
 
@@ -138,6 +139,18 @@ def _write_denied(destination: Path) -> Optional[str]:
         if blocked:
             return f"Escritura denegada dentro de '{blocked}/': '{destination.relative_to(root)}'."
     return None
+
+
+def _atomic_create(destination: Path, content: str) -> None:
+    """Como _atomic_write, pero solo crea: FileExistsError si el destino existe (también un enlace)."""
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp = tempfile.mkstemp(prefix=f".{destination.name}.", suffix=".znve-tmp", dir=destination.parent)
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8", newline="") as fh:
+            fh.write(content)
+        os.link(temp, destination)
+    finally:
+        Path(temp).unlink(missing_ok=True)
 
 
 def _atomic_write(destination: Path, content: str) -> None:
@@ -358,7 +371,12 @@ def znve_scaffold_harness(harness_directory: str, test_filename: str, harness_co
     if denied:
         return _rejected(denied)
 
-    _atomic_write(target_path, harness_code)
+    try:
+        _atomic_create(target_path, harness_code)
+    except FileExistsError:
+        return _rejected(
+            f"'{target_path.name}' ya existe: el arnés solo crea archivos, nunca sobrescribe tests ni snapshots."
+        )
 
     return {
         "status": "SUCCESS",

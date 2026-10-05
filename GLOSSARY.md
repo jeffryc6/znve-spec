@@ -34,7 +34,7 @@ Términos formales de Zero-Noise Vibe Engineering (ZNVE v2.3.0) en español e in
 
 * **Barrera Anti-Sobrepeso / Anti-Bloat Fence:** restricción que veta paquetes externos, métodos redundantes o dependencias cuando el runtime, el SDK nativo o la biblioteca estándar resuelven el problema. Una librería de terceros solo entra como excepción justificada en el propio contrato: qué resuelve, su peso y la alternativa nativa descartada.
 
-* **Guardrail / Guardrail:** regla operativa que el agente aplica en cada respuesta. ZNVE traduce sus 5 pilares en 7 guardrails (ver [SPECIFICATION.md §2.6](SPECIFICATION.md)).
+* **Guardrail / Guardrail:** regla operativa que el agente aplica en cada respuesta. ZNVE traduce sus 5 pilares en 8 guardrails (ver [SPECIFICATION.md §2.6](SPECIFICATION.md)).
 
 ---
 

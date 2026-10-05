@@ -79,6 +79,7 @@ y cualquier motor de datos (SQL, NoSQL, Key-Value, archivos locales o memoria).
   1. Diseñar una suite de pruebas en `tests/characterization/` que invoque el código legacy intacto (mediante importación pasiva, invocación CLI o subproceso).
   2. Generar una matriz de inyección: entradas válidas, casos límite, valores nulos/vacíos y payloads malformados.
   3. Capturar y almacenar en snapshots (*Golden Master*) las respuestas exactas actuales (incluyendo códigos de error preexistentes o formatos particulares que producción ya tolera).
+* **Determinismo:** La suite fija por entorno la semilla, `TZ`, el locale y el reloj, y enmascara en los snapshots los campos volátiles (timestamps, PIDs, IDs aleatorios) sin tocar el código bajo prueba. Volver a capturar un snapshot existente requiere aprobación humana.
 * **Criterio de Salida:** La suite de caracterización debe ejecutarse de forma determinista y registrar 100% de éxito contra el código original no modificado.
 
 ---

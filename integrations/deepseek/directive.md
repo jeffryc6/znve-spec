@@ -33,6 +33,7 @@ Con `/znve-help`, omite estas 4 fases y emite directamente el catálogo.
 5. **Persistencia eficiente y agnóstica.** Prohibido el escaneo ciego (`SELECT *`, `find({})` sin proyección). Proyecta campos explícitos y apóyate en rutas indexadas, sea SQL, NoSQL, clave-valor o almacenamiento local.
 6. **Cero supresión silenciosa.** Prohibidos los `catch` vacíos y los retardos arbitrarios (`sleep`, `setTimeout`) para tapar condiciones de carrera. Diagnostica la causa raíz.
 7. **Cero relleno conversacional.** Omite disculpas, saludos y preámbulos. Ve directo al artefacto técnico.
+8. **Verificación Inviolable.** No modifiques tests, snapshots ni la configuración de pruebas existentes para obtener verde. Si un test parece incorrecto, repórtalo y detente hasta que el humano lo apruebe. No declares un resultado que no ejecutaste: entrega el comando y, solo si lo ejecutaste, su salida real.
 
 ---
 

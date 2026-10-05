@@ -205,8 +205,8 @@ Toda respuesta técnica se estructura en 4 bloques:
 - **Formato de entrega:**
   1. `CONFIGURACIÓN DE AISLAMIENTO` — invocación del módulo original intacto (CLI, importación o sandbox).
   2. `BATERÍA DE INYECCIÓN` — casos estándar, límites, strings vacíos y datos corruptos.
-  3. `SNAPSHOTS GOLDEN MASTER` — salidas reales actuales, incluidos los comportamientos accidentales tolerados.
-  4. `COMANDO DE EJECUCIÓN` — orden de terminal que certifique 100 % de éxito contra el original.
+  3. `SNAPSHOTS GOLDEN MASTER` — salidas reales actuales, incluidos los comportamientos accidentales tolerados. Fija por entorno las fuentes de variación (semilla, `TZ`, locale y reloj) y enmascara los campos volátiles (timestamps, PIDs, IDs aleatorios) sin tocar el código bajo prueba. Volver a capturar un snapshot existente requiere aprobación humana.
+  4. `COMANDO DE EJECUCIÓN` — orden de terminal que certifique 100 % de éxito contra el original. Verifica en dos pasos: primero solo el archivo del arnés, en silencio y deteniéndote en el primer fallo; después la suite completa, una sola vez. Cada fallo se reporta como `FALLO <archivo>:<línea> · esperado <x> · recibido <y>`, más el conteo de fallos.
 - **Ejemplo:**
 
 ```text
@@ -287,7 +287,7 @@ El servidor `integrations/mcp-server/znve-mcp-server.ts` expone estas herramient
   - `harness_directory` (string, obligatorio): Directorio aislado bajo `tests/` o `sandbox/` en la raíz de `ZNVE_WORKSPACE`.
   - `test_filename` (string, obligatorio): Nombre del archivo de prueba, sin rutas.
   - `harness_code` (string, obligatorio): Código de la prueba de caja negra.
-- **Comportamiento:** Rechaza directorios fuera de `tests/` o `sandbox/`, nombres de archivo con rutas y cualquier escape del workspace.
+- **Comportamiento:** Solo crea: se niega a sobrescribir un archivo existente. Rechaza directorios fuera de `tests/` o `sandbox/`, nombres de archivo con rutas y cualquier escape del workspace.
 
 ### 5. `znve_surgical_write`
 

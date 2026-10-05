@@ -53,7 +53,7 @@ ZNVE resuelve estructuralmente el "bucle de degradación agéntica" (*AI agentic
 * Prohibidos los bloques `try/catch` vacíos o el silenciamiento de excepciones. Trazabilidad con `X-Run-ID`.
 
 ### 2.6 Guardrails operativos
-Las directivas de los asistentes traducen los 5 pilares en 7 guardrails que el agente aplica en cada respuesta:
+Las directivas de los asistentes traducen los 5 pilares en 8 guardrails que el agente aplica en cada respuesta:
 
 | # | Guardrail | Pilar |
 |---|---|---|
@@ -64,6 +64,7 @@ Las directivas de los asistentes traducen los 5 pilares en 7 guardrails que el a
 | 5 | Persistencia eficiente y agnóstica | 4 |
 | 6 | Cero supresión silenciosa | 5 |
 | 7 | Cero relleno conversacional | 1 |
+| 8 | Verificación Inviolable | 2 |
 
 ---
 
@@ -184,7 +185,7 @@ La versión, los axiomas, los guardrails, los escenarios, los comandos, la Capa 
 ### 9.2 Conformidad
 Una directiva o herramienta es conforme con ZNVE v2.3.0 si:
 1. Expone los 10 comandos con los encabezados de salida definidos en `protocols/COMMANDS.md`.
-2. Aplica los 7 guardrails de la sección 2.6 y la Capa Camaleónica del stack detectado.
+2. Aplica los 8 guardrails de la sección 2.6 y la Capa Camaleónica del stack detectado.
 3. Respeta el criterio de parada de la sección 3.2 y el formato por defecto de la sección 7.
 4. Cita una única versión de ZNVE, la de esta especificación.
 

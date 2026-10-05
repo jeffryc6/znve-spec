@@ -68,13 +68,14 @@ Las plantillas que empiezan por `_` son fragmentos compartidos: se incluyen con 
 - La especificación: nombre `znve`, versión SemVer, comandos únicos y 6 modos más ayuda.
 - Que ningún artefacto se haya desviado de la especificación.
 - Que cada directiva mencione los 10 comandos y cite una sola versión de ZNVE.
+- Que cada directiva con guardrails incluya el de Verificación Inviolable, que `SPECIFICATION.md`, `GLOSSARY.md` e `index.html` citen el número real de guardrails y que la salida de `/znve-harness` conserve el determinismo del Golden Master y la verificación en dos pasos.
 - Que no queden marcas `[cite: N]`, vallas ` ```markdown ` iniciales ni enlaces `utm_source`.
 - Que las skills de Claude y Gemini cumplan las reglas de subida (claves del frontmatter, nombre en minúsculas con guiones, descripción de hasta 1024 caracteres) y que sus enlaces a `references/` apunten a archivos generados.
 - Que las herramientas MCP documentadas sean las que expone `integrations/mcp-server/znve-mcp-server.ts` y que `protocols/COMMANDS.md` conserve las secciones que filtra `znve_help`.
 - Que el enum de escenarios de `integrations/openrouter/response-schema.json` coincida con la especificación.
 - Que los artefactos con `max_bytes` en `targets` respeten su presupuesto (hoy, el `AGENTS.md` global de DeepSeek Harness: un global grande compite con los proyectos y DSH puede descartarlo).
 - Que `install-dsh.ps1` no lleve versiones de ZNVE escritas a mano y que, ejecutado contra un `$DSH_HOME` temporal, instale la directiva como bloque sin tocar el resto del `AGENTS.md`, sea idempotente, migre una instalación antigua y no borre un global ajeno al desinstalar. Se omite si no hay PowerShell.
-- Que las herramientas de `znve_skill.py` cumplan sus barandillas: contención en `ZNVE_WORKSPACE` (o el cwd), arnés solo bajo `tests/` o `sandbox/`, escritura atómica y sin `.git/` ni `node_modules/`, detección de `catch`/`except` que silencian errores, importaciones vetadas, consultas ciegas y bloqueos.
+- Que las herramientas de `znve_skill.py` cumplan sus barandillas: contención en `ZNVE_WORKSPACE` (o el cwd), arnés solo bajo `tests/` o `sandbox/` y que solo crea (nunca sobrescribe), escritura atómica y sin `.git/` ni `node_modules/`, detección de `catch`/`except` que silencian errores, importaciones vetadas, consultas ciegas y bloqueos.
 - Que `znve.zip` excluya las cachés y los archivos ocultos.
 - Que `znve_skill.py` exponga la versión y el catálogo de la especificación, que la skill se llame `znve` y tenga 6 herramientas, que `get_znve_skill()` entregue las 6 herramientas con docstring, que `Auto_Installer.py` instale en `.agents/skills/znve/` y retire la instalación de `.antigravity/`, que `install_znve_global.py` instale en `~/.gemini/config/skills/znve/` y retire la copia legacy, y que reemplace la regla de `GEMINI.md` sin duplicarla.
 

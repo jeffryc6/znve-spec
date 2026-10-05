@@ -69,7 +69,7 @@ const TOOL_DOCS: Record<string, { description: string; params: Record<string, st
     }
   },
   "znve_scaffold_harness": {
-    "description": "Crea una suite Golden Master en un directorio aislado sin tocar producción. Rechaza directorios fuera de `tests/` o `sandbox/`, nombres de archivo con rutas y cualquier escape del workspace.",
+    "description": "Crea una suite Golden Master en un directorio aislado sin tocar producción. Solo crea: se niega a sobrescribir un archivo existente. Rechaza directorios fuera de `tests/` o `sandbox/`, nombres de archivo con rutas y cualquier escape del workspace.",
     "params": {
       "harness_directory": "Directorio aislado bajo `tests/` o `sandbox/` en la raíz de `ZNVE_WORKSPACE`.",
       "test_filename": "Nombre del archivo de prueba, sin rutas.",
@@ -199,6 +199,23 @@ function assertWritable(target: WorkspacePath): void {
 }
 
 // Temporal en el mismo directorio + rename: el TARGET_FILE nunca queda a medio escribir.
+// Como atomicWrite, pero solo crea: si el destino existe (también un enlace), falla sin tocarlo.
+async function atomicCreate(file: string, content: string): Promise<void> {
+  await fs.mkdir(path.dirname(file), { recursive: true });
+  const temp = path.join(path.dirname(file), `.${path.basename(file)}.${randomUUID()}.znve-tmp`);
+  try {
+    await fs.writeFile(temp, content, { encoding: "utf-8", flag: "wx" });
+    await fs.link(temp, file);
+  } catch (err: any) {
+    if (err.code === "EEXIST") {
+      throw new Error(`'${path.basename(file)}' ya existe: el arnés solo crea archivos, nunca sobrescribe tests ni snapshots.`);
+    }
+    throw err;
+  } finally {
+    await fs.rm(temp, { force: true });
+  }
+}
+
 async function atomicWrite(file: string, content: string): Promise<void> {
   await fs.mkdir(path.dirname(file), { recursive: true });
   const temp = path.join(path.dirname(file), `.${path.basename(file)}.${randomUUID()}.znve-tmp`);
@@ -517,7 +534,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           throw new Error(`El arnés debe ubicarse bajo ${HARNESS_ROOTS.map((r) => `${r}/`).join(" o ")} en la raíz de ZNVE_WORKSPACE.`);
         }
         assertWritable(target);
-        await atomicWrite(target.absolute, harnessCode);
+        await atomicCreate(target.absolute, harnessCode);
 
         return {
           content: [

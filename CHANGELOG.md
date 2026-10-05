@@ -14,6 +14,9 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 - `LICENSE`: la licencia dual (CC BY 4.0 y MIT) se extiende a `/integrations`.
 
 ### Añadido
+- **Guardrail «Verificación Inviolable»** (N2): no se modifican tests, snapshots ni configuración de pruebas existentes para obtener verde; un test sospechoso se reporta y se detiene; no se declara un resultado que no se ejecutó. Pasa de 7 a 8 guardrails (0 comandos nuevos).
+- **`/znve-harness`:** Golden Master determinista (semilla, `TZ`, locale y reloj fijos; campos volátiles enmascarados; volver a capturar un snapshot requiere aprobación humana) y verificación en dos pasos con formato atómico de fallo (`FALLO <archivo>:<línea> · esperado <x> · recibido <y>`).
+- **`znve_scaffold_harness` solo crea** (servidor MCP y skill de Antigravity): se niega a sobrescribir un archivo existente, también un enlace, y no deja temporales.
 - `integrations/README.md`: índice generado con el archivo que usar en cada asistente.
 - Este `CHANGELOG.md`.
 
