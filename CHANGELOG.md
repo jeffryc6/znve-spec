@@ -9,6 +9,8 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 - **Servidor MCP** en `integrations/mcp-server/`.
 - **Instrucciones de GitHub Copilot:** una sola copia, en `.github/copilot-instructions.md` (la ruta que lee Copilot).
 - **DeepSeek Harness** pasa a estar versionado en `integrations/deepseek/harness/`.
+- **`AGENTS.md` de DeepSeek Harness generado** desde `master_spec.json` (plantilla `deepseek_harness_agents.md.tmpl`), con un presupuesto de 16 KiB comprobado por test. Ya no repite pilares ni comandos a mano. Se omite la sección de pilares, como en el resto de las directivas generadas.
+- **`install-dsh.ps1`** instala la directiva como un bloque entre marcadores (`<!-- znve:start -->`) y conserva el resto de tu `AGENTS.md` global; migra la instalación anterior de archivo entero; la desinstalación retira solo el bloque y nunca borra un global ajeno a ZNVE. La versión ya no está escrita en el script: la lee de `AGENTS.md`.
 - `LICENSE`: la licencia dual (CC BY 4.0 y MIT) se extiende a `/integrations`.
 
 ### Añadido

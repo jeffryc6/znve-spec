@@ -454,6 +454,7 @@ def build_context(spec: dict) -> dict:
         "modes_list_md": modes_list_md(spec),
         "invocation_md": invocation_md(spec),
         "invocation_fallback": spec["invocation"]["fallback_es"],
+        "stop_criterion": spec["contract_rules"]["stop_criterion"],
         "commands_full_md": commands_full_md(spec),
         "commands_compact_md": commands_compact(spec, "es", "###"),
         "commands_compact_h4": commands_compact(spec, "es", "####"),

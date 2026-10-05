@@ -8,9 +8,9 @@ DSH ya soporta instrucciones persistentes mediante una cadena de archivos `AGENT
 
 | Archivo | Para qué sirve |
 |---|---|
-| `AGENTS.md` | **La directiva.** Es el archivo que se instala como global de DSH. Autocontenido y deliberadamente conciso. |
+| `AGENTS.md` | **La directiva.** Es el archivo que se instala como global de DSH. Autocontenido y deliberadamente conciso. Se **genera** desde `znve-auto/master_spec.json` (no se edita a mano) y un test limita su tamaño. |
 | `DSH_PROTOCOL.md` | Cómo se mapea ZNVE a los mecanismos reales de DSH, y qué se puede y qué no se puede garantizar. |
-| `install-dsh.ps1` | Instalador idempotente con copia de seguridad y dry-run. |
+| `install-dsh.ps1` | Instalador idempotente con copia de seguridad y dry-run. Instala la directiva como un bloque entre marcadores y conserva el resto de tu `AGENTS.md` global. |
 | `../directive.md` | Directiva existente para **la app web o la API** de DeepSeek (rol `system`). No sirve para DSH: aquí el mecanismo es la cadena `AGENTS.md`. |
 
 ## Instalación
@@ -18,13 +18,13 @@ DSH ya soporta instrucciones persistentes mediante una cadena de archivos `AGENT
 ### Opción A — instalador (recomendado)
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File protocols\agents\deepseek\install-dsh.ps1
+powershell -NoProfile -ExecutionPolicy Bypass -File integrations\deepseek\harness\install-dsh.ps1
 ```
 
 Primero, sin escribir nada:
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File protocols\agents\deepseek\install-dsh.ps1 -DryRun
+powershell -NoProfile -ExecutionPolicy Bypass -File integrations\deepseek\harness\install-dsh.ps1 -DryRun
 ```
 
 > El script es compatible con Windows PowerShell 5.1 y con PowerShell 7+. En Windows el binario se llama
@@ -32,7 +32,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File protocols\agents\deepseek\in
 
 ### Opción B — manual
 
-Copia `AGENTS.md` a la ruta global de DSH:
+Si **no** tienes un `AGENTS.md` global, copia el archivo a la ruta global de DSH (si ya tienes uno, usa el instalador: conserva tu contenido; `Copy-Item` lo sobrescribiría):
 
 ```powershell
 Copy-Item integrations/deepseek/harness/AGENTS.md "$env:USERPROFILE\.dsh\AGENTS.md"
@@ -57,10 +57,10 @@ Debes recibir el catálogo de los 10 comandos. Si no aparece, revisa `DSH_PROTOC
 ## Desinstalación
 
 ```powershell
-powershell -NoProfile -ExecutionPolicy Bypass -File protocols\agents\deepseek\install-dsh.ps1 -Uninstall
+powershell -NoProfile -ExecutionPolicy Bypass -File integrations\deepseek\harness\install-dsh.ps1 -Uninstall
 ```
 
-Restaura la copia de seguridad más reciente si existe; si no, elimina el archivo global.
+Retira solo el bloque de ZNVE y conserva el resto de tu `AGENTS.md` global; si el archivo queda vacío, lo elimina. Si el global no contiene ZNVE, no lo toca.
 
 ## Aviso importante
 

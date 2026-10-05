@@ -40,7 +40,8 @@ No edites los archivos generados: llevan un aviso en la cabecera y el CI falla s
 | `claude_project.md.tmpl` | `integrations/claude/project-instructions.md` |
 | `copilot_instructions.md.tmpl` | `.github/copilot-instructions.md` (única copia: es la ruta que lee Copilot) |
 | `cursor_rules.md.tmpl` | `integrations/cursor/cursorrules.md` (en inglés) |
-| `deepseek_directive.md.tmpl` | `integrations/deepseek/directive.md` |
+| `deepseek_directive.md.tmpl` | `integrations/deepseek/directive.md` (web y API) |
+| `deepseek_harness_agents.md.tmpl` | `integrations/deepseek/harness/AGENTS.md` (global de DeepSeek Harness; el target declara `max_bytes`) |
 | `ollama_modelfile.tmpl` | `integrations/ollama/Modelfile` |
 | `openrouter_system.md.tmpl` | `integrations/openrouter/system-prompt.md` |
 | `antigravity_skill.md.tmpl` | `integrations/antigravity/SKILL.md` |
@@ -71,12 +72,13 @@ Las plantillas que empiezan por `_` son fragmentos compartidos: se incluyen con 
 - Que las skills de Claude y Gemini cumplan las reglas de subida (claves del frontmatter, nombre en minúsculas con guiones, descripción de hasta 1024 caracteres) y que sus enlaces a `references/` apunten a archivos generados.
 - Que las herramientas MCP documentadas sean las que expone `integrations/mcp-server/znve-mcp-server.ts` y que `protocols/COMMANDS.md` conserve las secciones que filtra `znve_help`.
 - Que el enum de escenarios de `integrations/openrouter/response-schema.json` coincida con la especificación.
-- Que la directiva global de DeepSeek Harness (`integrations/deepseek/harness/AGENTS.md`) cite la versión de la especificación y los 10 comandos. Si el archivo no está en el checkout, esos tests se omiten.
+- Que los artefactos con `max_bytes` en `targets` respeten su presupuesto (hoy, el `AGENTS.md` global de DeepSeek Harness: un global grande compite con los proyectos y DSH puede descartarlo).
+- Que `install-dsh.ps1` no lleve versiones de ZNVE escritas a mano y que, ejecutado contra un `$DSH_HOME` temporal, instale la directiva como bloque sin tocar el resto del `AGENTS.md`, sea idempotente, migre una instalación antigua y no borre un global ajeno al desinstalar. Se omite si no hay PowerShell.
 - Que las herramientas de `znve_skill.py` cumplan sus barandillas: contención en `ZNVE_WORKSPACE` (o el cwd), arnés solo bajo `tests/` o `sandbox/`, escritura atómica y sin `.git/` ni `node_modules/`, detección de `catch`/`except` que silencian errores, importaciones vetadas, consultas ciegas y bloqueos.
 - Que `znve.zip` excluya las cachés y los archivos ocultos.
 - Que `znve_skill.py` exponga la versión y el catálogo de la especificación, que la skill se llame `znve` y tenga 6 herramientas, que `get_znve_skill()` entregue las 6 herramientas con docstring, que `Auto_Installer.py` instale en `.agents/skills/znve/` y retire la instalación de `.antigravity/`, que `install_znve_global.py` instale en `~/.gemini/config/skills/znve/` y retire la copia legacy, y que reemplace la regla de `GEMINI.md` sin duplicarla.
 
-Al final avisa, sin fallar, de los archivos mantenidos a mano que citan otra versión de ZNVE.
+Al final avisa, sin fallar, de los archivos mantenidos a mano (`.md`, `.py`, `.ts`, `.json`, `.html`, `.mjs` y `.ps1`) que citan otra versión de ZNVE.
 
 El comportamiento del servidor MCP se prueba aparte, con su propia suite (`node:test`, sin dependencias). Arranca el servidor por stdio contra un workspace temporal y cubre contención de rutas, validación de argumentos, barandillas, anotaciones y que `tools/list` coincida con `mcp.tools`:
 

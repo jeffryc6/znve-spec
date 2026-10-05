@@ -51,7 +51,7 @@ Los archivos anidados **no** se cargan de forma anticipada. Tras un `read`, `wri
 
 **No hay watcher de archivos.** Las ediciones externas se ven tras un toque estructurado, una reconciliación al reanudar la sesión, o una restauración del baseline tras una compactación.
 
-Esto tiene una consecuencia práctica para ZNVE: el `AGENTS.md` que vive en `integrations/deepseek/harness/` **no** se carga por estar en el repo. Solo se carga si la sesión arranca bajo ese directorio o si una operación estructurada llega hasta él. Eso es precisamente lo que ocurrió al crearlo: una escritura bajo esa ruta hizo que DSH lo descubriera e inyectara.
+Esto tiene una consecuencia práctica para ZNVE: el `AGENTS.md` que vive en `integrations/deepseek/harness/` **no** se carga por estar en el repo. Solo se carga si la sesión arranca bajo ese directorio o si una operación estructurada llega hasta él.
 
 ## 3. Qué puede y qué no puede garantizar ZNVE en DSH
 

@@ -389,6 +389,7 @@
     {"template": "copilot_instructions.md.tmpl", "output": ".github/copilot-instructions.md"},
     {"template": "cursor_rules.md.tmpl", "output": "integrations/cursor/cursorrules.md"},
     {"template": "deepseek_directive.md.tmpl", "output": "integrations/deepseek/directive.md"},
+    {"template": "deepseek_harness_agents.md.tmpl", "output": "integrations/deepseek/harness/AGENTS.md", "max_bytes": 16384},
     {"template": "ollama_modelfile.tmpl", "output": "integrations/ollama/Modelfile"},
     {"template": "openrouter_system.md.tmpl", "output": "integrations/openrouter/system-prompt.md"},
     {"template": "antigravity_skill.md.tmpl", "output": "integrations/antigravity/SKILL.md"},

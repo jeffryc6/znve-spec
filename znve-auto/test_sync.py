@@ -19,6 +19,8 @@ import io
 import json
 import os
 import re
+import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -35,9 +37,9 @@ ZNVE_VERSION_REF = re.compile(r"ZNVE[^\n\d]{0,40}?v?(\d+\.\d+\.\d+)")
 SKILL_KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compatibility"}
 MCP_SERVER = REPO / "integrations" / "mcp-server" / "znve-mcp-server.ts"
 OPENROUTER_SCHEMA = REPO / "integrations" / "openrouter" / "response-schema.json"
-# Directiva global de DeepSeek Harness: se mantiene a mano (un AGENTS.md global compite
-# por presupuesto de render y debe seguir siendo conciso), así que se verifica, no se genera.
-DEEPSEEK_AGENTS = REPO / "integrations" / "deepseek" / "harness" / "AGENTS.md"
+# Instalador de la directiva global de DeepSeek Harness (el AGENTS.md que instala se genera).
+DSH_INSTALLER = REPO / "integrations" / "deepseek" / "harness" / "install-dsh.ps1"
+POWERSHELL = shutil.which("powershell") or shutil.which("pwsh")
 SKILL_FILES = (
     "integrations/claude/skills/znve/SKILL.md",
     "integrations/gemini/skills/znve/SKILL.md",
@@ -123,6 +125,14 @@ class ArtifactTests(unittest.TestCase):
             found = set(ZNVE_VERSION_REF.findall(text))
             self.assertLessEqual(found, {version}, f"{rel} cita {found - {version}}")
 
+    def test_size_budgets(self):
+        """Los artefactos con 'max_bytes' (p. ej. el AGENTS.md global de DSH) respetan su presupuesto."""
+        budgeted = [t for t in self.spec["targets"] if "max_bytes" in t]
+        self.assertTrue(budgeted, "ningún artefacto declara max_bytes")
+        for target in budgeted:
+            size = len(self.rendered[target["output"]].encode("utf-8"))
+            self.assertLessEqual(size, target["max_bytes"], f"{target['output']} pesa {size} B")
+
     def test_no_residue(self):
         """Sin marcas [cite: N], vallas ```markdown iniciales ni enlaces de rastreo."""
         for rel, text in self.rendered.items():
@@ -173,27 +183,6 @@ class ExternalContractTests(unittest.TestCase):
     def setUpClass(cls):
         cls.spec = builder.load_spec()
         cls.server = MCP_SERVER.read_text(encoding="utf-8")
-        cls.agents = DEEPSEEK_AGENTS.read_text(encoding="utf-8") if DEEPSEEK_AGENTS.exists() else ""
-
-    @unittest.skipUnless(DEEPSEEK_AGENTS.exists(), f"{DEEPSEEK_AGENTS.name} de DSH no está en este checkout")
-    def test_deepseek_agents_cites_spec_version(self):
-        """La directiva global de DSH cita la versión de la especificación y solo esa."""
-        refs = set(re.findall(r"ZNVE[^\n\d]{0,40}?v?(\d+\.\d+\.\d+)", self.agents))
-        self.assertTrue(refs, f"{DEEPSEEK_AGENTS.name} no cita ninguna versión de ZNVE")
-        self.assertEqual(
-            refs,
-            {self.spec["version"]},
-            f"cita {sorted(refs - {self.spec['version']})} en vez de {self.spec['version']}",
-        )
-
-    @unittest.skipUnless(DEEPSEEK_AGENTS.exists(), f"{DEEPSEEK_AGENTS.name} de DSH no está en este checkout")
-    def test_deepseek_agents_lists_all_commands(self):
-        """La directiva global de DSH expone los 10 comandos de la especificación."""
-        self.assertEqual(len(self.spec["commands"]), 10, "la especificación ya no declara 10 comandos")
-        for c in self.spec["commands"]:
-            self.assertIn(c["name"], self.agents, f"{c['name']} falta en {DEEPSEEK_AGENTS.name}")
-        for alias in ("/znve-help", "/znve-contract", "/znve-execute"):
-            self.assertIn(alias, self.agents, f"falta la forma de invocación {alias}")
 
     def test_mcp_tools_match_server(self):
         """Las herramientas MCP documentadas son las que expone el servidor."""
@@ -445,6 +434,115 @@ class SkillToolBehaviorTests(unittest.TestCase):
             self.assertRejected(self.skill.znve_forensic_scan(target), target)
 
 
+class DshInstallerTests(unittest.TestCase):
+    """install-dsh.ps1 instala la directiva como un bloque y nunca toca lo que no es de ZNVE."""
+
+    START, END = "<!-- znve:start -->", "<!-- znve:end -->"
+
+    @classmethod
+    def setUpClass(cls):
+        cls.spec = builder.load_spec()
+        cls.source = (DSH_INSTALLER.parent / "AGENTS.md").read_text(encoding="utf-8")
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.home = Path(self._tmp.name)
+        self.agents = self.home / "AGENTS.md"
+
+    def tearDown(self):
+        self._tmp.cleanup()
+
+    def run_installer(self, *flags: str) -> subprocess.CompletedProcess:
+        cmd = [POWERSHELL, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(DSH_INSTALLER), "-DshHome", str(self.home), *flags]
+        return subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
+
+    def backups(self) -> list[str]:
+        return sorted(p.name for p in self.home.glob("AGENTS.md.bak-*"))
+
+    def test_installer_cites_only_spec_version(self):
+        """El instalador no lleva versiones escritas a mano que se queden atrás al subir de versión."""
+        refs = set(ZNVE_VERSION_REF.findall(DSH_INSTALLER.read_text(encoding="utf-8")))
+        self.assertLessEqual(refs, {self.spec["version"]}, f"cita {sorted(refs - {self.spec['version']})}")
+
+    @unittest.skipUnless(POWERSHELL, "PowerShell no está disponible")
+    def test_install_into_empty_home(self):
+        result = self.run_installer()
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        text = self.agents.read_text(encoding="utf-8")
+        self.assertTrue(text.startswith(self.START) and text.rstrip().endswith(self.END))
+        self.assertIn(self.source.strip(), text)
+        self.assertNotIn("\r", text)
+
+    @unittest.skipUnless(POWERSHELL, "PowerShell no está disponible")
+    def test_install_keeps_existing_content_and_is_idempotent(self):
+        self.agents.write_text("Mis reglas.\n", encoding="utf-8")
+        self.assertEqual(self.run_installer().returncode, 0)
+        once = self.agents.read_text(encoding="utf-8")
+        self.assertTrue(once.startswith("Mis reglas.\n"))
+        self.assertEqual(once.count(self.START), 1)
+        self.assertEqual(len(self.backups()), 1)
+        self.assertEqual(self.run_installer().returncode, 0)
+        self.assertEqual(self.agents.read_text(encoding="utf-8"), once)
+        self.assertEqual(len(self.backups()), 1, "una reinstalación idéntica no debe crear copias")
+
+    @unittest.skipUnless(POWERSHELL, "PowerShell no está disponible")
+    def test_install_replaces_stale_block(self):
+        self.agents.write_text(f"Antes.\n\n{self.START}\nviejo\n{self.END}\n\nDespués.\n", encoding="utf-8")
+        self.assertEqual(self.run_installer().returncode, 0)
+        text = self.agents.read_text(encoding="utf-8")
+        self.assertNotIn("viejo", text)
+        self.assertTrue(text.startswith("Antes.") and text.rstrip().endswith("Después."))
+        self.assertEqual(text.count(self.START), 1)
+
+    @unittest.skipUnless(POWERSHELL, "PowerShell no está disponible")
+    def test_install_migrates_whole_file_install(self):
+        self.agents.write_text(self.source, encoding="utf-8")
+        self.assertEqual(self.run_installer().returncode, 0)
+        text = self.agents.read_text(encoding="utf-8")
+        self.assertTrue(text.startswith(self.START))
+        self.assertEqual(text.count("Estándar activo:"), 1)
+
+    @unittest.skipUnless(POWERSHELL, "PowerShell no está disponible")
+    def test_dry_run_writes_nothing(self):
+        self.agents.write_text("Mis reglas.\n", encoding="utf-8")
+        self.assertEqual(self.run_installer("-DryRun").returncode, 0)
+        self.assertEqual(self.agents.read_text(encoding="utf-8"), "Mis reglas.\n")
+        self.assertEqual(self.backups(), [])
+
+    @unittest.skipUnless(POWERSHELL, "PowerShell no está disponible")
+    def test_uninstall_removes_only_the_block(self):
+        self.agents.write_text("Mis reglas.\n", encoding="utf-8")
+        self.run_installer()
+        self.assertEqual(self.run_installer("-Uninstall").returncode, 0)
+        self.assertEqual(self.agents.read_text(encoding="utf-8"), "Mis reglas.\n")
+
+    @unittest.skipUnless(POWERSHELL, "PowerShell no está disponible")
+    def test_uninstall_deletes_file_left_empty(self):
+        self.run_installer()
+        self.assertEqual(self.run_installer("-Uninstall").returncode, 0)
+        self.assertFalse(self.agents.exists())
+
+    @unittest.skipUnless(POWERSHELL, "PowerShell no está disponible")
+    def test_uninstall_never_touches_foreign_global(self):
+        """Sin la directiva de ZNVE, desinstalar no borra ni modifica el AGENTS.md del usuario."""
+        self.agents.write_text("Reglas ajenas a ZNVE.\n", encoding="utf-8")
+        self.assertEqual(self.run_installer("-Uninstall").returncode, 0)
+        self.assertEqual(self.agents.read_text(encoding="utf-8"), "Reglas ajenas a ZNVE.\n")
+        self.assertEqual(self.backups(), [])
+
+    @unittest.skipUnless(POWERSHELL, "PowerShell no está disponible")
+    def test_uninstall_legacy_restores_newest_backup_by_name(self):
+        """Una instalación antigua (archivo entero) restaura la copia más reciente por nombre, no por fecha."""
+        self.agents.write_text(self.source, encoding="utf-8")
+        old = self.home / "AGENTS.md.bak-20260101-000000"
+        new = self.home / "AGENTS.md.bak-20260201-000000"
+        new.write_text("Reglas nuevas.\n", encoding="utf-8")
+        old.write_text("Reglas viejas.\n", encoding="utf-8")
+        os.utime(new, (1_000_000_000, 1_000_000_000))  # la más reciente por nombre es la más antigua por fecha
+        self.assertEqual(self.run_installer("-Uninstall").returncode, 0)
+        self.assertEqual(self.agents.read_text(encoding="utf-8"), "Reglas nuevas.\n")
+
+
 def stale_hand_maintained(spec: dict) -> list[str]:
     """Archivos no generados que citan una versión de ZNVE distinta de la especificación."""
     generated = {t["output"] for t in spec["targets"]} | {b["output"] for b in spec["bundles"]}
@@ -453,7 +551,7 @@ def stale_hand_maintained(spec: dict) -> list[str]:
         rel = path.relative_to(REPO).as_posix()
         if not path.is_file() or rel in generated or HAND_MAINTAINED_SKIP & set(path.parts):
             continue
-        if path.suffix.lower() not in {".md", ".py", ".ts", ".json", ".html", ".mjs"}:
+        if path.suffix.lower() not in {".md", ".py", ".ts", ".json", ".html", ".mjs", ".ps1"}:
             continue
         try:
             text = path.read_text(encoding="utf-8")
