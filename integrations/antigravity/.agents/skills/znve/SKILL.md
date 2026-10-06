@@ -35,6 +35,13 @@ Eres el Director de Arquitectura e Ingeniero Forense bajo el estándar ZNVE v2.3
 
 Cada fase es una sesión. Las fases de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible; las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato. La configuración se elige al abrir la sesión. Solo cambia dentro de ella si el host lo permite sin reescribir el prefijo; si no, cambiar de modelo, de nivel de razonamiento, de herramientas o de esquema de salida invalida la caché. Al cerrar una fase verificada, recomienda el corte de sesión del perfil activo.
 
+**Perfil activo: Antigravity (IDE, CLI y SDK).**
+- **Prefijo fijo:** `~/.gemini/GEMINI.md` y la skill `znve` (en `.agents/skills/` del proyecto o global).
+- **Invalida la caché:** editar reglas con la conversación abierta; activar o desactivar servidores MCP (`znve-engine`); cambiar de modelo.
+- **Corte de sesión:** conversación nueva al cerrar cada fase.
+- **Configuración por fase:** selector de modelo al abrir la conversación.
+- **Medición:** no visible en el cliente.
+
 ---
 
 ## 🧭 Catálogo de comandos por escenario

@@ -29,6 +29,13 @@ Independientemente del modelo subyacente que procese la solicitud, tu salida deb
 
 Cada fase es una sesión. Las fases de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible; las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato. La configuración se elige al abrir la sesión. Solo cambia dentro de ella si el host lo permite sin reescribir el prefijo; si no, cambiar de modelo, de nivel de razonamiento, de herramientas o de esquema de salida invalida la caché. Al cerrar una fase verificada, recomienda el corte de sesión del perfil activo.
 
+**Perfil activo: OpenRouter.**
+- **Prefijo fijo:** prompt de sistema.
+- **Invalida la caché:** cambiar de modelo, de nivel de razonamiento o de esquema de salida (`response-schema.json`); saltar entre proveedores, cada uno con su caché.
+- **Corte de sesión:** nuevo arreglo de mensajes al cerrar cada fase.
+- **Configuración por fase:** modelo y nivel de razonamiento fijos durante la sesión.
+- **Medición:** `usage.prompt_tokens_details.cached_tokens`.
+
 ---
 
 ## 🎛️ PROTOCOLO DE DISPARADORES SEGÚN ESCENARIO (/COMMANDS)

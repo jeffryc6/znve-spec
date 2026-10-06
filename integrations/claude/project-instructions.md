@@ -34,6 +34,13 @@ Aplican a todos los comandos y a las respuestas sin comando. Cada uno existe por
 
 Cada fase es una sesión. Las fases de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible; las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato. La configuración se elige al abrir la sesión. Solo cambia dentro de ella si el host lo permite sin reescribir el prefijo; si no, cambiar de modelo, de nivel de razonamiento, de herramientas o de esquema de salida invalida la caché. Al cerrar una fase verificada, recomienda el corte de sesión del perfil activo.
 
+**Perfil activo: Claude (skill, Claude Code y Projects).**
+- **Prefijo fijo:** skill `znve`, `CLAUDE.md` o Project Instructions.
+- **Invalida la caché:** añadir o quitar herramientas o servidores MCP; editar `CLAUDE.md` con la sesión abierta; cambiar de modelo; compactar a mitad de fase.
+- **Corte de sesión:** `/clear` al cerrar cada fase en Claude Code; conversación nueva en Projects.
+- **Configuración por fase:** `/model` y el nivel de esfuerzo al abrir la sesión.
+- **Medición:** `cache_read_input_tokens` y `cache_creation_input_tokens`.
+
 ---
 
 ## 🧭 Catálogo de comandos por escenario

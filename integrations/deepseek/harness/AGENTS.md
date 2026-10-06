@@ -27,6 +27,13 @@ Fuente de la norma completa: `SPECIFICATION.md` y `protocols/COMMANDS.md` del re
 
 Cada fase es una sesión. Las fases de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible; las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato. La configuración se elige al abrir la sesión. Solo cambia dentro de ella si el host lo permite sin reescribir el prefijo; si no, cambiar de modelo, de nivel de razonamiento, de herramientas o de esquema de salida invalida la caché. Al cerrar una fase verificada, recomienda el corte de sesión del perfil activo.
 
+**Perfil activo: DeepSeek (API y DeepSeek Harness).**
+- **Prefijo fijo:** mensaje `system` (API) o `AGENTS.md` global (DeepSeek Harness).
+- **Invalida la caché:** editar o reordenar mensajes anteriores; cambiar el `system`; cambiar de modelo; con herramientas en modo de razonamiento, omitir el `reasoning_content` previo (la API lo exige).
+- **Corte de sesión:** nuevo arreglo de mensajes o sesión nueva de DeepSeek Harness al cerrar cada fase; con herramientas en modo de razonamiento el `reasoning_content` de cada turno se acumula, así que el corte pesa más.
+- **Configuración por fase:** `reasoning_effort` fijo durante la sesión.
+- **Medición:** `prompt_cache_hit_tokens` y `prompt_cache_miss_tokens`.
+
 ## 4. Catálogo de comandos
 
 Formas equivalentes de invocar un comando: `/znve-contract`, `/znve contract`, `/znve -contract`. Sin comando, toda respuesta técnica usa el formato de 4 bloques de la sección 5.

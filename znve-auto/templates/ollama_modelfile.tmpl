@@ -8,7 +8,8 @@
 
 FROM qwen2.5-coder:14b
 
-# PARÁMETROS DETERMINISTAS DE INFERENCIA
+# PARÁMETROS DE INFERENCIA
+# Una temperatura baja reduce la variación pero no garantiza el determinismo: lo garantizan el contrato y los tests.
 PARAMETER temperature 0.1
 PARAMETER top_p 0.85
 PARAMETER top_k 30

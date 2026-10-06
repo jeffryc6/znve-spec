@@ -43,6 +43,13 @@ Aplican a todos los comandos y a las respuestas sin comando. Cada uno existe por
 
 Cada fase es una sesión. Las fases de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible; las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato. La configuración se elige al abrir la sesión. Solo cambia dentro de ella si el host lo permite sin reescribir el prefijo; si no, cambiar de modelo, de nivel de razonamiento, de herramientas o de esquema de salida invalida la caché. Al cerrar una fase verificada, recomienda el corte de sesión del perfil activo.
 
+**Perfil activo: Gemini (app y CLI).**
+- **Prefijo fijo:** skill `znve` y `~/.gemini/GEMINI.md`.
+- **Invalida la caché:** editar `GEMINI.md` o la skill con la sesión abierta; activar o desactivar skills o extensiones; cambiar de modelo; compactar el historial a mitad de fase.
+- **Corte de sesión:** `/clear` en la CLI o chat nuevo en la app, al cerrar cada fase.
+- **Configuración por fase:** elige el modelo al abrir la sesión y no lo cambies dentro de ella.
+- **Medición:** `usage_metadata.cached_content_token_count`.
+
 ---
 
 ## 🧭 Catálogo de comandos por escenario

@@ -4,6 +4,9 @@
 // - El prompt de sistema por defecto es system-prompt.md (generado por znve-auto desde master_spec.json).
 // - Con `structured: true` exige la respuesta en el esquema de response-schema.json y la devuelve parseada.
 // - Sin dependencias externas y sin logs: devuelve el artefacto y lanza errores explícitos.
+// - Con ZNVE_OPENROUTER_USAGE=1 escribe en stderr los campos de uso de la respuesta (tokens y aciertos de caché):
+//   es el instrumento de la prueba A/B. Sin la variable, no imprime nada.
+// - response-schema.json debe permanecer estable: cambiarlo invalida la caché del prefijo.
 
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
@@ -86,6 +89,10 @@ export async function executeZnveTask({
 
   if (!output) {
     throw new Error("[ZNVE_OR_EMPTY] No se recibió contenido del proveedor.");
+  }
+
+  if (process.env.ZNVE_OPENROUTER_USAGE === "1") {
+    process.stderr.write(`[ZNVE_OR_USAGE] ${JSON.stringify({ model: data.model ?? model, usage: data.usage ?? null })}\n`);
   }
 
   if (!structured) return output;

@@ -34,6 +34,8 @@ Términos formales de Zero-Noise Vibe Engineering (ZNVE v2.3.0) en español e in
 
 * **Barrera Anti-Sobrepeso / Anti-Bloat Fence:** restricción que veta paquetes externos, métodos redundantes o dependencias cuando el runtime, el SDK nativo o la biblioteca estándar resuelven el problema. Una librería de terceros solo entra como excepción justificada en el propio contrato: qué resuelve, su peso y la alternativa nativa descartada.
 
+* **Capa de Agente / Agent Layer:** la parte de cada directiva que depende de la IA que se usa (no de la plataforma del proyecto, que es la Capa Camaleónica): una regla común de fases y un perfil con el prefijo fijo del asistente, lo que invalida su caché, cómo cortar la sesión, cómo fijar la configuración de cada fase y cómo medir. Cada directiva lleva solo su perfil.
+
 * **Cerca de Contexto / Context Fence:** guardrail 8. El contexto del agente es por excepción, igual que la telemetría: rangos en lugar de archivos completos, verificaciones silenciosas, contratos por ruta, cero secretos y todo contenido externo tratado como dato, nunca como instrucción. Se aplica también por código en el servidor MCP.
 
 * **Verificación Inviolable / Inviolable Verification:** guardrail 9. No se modifican tests, snapshots ni configuración de pruebas existentes para obtener verde, y no se declara un resultado que no se ejecutó. Un test sospechoso se reporta y el agente se detiene hasta que el humano lo apruebe.

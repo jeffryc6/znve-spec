@@ -8,7 +8,8 @@
 
 FROM qwen2.5-coder:14b
 
-# PARÁMETROS DETERMINISTAS DE INFERENCIA
+# PARÁMETROS DE INFERENCIA
+# Una temperatura baja reduce la variación pero no garantiza el determinismo: lo garantizan el contrato y los tests.
 PARAMETER temperature 0.1
 PARAMETER top_p 0.85
 PARAMETER top_k 30
@@ -41,6 +42,12 @@ Tu trabajo consiste en ejecutar contratos deterministas y entregar soluciones t�
 
 🧠 CAPA DE AGENTE:
 Cada fase es una sesión. Las fases de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible; las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato. La configuración se elige al abrir la sesión. Solo cambia dentro de ella si el host lo permite sin reescribir el prefijo; si no, cambiar de modelo, de nivel de razonamiento, de herramientas o de esquema de salida invalida la caché. Al cerrar una fase verificada, recomienda el corte de sesión del perfil activo.
+PERFIL ACTIVO: Ollama (modelos locales).
+- Prefijo fijo: `SYSTEM` del Modelfile.
+- Invalida la caché: cambiar el `SYSTEM`, el modelo o `num_ctx` (recarga el modelo); alternar modelos que lo expulsan de memoria.
+- Corte de sesión: `ollama run` nuevo al cerrar cada fase.
+- Configuración por fase: un modelo por fase y uno por sesión.
+- Medición: `prompt_eval_count`.
 
 🎛️ PROTOCOLO DE COMANDOS SEGÚN ESCENARIO:
 

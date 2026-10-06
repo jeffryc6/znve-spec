@@ -245,3 +245,52 @@ ENTREGA:
 3. CICLO DE VIDA Y RECURSOS: handles, conexiones, sockets o `WakeLock` sin desecho explícito (`IDisposable`, `finally`); listeners huérfanos.
 4. HOJA DE REMEDIACIÓN: acciones atómicas priorizadas por causa raíz, cada una con TARGET_FILE y verificación. Incluye la purga de logs rutinarios (`console.log("ok")`, `print("DEBUG")`).
 ```
+
+---
+
+## 11. Rendimiento y caché
+
+ZNVE aplica «cero ruido» también al contexto del agente (guardrail 8): cada token que entra cuesta, resta atención al contrato y se retiene en el proveedor. El agente no controla la caché del servidor; controla **qué entra en cada turno, cuánto escribe y si respeta la verificación**.
+
+### 11.1 Orden estable → volátil
+
+Ordena todo lo que le das a la IA de lo más fijo a lo más cambiante:
+
+1. Directiva de ZNVE y perfil del asistente (fijos; es lo que se cachea).
+2. Reglas del proyecto y contratos ya aprobados.
+3. El contrato activo y el `TARGET_FILE`, **al final**: es donde la atención del modelo es más fuerte, sobre todo en modelos con ventana deslizante.
+
+### 11.2 Prácticas de sesión
+
+- Cada fase es una sesión: corta al cerrar una fase verificada (el perfil de tu asistente dice cómo).
+- No cambies de modelo, skills, servidores MCP, herramientas ni esquemas de salida a mitad de fase. Las herramientas se **restringen**, no se quitan.
+- No edites las directivas con la sesión abierta.
+- No compactes ni pidas resúmenes a mitad de fase.
+- Agrupa en un mismo turno las lecturas independientes y pide rangos de líneas, no archivos completos.
+- Con razonamiento alto para diseñar (`contract`, `forensic`, `triage`, `audit`) y el modelo más rápido que cumpla el contrato para ejecutar (`execute`, `hotfix`, `harness`).
+
+### 11.3 Protocolo de medición
+
+Mide con los campos de uso que devuelve la API de cada proveedor, no con estimaciones:
+
+| Proveedor | Campos |
+|---|---|
+| Gemini | `usage_metadata.cached_content_token_count` |
+| Anthropic | `cache_read_input_tokens`, `cache_creation_input_tokens` |
+| DeepSeek | `prompt_cache_hit_tokens`, `prompt_cache_miss_tokens` |
+| OpenAI | `input_tokens_details.cached_tokens` |
+| OpenRouter | `usage.prompt_tokens_details.cached_tokens` (el cliente de `integrations/openrouter/` los escribe en `stderr` con `ZNVE_OPENROUTER_USAGE=1`) |
+| Ollama | `prompt_eval_count` (baja cuando reutiliza el prefijo) |
+
+Indicadores: tokens sin caché por turno, porcentaje de aciertos de caché, y tokens de entrada y de salida por ciclo de verificación. Compara siempre la misma tarea con y sin la directiva, varias veces, y conserva las sondas de seguridad (instrucción inyectada en el código, secreto canario y test existente incorrecto).
+
+Mantén estable `integrations/openrouter/response-schema.json`: cambiar el esquema de salida invalida la caché del prefijo.
+
+### 11.4 Cifras de referencia (octubre de 2026)
+
+Las cifras caducan; verifícalas en la documentación del proveedor antes de decidir con ellas. Por eso viven aquí y no en las directivas.
+
+- Los tokens servidos desde la caché cuestan una fracción de los nuevos: del orden de 10 a 20 veces menos en OpenAI, Gemini y Anthropic, de 30 a 50 veces menos en DeepSeek V4 y hasta unas 120 veces menos en MiMo V2.6 Pro (cifra del fabricante, sin verificación independiente).
+- Latencia: recortar a la mitad la **salida** la reduce cerca de un 50 %; recortar a la mitad la **entrada** solo la reduce entre un 1 y un 5 % en la nube. En local (Ollama) sí pesa la entrada, porque el procesado del prompt corre a cientos de tokens por segundo. Por eso la salida mínima (diffs en lugar de archivos completos) importa más que la entrada mínima para la velocidad.
+- La caché del proveedor retiene lo que entra (hasta 24 horas en algunos casos) y puede inferirse por tiempo de respuesta: otro motivo para que los secretos no entren al contexto.
+- Ollama: el KV cache crece con `num_ctx`; con `qwen2.5-coder:14b` a 32k tokens ronda los 6 GB, y `OLLAMA_FLASH_ATTENTION=1` con `OLLAMA_KV_CACHE_TYPE=q8_0` lo reduce a la mitad.

@@ -343,6 +343,8 @@ ollama create znve-agent -f ./integrations/ollama/Modelfile
 ollama run znve-agent
 ```
 
+- Memoria: el KV cache crece con `num_ctx`; con `qwen2.5-coder:14b` a 32k tokens ronda los 6 GB (cálculo aproximado). `OLLAMA_FLASH_ATTENTION=1` y `OLLAMA_KV_CACHE_TYPE=q8_0` en el servidor lo reducen a la mitad.
+
 ### 6. Gemini (app web/Mac y Gemini CLI)
 
 - App de Gemini: en **Settings → Skills → Upload**, sube la carpeta `integrations/gemini/skills/znve/`.
@@ -429,3 +431,22 @@ node install-antigravity.mjs --workspace "<ruta>/tu-proyecto"
 7. Agente   --> Ejecuta en sombra validando Salida(Nuevo) == Salida(Legacy)
 8. Usuario  --> Despliega el módulo nuevo gradualmente con Strangler Fig
 ```
+
+---
+
+## 🧠 SECCIÓN 5: CAPA DE AGENTE (PERFILES POR ASISTENTE)
+
+Cada fase es una sesión. Las fases de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible; las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato. La configuración se elige al abrir la sesión. Solo cambia dentro de ella si el host lo permite sin reescribir el prefijo; si no, cambiar de modelo, de nivel de razonamiento, de herramientas o de esquema de salida invalida la caché. Al cerrar una fase verificada, recomienda el corte de sesión del perfil activo.
+
+Cada directiva lleva solo su perfil; esta tabla los reúne todos. Solo describen comportamiento: las cifras de precios y límites, que caducan, están en `protocols/PROMPT_GUIDE.md`.
+
+| Asistente | Prefijo fijo | Invalida la caché | Corte de sesión | Configuración por fase | Medición |
+|---|---|---|---|---|---|
+| **Gemini (app y CLI)** | skill `znve` y `~/.gemini/GEMINI.md` | editar `GEMINI.md` o la skill con la sesión abierta; activar o desactivar skills o extensiones; cambiar de modelo; compactar el historial a mitad de fase | `/clear` en la CLI o chat nuevo en la app, al cerrar cada fase | elige el modelo al abrir la sesión y no lo cambies dentro de ella | `usage_metadata.cached_content_token_count` |
+| **Antigravity (IDE, CLI y SDK)** | `~/.gemini/GEMINI.md` y la skill `znve` (en `.agents/skills/` del proyecto o global) | editar reglas con la conversación abierta; activar o desactivar servidores MCP (`znve-engine`); cambiar de modelo | conversación nueva al cerrar cada fase | selector de modelo al abrir la conversación | no visible en el cliente |
+| **Claude (skill, Claude Code y Projects)** | skill `znve`, `CLAUDE.md` o Project Instructions | añadir o quitar herramientas o servidores MCP; editar `CLAUDE.md` con la sesión abierta; cambiar de modelo; compactar a mitad de fase | `/clear` al cerrar cada fase en Claude Code; conversación nueva en Projects | `/model` y el nivel de esfuerzo al abrir la sesión | `cache_read_input_tokens` y `cache_creation_input_tokens` |
+| **DeepSeek (API y DeepSeek Harness)** | mensaje `system` (API) o `AGENTS.md` global (DeepSeek Harness) | editar o reordenar mensajes anteriores; cambiar el `system`; cambiar de modelo; con herramientas en modo de razonamiento, omitir el `reasoning_content` previo (la API lo exige) | nuevo arreglo de mensajes o sesión nueva de DeepSeek Harness al cerrar cada fase; con herramientas en modo de razonamiento el `reasoning_content` de cada turno se acumula, así que el corte pesa más | `reasoning_effort` fijo durante la sesión | `prompt_cache_hit_tokens` y `prompt_cache_miss_tokens` |
+| **Ollama (modelos locales)** | `SYSTEM` del Modelfile | cambiar el `SYSTEM`, el modelo o `num_ctx` (recarga el modelo); alternar modelos que lo expulsan de memoria | `ollama run` nuevo al cerrar cada fase | un modelo por fase y uno por sesión | `prompt_eval_count` |
+| **OpenRouter** | prompt de sistema | cambiar de modelo, de nivel de razonamiento o de esquema de salida (`response-schema.json`); saltar entre proveedores, cada uno con su caché | nuevo arreglo de mensajes al cerrar cada fase | modelo y nivel de razonamiento fijos durante la sesión | `usage.prompt_tokens_details.cached_tokens` |
+| **Cursor y Windsurf** | `.cursorrules` | editar las reglas con el chat abierto; cambiar de modelo | chat nuevo al cerrar cada fase | selector de modelo al abrir el chat | no visible en el cliente |
+| **GitHub Copilot** | `.github/copilot-instructions.md` | editar las instrucciones con el chat abierto; cambiar de modelo | chat nuevo al cerrar cada fase | selector de modelo al abrir el chat | no visible en el cliente |

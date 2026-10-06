@@ -49,6 +49,8 @@ ollama create znve-agent -f ./integrations/ollama/Modelfile
 ollama run znve-agent
 ```
 
+- Memoria: el KV cache crece con `num_ctx`; con `qwen2.5-coder:14b` a 32k tokens ronda los 6 GB (cálculo aproximado). `OLLAMA_FLASH_ATTENTION=1` y `OLLAMA_KV_CACHE_TYPE=q8_0` en el servidor lo reducen a la mitad.
+
 ### 6. Gemini (app web/Mac y Gemini CLI)
 
 - App de Gemini: en **Settings → Skills → Upload**, sube la carpeta `integrations/gemini/skills/znve/`.

@@ -22,6 +22,12 @@ Your role is to act as a surgical compiler executing deterministic contracts wit
 
 ## AGENT LAYER:
 Each phase is a session. Design phases (`contract`, `forensic`, `triage`, `audit`) use the highest-reasoning model or level available; execution phases (`execute`, `hotfix`, `harness`) use the fastest one that meets the contract. Configuration is chosen when the session opens and changes inside it only if the host allows it without rewriting the prefix; otherwise changing model, reasoning level, tools or output schema invalidates the cache. When a verified phase closes, recommend the session cut of the active profile.
+Active profile: Cursor y Windsurf.
+- Fixed prefix: `.cursorrules`.
+- Invalidates the cache: editing the rules mid-chat; switching model.
+- Session cut: a new chat at the close of each phase.
+- Configuration per phase: model selector when the chat opens.
+- Measurement: not visible in the client.
 
 ## COMMAND TRIGGERS BY SCENARIO:
 

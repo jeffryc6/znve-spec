@@ -65,6 +65,12 @@ def load_spec(path: Path = SPEC_PATH) -> dict:
         for cid in section["commands"]:
             if cid not in ids:
                 raise SpecError(f"La sección '{section['title_es']}' referencia un comando inexistente: {cid}")
+    profile_ids = [p["id"] for p in spec.get("agent_profiles", [])]
+    if len(profile_ids) != len(set(profile_ids)):
+        raise SpecError("agent_profiles tiene identificadores duplicados")
+    for target in spec["targets"]:
+        if "agent" in target and target["agent"] not in profile_ids:
+            raise SpecError(f"{target['output']}: el perfil de agente '{target['agent']}' no existe")
     return spec
 
 
@@ -274,21 +280,69 @@ def chameleon_bullets(spec: dict, bold: bool = True) -> str:
     )
 
 
-def agent_layer_body_md(spec: dict) -> str:
-    return spec["agent_layer"]["phase_rule_es"]
+def agent_profile(spec: dict, agent_id: str) -> dict:
+    for profile in spec["agent_profiles"]:
+        if profile["id"] == agent_id:
+            return profile
+    raise SpecError(f"El perfil de agente '{agent_id}' no existe en agent_profiles")
 
 
-def agent_layer_md(spec: dict) -> str:
-    return f"## 🧠 {spec['agent_layer']['title_es']}\n\n{agent_layer_body_md(spec)}"
+def profile_metric(profile: dict, lang: str) -> str:
+    metrics = [f"`{m}`" for m in profile["metrics"]]
+    if not metrics:
+        return "no visible en el cliente" if lang == "es" else "not visible in the client"
+    return (" y " if lang == "es" else " and ").join(metrics)
 
 
-def agent_layer_plain(spec: dict) -> str:
-    return f"🧠 {spec['agent_layer']['title_es'].upper()}:\n{agent_layer_body_md(spec)}"
+def profile_fields(profile: dict, lang: str) -> list:
+    """(etiqueta, texto) de cada campo del perfil en el idioma pedido."""
+    labels = (
+        ("Prefijo fijo", "Fixed prefix", "prefix"),
+        ("Invalida la caché", "Invalidates the cache", "invalidators"),
+        ("Corte de sesión", "Session cut", "session_cut"),
+        ("Configuración por fase", "Configuration per phase", "phase_config"),
+    )
+    rows = [(es if lang == "es" else en, profile[f"{key}_{lang}"]) for es, en, key in labels]
+    rows.append(("Medición" if lang == "es" else "Measurement", profile_metric(profile, lang)))
+    return rows
 
 
-def agent_layer_en(spec: dict) -> str:
+def agent_layer_body_md(spec: dict, agent_id: str) -> str:
+    """Regla común de fases más el perfil del asistente (solo el suyo, para acotar los tokens)."""
+    profile = agent_profile(spec, agent_id)
+    lines = [spec["agent_layer"]["phase_rule_es"], "", f"**Perfil activo: {profile['name']}.**"]
+    lines += [f"- **{label}:** {text}." for label, text in profile_fields(profile, "es")]
+    return "\n".join(lines)
+
+
+def agent_layer_md(spec: dict, agent_id: str) -> str:
+    return f"## 🧠 {spec['agent_layer']['title_es']}\n\n{agent_layer_body_md(spec, agent_id)}"
+
+
+def agent_layer_plain(spec: dict, agent_id: str) -> str:
+    profile = agent_profile(spec, agent_id)
+    lines = [f"🧠 {spec['agent_layer']['title_es'].upper()}:", spec["agent_layer"]["phase_rule_es"], f"PERFIL ACTIVO: {profile['name']}."]
+    lines += [f"- {label}: {text}." for label, text in profile_fields(profile, "es")]
+    return "\n".join(lines)
+
+
+def agent_layer_en(spec: dict, agent_id: str) -> str:
     layer = spec["agent_layer"]
-    return f"## {layer['title_en'].upper()}:\n{layer['phase_rule_en']}"
+    profile = agent_profile(spec, agent_id)
+    lines = [f"## {layer['title_en'].upper()}:", layer["phase_rule_en"], f"Active profile: {profile['name']}."]
+    lines += [f"- {label}: {text}." for label, text in profile_fields(profile, "en")]
+    return "\n".join(lines)
+
+
+def agent_profiles_table_md(spec: dict) -> str:
+    """Tabla completa de perfiles para el manual (las directivas llevan solo el suyo)."""
+    rows = ["| Asistente | Prefijo fijo | Invalida la caché | Corte de sesión | Configuración por fase | Medición |", "|---|---|---|---|---|---|"]
+    for p in spec["agent_profiles"]:
+        rows.append(
+            f"| **{p['name']}** | {p['prefix_es']} | {p['invalidators_es']} | {p['session_cut_es']} | "
+            f"{p['phase_config_es']} | {profile_metric(p, 'es')} |"
+        )
+    return "\n".join(rows)
 
 
 def secrets_ts(spec: dict) -> str:
@@ -485,10 +539,8 @@ def build_context(spec: dict) -> dict:
         "invocation_md": invocation_md(spec),
         "invocation_fallback": spec["invocation"]["fallback_es"],
         "stop_criterion": spec["contract_rules"]["stop_criterion"],
-        "agent_layer_body_md": agent_layer_body_md(spec),
-        "agent_layer_md": agent_layer_md(spec),
-        "agent_layer_plain": agent_layer_plain(spec),
-        "agent_layer_en": agent_layer_en(spec),
+        "agent_profiles_table_md": agent_profiles_table_md(spec),
+        "agent_phase_rule_md": spec["agent_layer"]["phase_rule_es"],
         "secrets_ts": secrets_ts(spec),
         "secrets_py": secrets_py(spec),
         "next_guardrail_number": str(len(spec["guardrails"]) + 1),
@@ -578,7 +630,17 @@ def render_targets(spec: dict) -> dict:
         tmpl_path = TEMPLATES_DIR / target["template"]
         if not tmpl_path.exists():
             raise SpecError(f"Falta la plantilla {tmpl_path.relative_to(REPO_ROOT)}")
-        outputs[target["output"]] = normalize(render(tmpl_path.read_text(encoding="utf-8"), ctx, target["template"]))
+        target_ctx = ctx
+        if "agent" in target:
+            agent_id = target["agent"]
+            target_ctx = {
+                **ctx,
+                "agent_layer_body_md": agent_layer_body_md(spec, agent_id),
+                "agent_layer_md": agent_layer_md(spec, agent_id),
+                "agent_layer_plain": agent_layer_plain(spec, agent_id),
+                "agent_layer_en": agent_layer_en(spec, agent_id),
+            }
+        outputs[target["output"]] = normalize(render(tmpl_path.read_text(encoding="utf-8"), target_ctx, target["template"]))
     for region in spec.get("regions", []):
         if region["block"] not in ctx:
             raise SpecError(f"{region['output']}: bloque desconocido '{region['block']}'")

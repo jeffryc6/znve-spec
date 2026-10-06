@@ -108,3 +108,18 @@ Toda respuesta técnica se estructura en 4 bloques:
 | Gemini responde sin el formato ZNVE | La skill está desactivada o no se activó. Revisa **Settings → Skills** (app) o `/skills list` (CLI), o nombra la skill: "usa la skill znve". |
 | La subida falla en la app | Hay un archivo binario oculto o el nombre de la skill no está en minúsculas con guiones. No edites `SKILL.md`: regenéralo con `python znve-auto/builder.py`. |
 | Una versión antigua sigue respondiendo | Hay otra copia de `znve` con más precedencia. Revisa `.gemini/skills/` y `.agents/skills/` del proyecto. |
+
+---
+
+## 5. Rendimiento y caché
+
+Cada fase es una sesión. Las fases de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible; las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato. La configuración se elige al abrir la sesión. Solo cambia dentro de ella si el host lo permite sin reescribir el prefijo; si no, cambiar de modelo, de nivel de razonamiento, de herramientas o de esquema de salida invalida la caché. Al cerrar una fase verificada, recomienda el corte de sesión del perfil activo.
+
+**Perfil activo: Gemini (app y CLI).**
+- **Prefijo fijo:** skill `znve` y `~/.gemini/GEMINI.md`.
+- **Invalida la caché:** editar `GEMINI.md` o la skill con la sesión abierta; activar o desactivar skills o extensiones; cambiar de modelo; compactar el historial a mitad de fase.
+- **Corte de sesión:** `/clear` en la CLI o chat nuevo en la app, al cerrar cada fase.
+- **Configuración por fase:** elige el modelo al abrir la sesión y no lo cambies dentro de ella.
+- **Medición:** `usage_metadata.cached_content_token_count`.
+
+Cifras de referencia, prácticas de sesión y protocolo de medición: `protocols/PROMPT_GUIDE.md`, sección «Rendimiento y caché».

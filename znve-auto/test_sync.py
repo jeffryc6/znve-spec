@@ -46,6 +46,14 @@ SKILL_FILES = (
 )
 ANTIGRAVITY_DIR = REPO / "integrations" / "antigravity"
 HAND_MAINTAINED_SKIP = {".git", "node_modules", "dist", "znve-auto"}
+# Presupuestos en bytes (RFC 0002 §3, medidos): un guardrail es una línea del prefijo de cada petición.
+GUARDRAIL_MAX_BYTES = {"Cerca de Contexto (Context Fence)": 700, "Verificación Inviolable": 400}
+# Regla común de fases más el perfil del asistente. La RFC proponía 900 B; la regla sola ya pesa más de 600 B.
+AGENT_BLOCK_MAX_BYTES = 1400
+# Descripciones de las herramientas MCP: viajan en el prefijo de cada petición (línea base v2.3.0: unos 2 KiB).
+MCP_TOOL_DOCS_MAX_BYTES = 3200
+DATE = re.compile(r"\b20\d\d-\d\d-\d\d\b")
+HOST_PATH = re.compile(r"[A-Za-z]:\\Users\\|/Users/\w|/home/\w")
 
 
 def frontmatter(text: str) -> dict:
@@ -103,6 +111,40 @@ class SpecTests(unittest.TestCase):
             found = [int(n) for groups in re.findall(pattern, (REPO / rel).read_text(encoding="utf-8")) for n in groups if n]
             self.assertTrue(found, f"{rel} ya no cita el número de guardrails")
             self.assertEqual(set(found), {total}, f"{rel} cita {sorted(set(found))} y la especificación tiene {total}")
+
+    def test_agent_profiles_are_consistent(self):
+        """Cada target con 'agent' usa un perfil existente y todo perfil se usa al menos una vez."""
+        ids = [p["id"] for p in self.spec["agent_profiles"]]
+        self.assertEqual(len(ids), len(set(ids)))
+        used = {t["agent"] for t in self.spec["targets"] if "agent" in t}
+        self.assertLessEqual(used, set(ids))
+        self.assertEqual(set(ids), used, f"perfiles sin usar: {sorted(set(ids) - used)}")
+
+    def test_agent_profiles_have_no_volatile_figures(self):
+        """Los perfiles solo describen comportamiento: sin dígitos (precios, mínimos, versiones de modelo)."""
+        for profile in self.spec["agent_profiles"]:
+            for key, value in profile.items():
+                if key.endswith("_es") or key == "name":
+                    self.assertNotRegex(value, r"\d", f"{profile['id']}.{key}")
+            for key in ("prefix", "invalidators", "session_cut", "phase_config"):
+                self.assertTrue(profile[f"{key}_es"] and profile[f"{key}_en"], f"{profile['id']}.{key}")
+
+    def test_guardrail_budgets(self):
+        """Los guardrails de la Capa de Agente respetan el presupuesto de bytes de la RFC 0002."""
+        for guardrail in self.spec["guardrails"]:
+            limit = GUARDRAIL_MAX_BYTES.get(guardrail["title_es"])
+            if limit:
+                for lang in ("es", "en"):
+                    size = len(guardrail[f"text_{lang}"].encode("utf-8"))
+                    self.assertLessEqual(size, limit, f"{guardrail['title_es']} ({lang}) pesa {size} B")
+
+    def test_mcp_tool_docs_budget(self):
+        """Las descripciones de las herramientas MCP, que viajan en cada petición, no crecen sin control."""
+        total = sum(
+            len(f"{t['summary_es']} {t['behavior_es']}".encode("utf-8")) + sum(len(p["desc_es"].encode("utf-8")) for p in t["params"])
+            for t in self.spec["mcp"]["tools"]
+        )
+        self.assertLessEqual(total, MCP_TOOL_DOCS_MAX_BYTES, f"las descripciones pesan {total} B")
 
     def test_default_format(self):
         """La respuesta por defecto tiene exactamente 4 bloques."""
@@ -192,6 +234,42 @@ class ArtifactTests(unittest.TestCase):
                 layer["phase_rule_es"] in text or layer["phase_rule_en"] in text,
                 f"{target['output']} no incluye la regla común de fases",
             )
+
+    def test_each_directive_has_only_its_profile(self):
+        """Cada artefacto con 'agent' lleva el perfil de su asistente y ninguno de los otros."""
+        profiles = {p["id"]: p for p in self.spec["agent_profiles"]}
+        for target in self.spec["targets"]:
+            if "agent" not in target:
+                continue
+            text = self.rendered[target["output"]]
+            mine = profiles[target["agent"]]
+            self.assertTrue(
+                mine["prefix_es"] in text or mine["prefix_en"] in text, f"{target['output']} no incluye su perfil '{mine['id']}'"
+            )
+            for other in profiles.values():
+                if other["id"] != mine["id"] and other["prefix_es"] != mine["prefix_es"]:
+                    self.assertNotIn(other["prefix_es"], text, f"{target['output']} incluye el perfil de '{other['id']}'")
+                    self.assertNotIn(other["prefix_en"], text, f"{target['output']} incluye el perfil de '{other['id']}'")
+
+    def test_agent_block_budget(self):
+        """El bloque de Capa de Agente (regla de fases y perfil) de cada asistente cabe en su presupuesto."""
+        for profile in self.spec["agent_profiles"]:
+            for render in (builder.agent_layer_body_md, builder.agent_layer_en):
+                size = len(render(self.spec, profile["id"]).encode("utf-8"))
+                self.assertLessEqual(size, AGENT_BLOCK_MAX_BYTES, f"{profile['id']}: {render.__name__} pesa {size} B")
+
+    def test_manual_has_all_profiles(self):
+        """El manual reúne la tabla completa de perfiles."""
+        manual = self.rendered["protocols/COMMANDS.md"]
+        for profile in self.spec["agent_profiles"]:
+            self.assertIn(profile["name"], manual)
+
+    def test_stable_prefix(self):
+        """Prefijo estable por construcción: ningún artefacto generado contiene fechas ni rutas del host."""
+        for target in self.spec["targets"]:  # los archivos con bloques gestionados (README, index.html) son de edición manual
+            rel, text = target["output"], self.rendered[target["output"]]
+            self.assertIsNone(DATE.search(text), f"{rel} contiene una fecha")
+            self.assertIsNone(HOST_PATH.search(text), f"{rel} contiene una ruta de usuario del host")
 
     def test_harness_output_is_deterministic_and_verified(self):
         """El comando harness fija el determinismo del Golden Master y la verificación en dos pasos."""
@@ -370,6 +448,19 @@ class AntigravityPythonTests(unittest.TestCase):
             self.assertFalse(legacy.exists())
             self.assertTrue((home / ".gemini" / "config" / "global_workflows" / "znve-help.md").exists())
             self.assertEqual((home / ".gemini" / "GEMINI.md").read_text(encoding="utf-8").count("znve:start"), 1)
+
+    def test_global_gemini_block_is_static_and_minimal(self):
+        """El bloque de GEMINI.md es mínimo y estático: sin catálogo de comandos (lo da la skill) ni fechas."""
+        installer = load_module("znve_global_installer_block", ANTIGRAVITY_DIR / "install_znve_global.py")
+        rule = installer.upsert_rule("")
+        self.assertIn("Cerca de Contexto", rule)
+        self.assertIn("Verificación Inviolable", rule)
+        for command in self.spec["commands"]:
+            if command["id"] != "help":
+                self.assertNotIn(command["name"], rule, "el bloque no debe repetir el catálogo")
+        self.assertIsNone(DATE.search(rule))
+        self.assertLessEqual(len(rule.encode("utf-8")), 1400)
+        self.assertEqual(installer.upsert_rule(rule), rule)
 
     def test_global_rule_is_replaced(self):
         """install_znve_global sustituye la regla de GEMINI.md en vez de duplicarla."""

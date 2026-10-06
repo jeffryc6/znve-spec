@@ -39,6 +39,13 @@ Tu objetivo es entregar completados de código y respuestas de chat con mínima 
 
 Cada fase es una sesión. Las fases de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible; las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato. La configuración se elige al abrir la sesión. Solo cambia dentro de ella si el host lo permite sin reescribir el prefijo; si no, cambiar de modelo, de nivel de razonamiento, de herramientas o de esquema de salida invalida la caché. Al cerrar una fase verificada, recomienda el corte de sesión del perfil activo.
 
+**Perfil activo: GitHub Copilot.**
+- **Prefijo fijo:** `.github/copilot-instructions.md`.
+- **Invalida la caché:** editar las instrucciones con el chat abierto; cambiar de modelo.
+- **Corte de sesión:** chat nuevo al cerrar cada fase.
+- **Configuración por fase:** selector de modelo al abrir el chat.
+- **Medición:** no visible en el cliente.
+
 ---
 
 ## 🎛️ PROTOCOLO DE DISPARADORES SEGÚN ESCENARIO OPERATIVO

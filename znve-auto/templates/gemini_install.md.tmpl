@@ -92,3 +92,11 @@ Dentro de la sesión, `/skills list` debe mostrar `{{name}}` como activa. Para p
 | Gemini responde sin el formato ZNVE | La skill está desactivada o no se activó. Revisa **Settings → Skills** (app) o `/skills list` (CLI), o nombra la skill: "usa la skill {{name}}". |
 | La subida falla en la app | Hay un archivo binario oculto o el nombre de la skill no está en minúsculas con guiones. No edites `SKILL.md`: regenéralo con `python znve-auto/builder.py`. |
 | Una versión antigua sigue respondiendo | Hay otra copia de `{{name}}` con más precedencia. Revisa `.gemini/skills/` y `.agents/skills/` del proyecto. |
+
+---
+
+## 5. Rendimiento y caché
+
+{{agent_layer_body_md}}
+
+Cifras de referencia, prácticas de sesión y protocolo de medición: `protocols/PROMPT_GUIDE.md`, sección «Rendimiento y caché».
