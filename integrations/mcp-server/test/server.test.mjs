@@ -8,7 +8,7 @@
 
 import { after, before, describe, test } from "node:test";
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
@@ -713,6 +713,59 @@ describe("contrato de respuesta común (znve-auto/tool_contract_cases.json)", ()
         await exited;
       }
       fs.rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Instalador de Antigravity: ruta documentada del mcp_config.json
+// ---------------------------------------------------------------------------
+
+describe("install-antigravity.mjs", () => {
+  const INSTALLER = path.join(MCP_DIR, "install-antigravity.mjs");
+
+  const dryRun = (home) =>
+    spawnSync(process.execPath, [INSTALLER, "--dry-run", "--skip-build"], {
+      env: { ...process.env, HOME: home, USERPROFILE: home },
+      encoding: "utf-8",
+      timeout: 60_000,
+    });
+
+  const target = (output) => output.match(/\[dry-run\] (.+?mcp_config\.json) ->/)?.[1];
+
+  test("sin ningún config crea el de la ruta global documentada", () => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "znve-home-"));
+    try {
+      const run = dryRun(home);
+      assert.equal(run.status, 0, run.stdout + run.stderr);
+      assert.equal(path.resolve(target(run.stdout)), path.join(home, ".gemini", "config", "mcp_config.json"));
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
+    }
+  });
+
+  test("conserva el config de una instalación anterior si es el único que existe", () => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "znve-home-"));
+    try {
+      const legacy = path.join(home, ".gemini", "antigravity", "mcp_config.json");
+      fs.mkdirSync(path.dirname(legacy), { recursive: true });
+      fs.writeFileSync(legacy, '{"mcpServers":{}}');
+      assert.equal(path.resolve(target(dryRun(home).stdout)), legacy);
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
+    }
+  });
+
+  test("si existe el documentado y uno anterior, gana el documentado", () => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "znve-home-"));
+    try {
+      for (const rel of [[".gemini", "config"], [".gemini", "antigravity"]]) {
+        fs.mkdirSync(path.join(home, ...rel), { recursive: true });
+        fs.writeFileSync(path.join(home, ...rel, "mcp_config.json"), '{"mcpServers":{}}');
+      }
+      assert.equal(path.resolve(target(dryRun(home).stdout)), path.join(home, ".gemini", "config", "mcp_config.json"));
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
     }
   });
 });

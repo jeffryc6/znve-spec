@@ -18,8 +18,11 @@ const REPO_ROOT = path.resolve(HERE, "../..");
 const SERVER_JS = path.join(HERE, "dist", "znve-mcp-server.js");
 const SPEC_PATH = path.join(REPO_ROOT, "znve-auto", "master_spec.json");
 
-// Rutas conocidas del config de Antigravity (la primera existente gana; la última es la documentada por defecto).
+// Rutas del config de Antigravity. La documentada (https://antigravity.google/docs/mcp) es la global
+// ~/.gemini/config/mcp_config.json; las otras dos son de instalaciones anteriores. La primera que exista gana y,
+// si no hay ninguna, se crea la documentada.
 const CONFIG_CANDIDATES = [
+  path.join(os.homedir(), ".gemini", "config", "mcp_config.json"),
   path.join(os.homedir(), ".gemini", "antigravity-ide", "mcp_config.json"),
   path.join(os.homedir(), ".gemini", "antigravity", "mcp_config.json"),
 ];
@@ -75,7 +78,7 @@ function expectedTools() {
 
 function resolveConfigPath(explicit) {
   if (explicit) return explicit;
-  return CONFIG_CANDIDATES.find((p) => fs.existsSync(p)) ?? CONFIG_CANDIDATES[CONFIG_CANDIDATES.length - 1];
+  return CONFIG_CANDIDATES.find((p) => fs.existsSync(p)) ?? CONFIG_CANDIDATES[0];
 }
 
 function readConfig(configPath) {

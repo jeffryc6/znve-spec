@@ -42,6 +42,7 @@ python <ruta>/znve-spec/integrations/antigravity/install_znve_global.py
 ```
 
 - Copia `SKILL.md` a `~/.gemini/config/skills/znve/`, la ruta global de Antigravity IDE y Antigravity 2.0.
+- Para la **CLI de Antigravity**, la ruta global es otra (`~/.gemini/antigravity-cli/skills/`): copia allí la carpeta `znve/` si la usas fuera de un proyecto; dentro de un proyecto, `.agents/skills/` sirve a las dos.
 - Elimina la copia antigua de `~/.gemini/antigravity/skills/znve/` (ruta legacy) para que no compita con la nueva. Si esa carpeta contiene otros archivos, avisa y no la toca.
 - Registra el workflow `/znve-help` en `~/.gemini/config/global_workflows/`.
 - Escribe la regla ZNVE en `~/.gemini/GEMINI.md`. Si ya hay una de una versión anterior, la sustituye en lugar de añadir otra.

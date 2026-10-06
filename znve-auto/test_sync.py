@@ -1030,6 +1030,29 @@ class SdkExampleTests(unittest.TestCase):
         self.assertNotRegex(self.SOURCE, r"env=os\.environ")
 
 
+class CiWorkflowTests(unittest.TestCase):
+    """Cadena de suministro del CI: acciones fijadas a un commit y permisos mínimos."""
+
+    WORKFLOWS = sorted((REPO / ".github" / "workflows").glob("*.yml"))
+
+    def test_workflows_exist(self):
+        self.assertTrue(self.WORKFLOWS)
+
+    def test_actions_are_pinned_to_a_commit_sha(self):
+        for workflow in self.WORKFLOWS:
+            for number, line in enumerate(workflow.read_text(encoding="utf-8").splitlines(), 1):
+                match = re.search(r"uses:\s*(\S+)", line)
+                if not match or match.group(1).startswith("./"):
+                    continue
+                self.assertRegex(
+                    match.group(1), r"^[\w.-]+/[\w./-]+@[0-9a-f]{40}$", f"{workflow.name}:{number} no está fijada a un SHA"
+                )
+
+    def test_workflows_default_to_read_only_token(self):
+        for workflow in self.WORKFLOWS:
+            self.assertRegex(workflow.read_text(encoding="utf-8"), r"(?m)^permissions:\s*\n\s+contents:\s*read\s*$", workflow.name)
+
+
 def stale_hand_maintained(spec: dict) -> list[str]:
     """Archivos no generados que citan una versión de ZNVE distinta de la especificación."""
     generated = {t["output"] for t in spec["targets"]} | {b["output"] for b in spec["bundles"]}

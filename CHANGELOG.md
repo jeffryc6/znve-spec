@@ -37,7 +37,9 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 - **Builder:** un archivo suelto en la carpeta del paquete `znve.zip` ya no se empaqueta en silencio: el builder falla indicando su ruta (los miembros escritos a mano se declaran en `include`).
 - **`antigravity_sdk_example.py`:** pasa al servidor un entorno mínimo explícito (lo que node necesita más `ZNVE_WORKSPACE`), sin depender de cómo trate el SDK `env`, y usa sangría de 4 espacios.
 - **`test_sync.py`:** la heurística de versiones ya no confunde `ZNVE_OR_ERROR` y similares con una cita de versión; las comprobaciones de versión incluyen los `.ps1`; tests de escape por enlaces simbólicos en `znve_skill.py`.
-- **CI:** la verificación de paridad corre en una matriz de Python 3.11 y 3.14.
+- **CI:** la verificación de paridad corre en una matriz de Python 3.11 y 3.14, y las acciones (`checkout`, `setup-python`, `setup-node`) están fijadas a un SHA de commit, con un test que lo exige.
+- **Instalador de Antigravity (`install-antigravity.mjs`):** el `mcp_config.json` que se crea por defecto es el de la ruta global documentada, `~/.gemini/config/mcp_config.json`; los de instalaciones anteriores (`~/.gemini/antigravity-ide/` y `~/.gemini/antigravity/`) se siguen usando si son los únicos que existen. Para un solo proyecto, `--config <proyecto>/.agents/mcp_config.json`.
+- **Guía de Antigravity:** indica la ruta global de skills de la CLI (`~/.gemini/antigravity-cli/skills/`), distinta de la del IDE.
 
 ### Servidor MCP 2.0.0 (cambios incompatibles)
 

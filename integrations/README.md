@@ -88,7 +88,7 @@ node install-antigravity.mjs --workspace "<ruta>/tu-proyecto"
 }
 ```
 
-- Antigravity: `~/.gemini/antigravity/mcp_config.json` (o **Manage MCP Servers → View raw config**).
+- Antigravity: `~/.gemini/config/mcp_config.json` global o `.agents/mcp_config.json` en el proyecto (o **Manage MCP Servers → View raw config**).
 - Claude Desktop: `claude_desktop_config.json` (**Settings → Developer → Edit Config**).
 - Cursor: `.cursor/mcp.json` en el proyecto o `~/.cursor/mcp.json` global.
 - Windsurf: `~/.codeium/windsurf/mcp_config.json`.
