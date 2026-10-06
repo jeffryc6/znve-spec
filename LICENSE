@@ -12,6 +12,7 @@ su ubicación:
    - CONTRIBUTING.md
    - /rfcs
    - /case-studies
+   - /field-tests (datos y documentación de las pruebas de campo)
 
 2. PROTOCOLOS E INTEGRACIONES: CC BY 4.0 Y MIT (LICENCIA DUAL)
    - /protocols (protocolos y manual de comandos)
@@ -26,6 +27,7 @@ su ubicación:
 3. CÓDIGO Y HERRAMIENTAS DEL REPOSITORIO: MIT
    - /znve-auto (especificación maestra, compilador, plantillas y pruebas)
    - /.github (instrucciones de Copilot y flujos de CI)
+   - /field-tests (los scripts de medición, *.py)
    - index.html
 
 ------------------------------------------------------------------------------

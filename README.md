@@ -134,6 +134,8 @@ znve-spec/
 │   └── workflows/znve-parity.yml      <-- CI: spec parity & drift check
 ├── case-studies/
 │   └── 02-legacy-monolith-rescue/     <-- Golden Master legacy modernization
+├── field-tests/
+│   └── 2026-10-ab-pilot/              <-- Pilot A/B field test (v2.3.0 vs v2.4.0 directives)
 ├── protocols/
 │   ├── ZNVE_PROTOCOL.md               <-- Universal master protocol (6 modes)
 │   ├── ZNVE_MODERN_APPS_PROTOCOL.md   <-- Modern apps: triage, hotfix & upgrades
@@ -188,7 +190,7 @@ El primero regenera todos los artefactos; el segundo certifica la paridad; el te
 
 ## 📜 Dual License / Licenciamiento Dual
 
-- **Specification & documentation / Especificación y documentación** (`SPECIFICATION.md`, `README.md`, `GLOSSARY.md`, `CONTRIBUTING.md`, `rfcs/`, `case-studies/`): [CC BY 4.0](LICENSE).
+- **Specification & documentation / Especificación y documentación** (`SPECIFICATION.md`, `README.md`, `GLOSSARY.md`, `CONTRIBUTING.md`, `rfcs/`, `case-studies/`, `field-tests/`): [CC BY 4.0](LICENSE).
 - **Protocols & integrations / Protocolos e integraciones** (`protocols/`, `integrations/`: protocols, command manual, agent directives, skills, MCP server / protocolos, manual de comandos, directivas, skills, servidor MCP): [CC BY 4.0 **and** MIT](LICENSE). Both licenses apply together; use whichever fits / Ambas licencias a la vez; elige la que te convenga.
 - **Repository tooling / Herramientas del repositorio** (`znve-auto/`, `.github/`, `index.html`): [MIT](LICENSE).
 

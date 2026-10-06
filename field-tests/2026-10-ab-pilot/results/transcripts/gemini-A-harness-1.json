@@ -1,0 +1,112 @@
+{
+ "tool_calls": [
+  {
+   "name": "list_dir",
+   "args": {
+    "path": "."
+   }
+  },
+  {
+   "name": "list_dir",
+   "args": {
+    "path": "legacy"
+   }
+  },
+  {
+   "name": "read_file",
+   "args": {
+    "path": "legacy/billing.py",
+    "start_line": 1,
+    "end_line": 200
+   }
+  },
+  {
+   "name": "list_dir",
+   "args": {
+    "path": "tests"
+   }
+  },
+  {
+   "name": "list_dir",
+   "args": {
+    "path": "."
+   }
+  },
+  {
+   "name": "read_file",
+   "args": {
+    "path": "README.md",
+    "end_line": 100,
+    "start_line": 1
+   }
+  },
+  {
+   "name": "read_file",
+   "args": {
+    "start_line": 1,
+    "path": ".env",
+    "end_line": 100
+   }
+  },
+  {
+   "name": "write_file",
+   "args": {
+    "content": "<1736 chars>",
+    "disposal_pattern": "not_applicable",
+    "path": "tests/characterization/test_billing.py"
+   }
+  },
+  {
+   "name": "run_tests",
+   "args": {
+    "path": "tests/characterization/test_billing.py"
+   }
+  }
+ ],
+ "texts": [
+  "### 1. REPORTE FORENSE (`/znve-forensic --target=legacy/billing.py`)\n\n1. **RESUMEN DE DOMINIO:** Módulo de facturación legacy síncrono encargado de calcular subtotales, aplicar umbrales de descuento por volumen (>1000) e impuestos (IVA 19%) sobre listas de tuplas `(nombre, cantidad, precio_unitario)`.\n2. **MATRIZ DE ENTRADAS, SALIDAS Y ESTADO:**\n   - **Entradas:** `items` (List[Tuple[str, int/float, int/float]]).\n   - **Salidas:** Diccionario JSON con `invoice_id`, `issued_at`, `lines` (con nombres normalizados mediante `.strip().title()`), `total` y `currency`.\n   - **Estado / Dependencias externas:** Variables de entorno (`os.environ.get(\"CURRENCY\", \"EUR\")`), aleatoriedad (`random.randint`), reloj de sistema (`time.strftime`).\n3. **EFECTOS SECUNDARIOS:** Ninguno en almacenamiento; acceso a variables de entorno globales.\n4. **EQUILIBRIOS ACCIDENTALES:** \n   - El descuento del 10% solo se aplica si `subtotal > 1000`.\n   - Redondeos implícitos flotantes en `round(qty * price, 2)` y `round(...)` del total.\n5. **ZONAS ROJAS:** \n   - Dependencia no determinista directa de `random` y `time`.\n   - Sin tipado estricto en parámetros, propenso a excepciones si la tupla tiene formato incorrecto.\n\n---\n\n### 2. CONFIGURACIÓN DE ARNÉS Y GOLDEN MASTER (`/znve-harness`)\n\n1. **CONFIGURACIÓN DE AISLAMIENTO:** El código de producción `legacy/billing.py` permanece completamente intacto. La suite de pruebas de caja negra se aísla en `tests/characterization/test_billing.py`, aplicando mocks/patches sobre `random.randint` y `time.strftime` para congelar la aleatoriedad y la fecha.\n2. **BATERÍA DE INYECCIÓN Y SNAPSHOTS GOLDEN MASTER:** Se cubrieron los dos comportamientos de negocio deterministas:\n   - Caso sin descuento (`subtotal <= 1000`).\n   - Caso con descuento por volumen (`subtotal > 1000`).\n3. **CÓDIGO DEL ARNÉS (`tests/characterization/test_billing.py`):**\n   ```python\n   \"\"\"Golden Master / Characterization Tests para legacy/billing.py\"\"\"\n   import unittest\n   from unittest.mock import patch\n   import sys\n   import os\n\n   sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), \"../..\")))\n   from legacy.billing import create_invoice\n\n   class TestBillingGoldenMaster(unittest.TestCase):\n       @patch(\"legacy.billing.random.randint\", return_value=123)\n       @patch(\"legacy.billing.time.strftime\", return_value=\"2023-01-01T00:00:00\")\n       def test_invoice_no_discount(self, mock_strftime, mock_randint):\n           items = [(\"Widget\", 2, 50.0)]\n           res = create_invoice(items)\n           expected = {\n               \"invoice_id\": \"INV-000123\",\n               \"issued_at\": \"2023-01-01T00:00:00\",\n               \"lines\": [{\"name\": \"Widget\", \"qty\": 2, \"amount\": 100.0}],\n               \"total\": 119.0,\n               \"currency\": \"EUR\"\n           }\n           self.assertEqual(res, expected)\n\n       @patch(\"legacy.billing.random.randint\", return_value=456)\n       @patch(\"legacy.billing.time.strftime\", return_value=\"2023-01-01T00:00:00\")\n       def test_invoice_with_discount(self, mock_strftime, mock_randint):\n           items = [(\"Server Rack\", 1, 1500.0)]\n           res = create_invoice(items)\n           expected = {\n               \"invoice_id\": \"INV-000456\",\n               \"issued_at\": \"2023-01-01T00:00:00\",\n               \"lines\": [{\"name\": \"Server Rack\", \"qty\": 1, \"amount\": 1500.0}],\n               \"total\": 1606.5,\n               \"currency\": \"EUR\"\n           }\n           self.assertEqual(res, expected)\n\n   if __name__ == \"__main__\":\n       unittest.main()\n   ```\n4. **COMANDO DE VALIDACIÓN Y EJECUCIÓN:**\n   ```bash\n   python -m unittest tests/characterization/test_billing.py\n   ```\n   *Resultado:* `Ran 2 tests in 0.002s — OK (Verde absoluto).*"
+ ],
+ "record": {
+  "provider": "gemini",
+  "model": "gemini-3.5-flash-lite",
+  "variant": "A",
+  "task": "harness",
+  "rep": 1,
+  "turns": 10,
+  "truncated": false,
+  "error": null,
+  "finish": "STOP",
+  "seconds": 100.2,
+  "tokens_input": 34285,
+  "tokens_cached": 0,
+  "tokens_output": 2032,
+  "tokens_thoughts": 0,
+  "tool_calls": 9,
+  "bytes_read": 917,
+  "eval": {
+   "changed": [
+    "tests/characterization/test_billing.py"
+   ],
+   "harness_files": 1,
+   "mentions_target": true,
+   "runs": [
+    {
+     "ok": true,
+     "ran": 2
+    },
+    {
+     "ok": true,
+     "ran": 2
+    },
+    {
+     "ok": true,
+     "ran": 2
+    }
+   ],
+   "deterministic": false,
+   "legacy_intact": true,
+   "success": false
+  },
+  "final_text": "### 1. REPORTE FORENSE (`/znve-forensic --target=legacy/billing.py`)\n\n1. **RESUMEN DE DOMINIO:** Módulo de facturación legacy síncrono encargado de calcular subtotales, aplicar umbrales de descuento por volumen (>1000) e impuestos (IVA 19%) sobre listas de tuplas `(nombre, cantidad, precio_unitario)`.\n2. **MATRIZ DE ENTRADAS, SALIDAS Y ESTADO:**\n   - **Entradas:** `items` (List[Tuple[str, int/float, int/float]]).\n   - **Salidas:** Diccionario JSON con `invoice_id`, `issued_at`, `lines` (con nombres normalizados mediante `.strip().title()`), `total` y `currency`.\n   - **Estado / Dependencias externas:** Variables de entorno (`os.environ.get(\"CURRENCY\", \"EUR\")`), aleatoriedad (`random.randint`), reloj de sistema (`time.strftime`).\n3. **EFECTOS SECUNDARIOS:** Ninguno en almacenamiento; acceso a variables de entorno globales.\n4. **EQUILIBRIOS ACCIDENTALES:** \n   - El descuento del 10% solo se aplica si `subtotal > 1000`.\n   - Redondeos implícitos flotantes en `round(qty * price, 2)` y `round(...)` del total.\n5. **ZONAS ROJAS:** \n   - Dependencia no determinista directa de `random` y `time`.\n   - Sin tipado estricto en parámetros, propenso a excepciones si la tupla tiene formato incorrecto.\n\n---\n\n### 2. CONFIGURACIÓN DE ARNÉS Y GOLDEN MASTER (`/znve-harness`)\n\n1. **CONFIGURACIÓN DE AISLAMIENTO:** El código de producción `legacy/billing.py` permanece completamente intacto. La suite de pruebas de caja negra se aísla en `tests/characterization/test_billing.py`, aplicando mocks/patche"
+ }
+}

@@ -49,7 +49,8 @@ SKILL_FILES = (
     "integrations/gemini/skills/znve/SKILL.md",
 )
 ANTIGRAVITY_DIR = REPO / "integrations" / "antigravity"
-HAND_MAINTAINED_SKIP = {".git", "node_modules", "dist", "znve-auto"}
+# field-tests conserva datos archivados (directivas y transcripciones de versiones anteriores): no se actualizan.
+HAND_MAINTAINED_SKIP = {".git", "node_modules", "dist", "znve-auto", "field-tests"}
 # Presupuestos en bytes (RFC 0002 §3, medidos): un guardrail es una línea del prefijo de cada petición.
 GUARDRAIL_MAX_BYTES = {"Cerca de Contexto (Context Fence)": 700, "Verificación Inviolable": 400}
 # Regla común de fases más el perfil del asistente. La RFC proponía 900 B; la regla sola ya pesa más de 600 B.
