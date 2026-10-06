@@ -33,6 +33,12 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 - `integrations/README.md`: índice generado con el archivo que usar en cada asistente.
 - Este `CHANGELOG.md`.
 
+### Mantenimiento
+- **Builder:** un archivo suelto en la carpeta del paquete `znve.zip` ya no se empaqueta en silencio: el builder falla indicando su ruta (los miembros escritos a mano se declaran en `include`).
+- **`antigravity_sdk_example.py`:** pasa al servidor un entorno mínimo explícito (lo que node necesita más `ZNVE_WORKSPACE`), sin depender de cómo trate el SDK `env`, y usa sangría de 4 espacios.
+- **`test_sync.py`:** la heurística de versiones ya no confunde `ZNVE_OR_ERROR` y similares con una cita de versión; las comprobaciones de versión incluyen los `.ps1`; tests de escape por enlaces simbólicos en `znve_skill.py`.
+- **CI:** la verificación de paridad corre en una matriz de Python 3.11 y 3.14.
+
 ### Servidor MCP 2.0.0 (cambios incompatibles)
 
 El servidor pasa de 1.2.0 a **2.0.0**: unifica su contrato con `znve_skill.py`, migra a `McpServer.registerTool` y fija su lista de herramientas. La norma sigue en 2.3.0; esta ruptura afecta solo a quien consuma las respuestas del servidor o de la skill de Python.

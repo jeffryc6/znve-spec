@@ -696,19 +696,33 @@ def bundle_ignored(rel: str) -> bool:
 
 
 def bundle_members(bundle: dict, rendered: dict) -> dict:
-    """Archivos del paquete: los generados dentro de la carpeta más los que existan a mano en disco."""
+    """Archivos del paquete: los generados dentro de la carpeta más los declarados en 'include' (a mano, en disco)."""
     prefix = f"{bundle['root']}/{bundle['folder']}/"
     members = {}
-    folder = REPO_ROOT / bundle["root"] / bundle["folder"]
-    if folder.exists():
-        for path in folder.rglob("*"):
-            if path.is_file() and not bundle_ignored(path.relative_to(folder).as_posix()):
-                rel = path.relative_to(REPO_ROOT).as_posix()
-                members[rel[len(bundle["root"]) + 1:]] = path.read_bytes()
+    for rel in bundle.get("include", []):
+        path = REPO_ROOT / bundle["root"] / bundle["folder"] / rel
+        if not path.is_file():
+            raise SpecError(f"{bundle['output']}: el archivo declarado en 'include' no existe: {rel}")
+        members[f"{bundle['folder']}/{rel}"] = path.read_bytes()
     for rel, content in rendered.items():
         if rel.startswith(prefix):
             members[rel[len(bundle["root"]) + 1:]] = content.encode("utf-8")
     return dict(sorted(members.items()))
+
+
+def bundle_orphans(bundle: dict, rendered: dict) -> list[str]:
+    """Archivos sueltos en la carpeta del paquete que ni se generan ni se declaran en 'include'."""
+    folder = REPO_ROOT / bundle["root"] / bundle["folder"]
+    if not folder.exists():
+        return []
+    known = set(bundle_members(bundle, rendered))
+    found = []
+    for path in sorted(folder.rglob("*")):
+        if path.is_file() and not bundle_ignored(path.relative_to(folder).as_posix()):
+            member = path.relative_to(REPO_ROOT / bundle["root"]).as_posix()
+            if member not in known:
+                found.append(path.relative_to(REPO_ROOT).as_posix())
+    return found
 
 
 def build_zip(members: dict) -> bytes:
@@ -764,6 +778,12 @@ def build(spec: dict, verify_only: bool = False, show_diff: bool = False) -> lis
                 fh.write(expected)
 
     for bundle in spec.get("bundles", []):
+        orphans = bundle_orphans(bundle, rendered)
+        if orphans:
+            raise SpecError(
+                f"{bundle['output']}: archivos sueltos en la carpeta del paquete: {', '.join(orphans)}. "
+                "Muévelos fuera, genéralos desde la especificación o decláralos en 'include'."
+            )
         members = bundle_members(bundle, rendered)
         path = REPO_ROOT / bundle["output"]
         if read_zip_members(path) == members:

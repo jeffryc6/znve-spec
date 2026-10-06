@@ -21,39 +21,44 @@ from google.antigravity.hooks import policy
 HERE = os.path.dirname(os.path.abspath(__file__))
 SERVER_JS = os.path.join(HERE, "dist", "znve-mcp-server.js")
 WORKSPACE = os.environ.get("ZNVE_WORKSPACE", os.path.abspath(os.path.join(HERE, "..", "..")))
+# Según cómo trate el SDK `env`, puede sustituir el entorno completo del proceso: se pasa lo que node
+# necesita para arrancar y nada más (ni claves de API ni otros secretos del entorno del agente).
+SERVER_ENV_KEYS = ("PATH", "SYSTEMROOT", "HOME", "USERPROFILE", "TMP", "TEMP", "TMPDIR")
 
 
 async def main() -> None:
-  if not os.path.exists(SERVER_JS):
-    raise SystemExit(f"No existe {SERVER_JS}. Ejecuta 'npm ci && npm run build' en {HERE}.")
+    if not os.path.exists(SERVER_JS):
+        raise SystemExit(f"No existe {SERVER_JS}. Ejecuta 'npm ci && npm run build' en {HERE}.")
 
-  znve = types.McpStdioServer(
-      name="znve-engine",
-      command=shutil.which("node") or "node",
-      args=[SERVER_JS],
-      env={"ZNVE_WORKSPACE": WORKSPACE},
-  )
+    server_env = {key: os.environ[key] for key in SERVER_ENV_KEYS if key in os.environ}
+    server_env["ZNVE_WORKSPACE"] = WORKSPACE
+    znve = types.McpStdioServer(
+        name="znve-engine",
+        command=shutil.which("node") or "node",
+        args=[SERVER_JS],
+        env=server_env,
+    )
 
-  # Solo lectura por defecto: las herramientas que escriben en disco quedan bloqueadas.
-  policies = [
-      policy.deny_all(),
-      policy.allow(znve, [
-          "znve_help",
-          "znve_forensic_scan",
-          "znve_validate_contract",
-          "znve_audit_resources",
-      ]),
-      policy.deny(znve, ["znve_surgical_write", "znve_scaffold_harness"]),
-  ]
+    # Solo lectura por defecto: las herramientas que escriben en disco quedan bloqueadas.
+    policies = [
+        policy.deny_all(),
+        policy.allow(znve, [
+            "znve_help",
+            "znve_forensic_scan",
+            "znve_validate_contract",
+            "znve_audit_resources",
+        ]),
+        policy.deny(znve, ["znve_surgical_write", "znve_scaffold_harness"]),
+    ]
 
-  config = LocalAgentConfig(mcp_servers=[znve], policies=policies)
+    config = LocalAgentConfig(mcp_servers=[znve], policies=policies)
 
-  async with Agent(config) as agent:
-    prompt = "Usa znve_help con topic 'mcp_tools' y resume las herramientas disponibles."
-    print(f"User: {prompt}")
-    response = await agent.chat(prompt)
-    print(f"Agent: {await response.text()}")
+    async with Agent(config) as agent:
+        prompt = "Usa znve_help con topic 'mcp_tools' y resume las herramientas disponibles."
+        print(f"User: {prompt}")
+        response = await agent.chat(prompt)
+        print(f"Agent: {await response.text()}")
 
 
 if __name__ == "__main__":
-  asyncio.run(main())
+    asyncio.run(main())

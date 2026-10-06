@@ -13,6 +13,7 @@ Uso:
 
 from __future__ import annotations
 
+import ast
 import base64
 import contextlib
 import importlib.util
@@ -34,7 +35,8 @@ import builder  # noqa: E402
 
 REPO = builder.REPO_ROOT
 SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
-ZNVE_VERSION_REF = re.compile(r"ZNVE[^\n\d]{0,40}?v?(\d+\.\d+\.\d+)")
+# \b tras ZNVE: ZNVE_OR_ERROR o ZNVE_MCP_ERROR son identificadores, no citas de versión.
+ZNVE_VERSION_REF = re.compile(r"ZNVE\b[^\n\d]{0,40}?v?(\d+\.\d+\.\d+)")
 SKILL_KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compatibility"}
 MCP_SERVER = REPO / "integrations" / "mcp-server" / "znve-mcp-server.ts"
 CONTRACT_CASES = REPO / "znve-auto" / "tool_contract_cases.json"
@@ -550,6 +552,46 @@ class SkillToolBehaviorTests(unittest.TestCase):
         self.assertEqual((folder / "test_legacy.py").read_text(encoding="utf-8"), "ORIGINAL\n")
         self.assertEqual([p.name for p in folder.iterdir()], ["test_legacy.py"], "sin temporales residuales")
 
+    # --- Escape por enlaces (S7) ----------------------------------------------
+
+    def link_dir(self, link: Path, target: Path) -> None:
+        """Enlace de directorio: symlink, o junction en Windows (no necesita privilegios)."""
+        try:
+            os.symlink(target, link, target_is_directory=True)
+        except (OSError, NotImplementedError):
+            made = os.name == "nt" and subprocess.run(
+                ["cmd", "/c", "mklink", "/J", str(link), str(target)], capture_output=True
+            ).returncode == 0
+            if not made:
+                self.skipTest("no se pudo crear el enlace en este sistema")
+
+    def test_directory_link_cannot_escape(self):
+        self.link_dir(self.ws / "link", self.outside)
+        read = self.skill.znve_forensic_scan("link/secret.txt")
+        self.assertRejected(read)
+        self.assertEqual(read["code"], "OUTSIDE_WORKSPACE")
+        self.assertNotIn("TOP-SECRET", str(read))
+        write = self.skill.znve_surgical_write("link/pwned.txt", "x", "not_applicable")
+        self.assertEqual(write["code"], "OUTSIDE_WORKSPACE")
+        self.assertFalse((self.outside / "pwned.txt").exists())
+
+    def test_link_inside_tests_cannot_take_the_harness_out(self):
+        (self.ws / "tests").mkdir(exist_ok=True)
+        self.link_dir(self.ws / "tests" / "out", self.outside)
+        result = self.skill.znve_scaffold_harness("tests/out", "h.py", "pass\n")
+        self.assertEqual(result["code"], "OUTSIDE_WORKSPACE")
+        self.assertFalse((self.outside / "h.py").exists())
+
+    def test_file_link_to_a_secret_is_denied(self):
+        (self.ws / ".env").write_text("TOKEN=CANARY", encoding="utf-8")
+        try:
+            os.symlink(self.ws / ".env", self.ws / "notas.txt")
+        except (OSError, NotImplementedError):
+            self.skipTest("no se pudo crear el enlace en este sistema")
+        result = self.skill.znve_forensic_scan("notas.txt")
+        self.assertEqual(result["code"], "SECRET_DENIED")
+        self.assertNotIn("CANARY", str(result))
+
     # --- Cerca de Contexto por código (M1-M3) ---------------------------------
 
     def test_forensic_range(self):
@@ -698,7 +740,8 @@ class DshInstallerTests(unittest.TestCase):
         self._tmp.cleanup()
 
     def run_installer(self, *flags: str) -> subprocess.CompletedProcess:
-        cmd = [POWERSHELL, "-NoProfile", "-ExecutionPolicy", "Bypass", "-File", str(DSH_INSTALLER), "-DshHome", str(self.home), *flags]
+        policy = ["-ExecutionPolicy", "Bypass"] if os.name == "nt" else []  # la política de ejecución es solo de Windows
+        cmd = [POWERSHELL, "-NoProfile", *policy, "-File", str(DSH_INSTALLER), "-DshHome", str(self.home), *flags]
         return subprocess.run(cmd, capture_output=True, text=True, encoding="utf-8", errors="replace", timeout=120)
 
     def backups(self) -> list[str]:
@@ -897,6 +940,94 @@ class ToolContractTests(unittest.TestCase):
             self.assertIn(f"`{code}`", manual)
         for tool in self.spec["mcp"]["tools"]:
             self.assertIn(f"| `{tool['name']}` |", manual)
+
+
+class BundleTests(unittest.TestCase):
+    """El paquete de la skill contiene solo lo generado o lo declarado: un archivo suelto es un error."""
+
+    BUNDLE = {"output": "skills/znve.zip", "root": "skills", "folder": "znve"}
+
+    def setUp(self):
+        self._tmp = tempfile.TemporaryDirectory()
+        self.root = Path(self._tmp.name)
+        self._patch = mock.patch.object(builder, "REPO_ROOT", self.root)
+        self._patch.start()
+        self.folder = self.root / "skills" / "znve"
+        (self.folder / "references").mkdir(parents=True)
+        (self.folder / "SKILL.md").write_text("generado", encoding="utf-8")
+
+    def tearDown(self):
+        self._patch.stop()
+        self._tmp.cleanup()
+
+    def test_stray_files_are_orphans_but_caches_are_not(self):
+        (self.folder / "notas.txt").write_text("suelto", encoding="utf-8")
+        (self.folder / "references" / "viejo.md").write_text("suelto", encoding="utf-8")
+        (self.folder / ".DS_Store").write_text("", encoding="utf-8")
+        (self.folder / "__pycache__").mkdir()
+        (self.folder / "__pycache__" / "x.pyc").write_text("", encoding="utf-8")
+        rendered = {"skills/znve/SKILL.md": "generado"}
+        self.assertEqual(
+            builder.bundle_orphans(self.BUNDLE, rendered), ["skills/znve/notas.txt", "skills/znve/references/viejo.md"]
+        )
+        self.assertEqual(sorted(builder.bundle_members(self.BUNDLE, rendered)), ["znve/SKILL.md"], "un huérfano no entra en el zip")
+
+    def test_include_declares_a_manual_member(self):
+        (self.folder / "scripts").mkdir()
+        (self.folder / "scripts" / "helper.py").write_text("print()", encoding="utf-8")
+        rendered = {"skills/znve/SKILL.md": "generado"}
+        bundle = {**self.BUNDLE, "include": ["scripts/helper.py"]}
+        self.assertEqual(builder.bundle_orphans(bundle, rendered), [])
+        self.assertEqual(sorted(builder.bundle_members(bundle, rendered)), ["znve/SKILL.md", "znve/scripts/helper.py"])
+
+    def test_missing_include_is_an_error(self):
+        bundle = {**self.BUNDLE, "include": ["no-existe.py"]}
+        with self.assertRaises(builder.SpecError):
+            builder.bundle_members(bundle, {})
+
+    def test_build_refuses_orphans(self):
+        (self.folder / "notas.txt").write_text("suelto", encoding="utf-8")
+        spec = {"bundles": [self.BUNDLE]}
+        with mock.patch.object(builder, "render_targets", return_value={"skills/znve/SKILL.md": "generado"}):
+            with self.assertRaisesRegex(builder.SpecError, "notas.txt"):
+                builder.build(spec, verify_only=True)
+
+
+class VersionReferenceTests(unittest.TestCase):
+    """La heurística de versiones ignora identificadores como ZNVE_OR_ERROR y detecta las citas reales."""
+
+    def test_detects_real_citations(self):
+        for text in (
+            "ZNVE v2.3.0",
+            "Zero-Noise Vibe Engineering (ZNVE) v2.3.0",
+            "Norma ZNVE 2.3.0",
+            "directiva global ZNVE v2.3.0 (resumen)",
+        ):
+            self.assertEqual(ZNVE_VERSION_REF.findall(text), ["2.3.0"], text)
+
+    def test_ignores_identifiers_followed_by_other_versions(self):
+        for text in (
+            "[ZNVE_OR_ERROR] 429: el SDK de MCP 1.32.0",
+            "ZNVE_MCP_ERROR con el SDK 1.32.0",
+            "ZNVE_WORKSPACE apunta a node 22.1.0",
+        ):
+            self.assertEqual(ZNVE_VERSION_REF.findall(text), [], text)
+
+
+class SdkExampleTests(unittest.TestCase):
+    """El ejemplo del SDK de Antigravity (no se puede importar sin el SDK) es válido y no filtra el entorno."""
+
+    SOURCE = (REPO / "integrations" / "mcp-server" / "antigravity_sdk_example.py").read_text(encoding="utf-8")
+
+    def test_is_valid_python(self):
+        ast.parse(self.SOURCE)
+
+    def test_passes_a_minimal_explicit_environment(self):
+        self.assertIn("ZNVE_WORKSPACE", self.SOURCE)
+        self.assertIn('"PATH"', self.SOURCE, "el servidor necesita PATH si el SDK sustituye el entorno")
+        self.assertNotIn("**os.environ", self.SOURCE)
+        self.assertNotIn("dict(os.environ", self.SOURCE)
+        self.assertNotRegex(self.SOURCE, r"env=os\.environ")
 
 
 def stale_hand_maintained(spec: dict) -> list[str]:

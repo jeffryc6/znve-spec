@@ -61,7 +61,7 @@ Además de las plantillas hay dos tipos de artefacto:
   - `integrations/mcp-server/znve-mcp-server.ts` y `integrations/antigravity/znve_skill.py`: el bloque `contract` (estado de cada código de error, librerías vetadas por defecto y, en el servidor, la versión de ZNVE; de `mcp.contract` en la especificación) y el bloque `secrets` (lista de secretos denegada y permitida, de `secrets` en la especificación; una sola fuente para las dos implementaciones).
   - `integrations/mcp-server/znve-mcp-server.ts`: tres bloques más. La cabecera (versión de ZNVE y axiomas, dentro de `/** ... */`), `fallback` (catálogo corto de `znve_help` si falta el manual) y `tools` (`TOOL_DOCS`: descripciones de las herramientas y de sus parámetros, desde `mcp.tools`).
   - `README.md`, `SPECIFICATION.md` e `index.html`: el catálogo de comandos.
-- **Paquetes (`bundles`).** `znve.zip` reúne la carpeta de la skill de Claude, reproducible byte a byte. Las cachés y los archivos ocultos (`__pycache__`, `*.pyc`, `.DS_Store`) nunca entran.
+- **Paquetes (`bundles`).** `znve.zip` reúne los archivos generados de la carpeta de la skill de Claude, reproducible byte a byte. Las cachés y los archivos ocultos (`__pycache__`, `*.pyc`, `.DS_Store`) nunca entran. Un archivo suelto en esa carpeta (ni generado ni declarado en `include`, la lista de miembros escritos a mano) es un **huérfano**: el builder se niega a empaquetarlo y falla con su ruta.
 - **Copias (`mirrors`).** `integrations/antigravity/.agents/skills/znve/` contiene `SKILL.md` y `scripts/znve_skill.py`, copias exactas de los originales: es el mismo árbol que deja `Auto_Installer.py` en cada proyecto.
 
 Las plantillas que empiezan por `_` son fragmentos compartidos: se incluyen con `{{> _nombre.md.tmpl}}`. Los bloques calculados desde la especificación se insertan con `{{clave}}`; la lista completa está en `build_context()` de `builder.py`.
@@ -83,7 +83,10 @@ Las plantillas que empiezan por `_` son fragmentos compartidos: se incluyen con 
 - Que el bloque de `GEMINI.md` de `install_znve_global.py` sea estático y no repita el catálogo de comandos.
 - Que `install-dsh.ps1` no lleve versiones de ZNVE escritas a mano y que, ejecutado contra un `$DSH_HOME` temporal, instale la directiva como bloque sin tocar el resto del `AGENTS.md`, sea idempotente, migre una instalación antigua y no borre un global ajeno al desinstalar. Se omite si no hay PowerShell.
 - Que las herramientas de `znve_skill.py` cumplan sus barandillas: contención en `ZNVE_WORKSPACE` (o el cwd), arnés solo bajo `tests/` o `sandbox/` y que solo crea (nunca sobrescribe), escritura atómica y sin `.git/` ni `node_modules/`, detección de `catch`/`except` que silencian errores, importaciones vetadas, consultas ciegas y bloqueos.
-- Que `znve.zip` excluya las cachés y los archivos ocultos.
+- Que `znve.zip` excluya las cachés y los archivos ocultos, y que el builder detecte los archivos huérfanos de la carpeta del paquete (y los miembros declarados en `include`).
+- Que la heurística de versiones distinga las citas reales (`ZNVE v2.3.0`) de identificadores como `ZNVE_OR_ERROR`.
+- Que las herramientas de `znve_skill.py` no se dejen escapar por enlaces de directorio (symlink o junction) ni por un enlace de archivo a un secreto (este último se omite si el sistema no permite crear el enlace).
+- Que el ejemplo del SDK de Antigravity sea Python válido y pase al servidor un entorno mínimo explícito, sin las claves de API del agente.
 - Que `znve_skill.py` exponga la versión y el catálogo de la especificación, que la skill se llame `znve` y tenga 6 herramientas, que `get_znve_skill()` entregue las 6 herramientas con docstring, que `Auto_Installer.py` instale en `.agents/skills/znve/` y retire la instalación de `.antigravity/`, que `install_znve_global.py` instale en `~/.gemini/config/skills/znve/` y retire la copia legacy, y que reemplace la regla de `GEMINI.md` sin duplicarla.
 
 Al final avisa, sin fallar, de los archivos mantenidos a mano (`.md`, `.py`, `.ts`, `.json`, `.html`, `.mjs` y `.ps1`) que citan otra versión de ZNVE.
