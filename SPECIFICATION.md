@@ -69,6 +69,15 @@ Las directivas de los asistentes traducen los 5 pilares en 9 guardrails que el a
 | 8 | Cerca de Contexto (Context Fence) | 1 |
 | 9 | Verificación Inviolable | 2 |
 
+### 2.7 Capa de Agente
+
+La Capa Camaleónica adapta ZNVE a la plataforma del proyecto; la **Capa de Agente** lo adapta a la IA que se usa. Cada directiva generada lleva dos partes:
+
+* **Regla común de fases:** cada fase es una sesión; las de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible y las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato; la configuración se elige al abrir la sesión y no cambia dentro de ella.
+* **Perfil del asistente:** solo el suyo (prefijo fijo, qué invalida su caché, corte de sesión, configuración por fase y campos de medición). Describen comportamiento y no llevan cifras, porque caducan; están en `agent_profiles` de `znve-auto/master_spec.json` y la SECCIÓN 5 de `protocols/COMMANDS.md` los reúne.
+
+Los guardrails 8 y 9 son instrucciones en todos los asistentes; **el servidor MCP y `znve_skill.py` además las aplican por código** (lista de secretos denegada, contenido marcado como dato no confiable, arnés que solo crea). Donde no hay servidor, siguen siendo instrucciones y no una garantía.
+
 ---
 
 ## 3. FLUJO DE CONTRATOS Y CONTROL ANTI-BUCLE

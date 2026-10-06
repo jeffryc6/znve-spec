@@ -933,8 +933,8 @@ def test_golden_master():  # ✓ must pass 100% against the intact code
           <p data-l="en" lang="en">The dashboard emitted one event per request. The contract came first (one row per JA4 fingerprint + User-Agent, capped at 200), then the code: <b>600 identical requests produced 1 event</b> instead of 600.</p>
         </div>
       </div>
-      <p class="muted" data-l="es">En el propio repositorio, la retrospectiva registró 30 hallazgos, de los que 28 ya están resueltos, entre ellos 18 pruebas automáticas y 22 artefactos generados desde una sola especificación.</p>
-      <p class="muted" data-l="en" lang="en">In this very repository, the retrospective logged 30 findings, 28 of them already resolved, backed by 18 automated tests and 22 artifacts generated from a single specification.</p>
+      <p class="muted" data-l="es">En el propio repositorio, la retrospectiva registró 30 hallazgos, de los que 28 ya están resueltos, entre ellos 89 pruebas automáticas y 30 artefactos generados desde una sola especificación.</p>
+      <p class="muted" data-l="en" lang="en">In this very repository, the retrospective logged 30 findings, 28 of them already resolved, backed by 89 automated tests and 30 artifacts generated from a single specification.</p>
     </section>
 
     <!-- ============================== INSTALACIÓN ============================== -->
@@ -1066,11 +1066,11 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
       <div class="flow">
         <div class="step"><b>master_spec.json</b><small data-l="es">Versión, guardrails, modos y 10 comandos</small><small data-l="en" lang="en">Version, guardrails, modes and 10 commands</small></div>
         <div class="arrow">→</div>
-        <div class="step"><b>builder.py</b><small data-l="es">15 plantillas + bloques gestionados</small><small data-l="en" lang="en">15 templates + managed regions</small></div>
+        <div class="step"><b>builder.py</b><small data-l="es">17 plantillas + bloques gestionados</small><small data-l="en" lang="en">17 templates + managed regions</small></div>
         <div class="arrow">→</div>
-        <div class="step"><b data-l="es">25 artefactos</b><b data-l="en" lang="en">25 artifacts</b><small data-l="es">Skills, directivas, manual, MCP, esta web</small><small data-l="en" lang="en">Skills, directives, manual, MCP, this site</small></div>
+        <div class="step"><b data-l="es">30 artefactos</b><b data-l="en" lang="en">30 artifacts</b><small data-l="es">Skills, directivas, manual, MCP, esta web</small><small data-l="en" lang="en">Skills, directives, manual, MCP, this site</small></div>
         <div class="arrow">→</div>
-        <div class="step"><b>test_sync.py</b><small data-l="es">20 pruebas de paridad</small><small data-l="en" lang="en">20 parity tests</small></div>
+        <div class="step"><b>test_sync.py</b><small data-l="es">89 pruebas de paridad y comportamiento</small><small data-l="en" lang="en">89 parity and behavior tests</small></div>
         <div class="arrow">→</div>
         <div class="step"><b>GitHub Actions</b><small data-l="es">Falla si algo se desvía</small><small data-l="en" lang="en">Fails on any drift</small></div>
       </div>
@@ -1081,28 +1081,32 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
 ├── README.md               portada bilingüe
 ├── SPECIFICATION.md        norma técnica formal
 ├── GLOSSARY.md             glosario ES/EN
-├── protocols/
-│   ├── ZNVE_PROTOCOL.md    los 6 modos
-│   ├── COMMANDS.md         manual de comandos y MCP
-│   ├── agents/             Claude, Gemini, Copilot,
-│   │                       Cursor, DeepSeek, Ollama,
-│   │                       OpenRouter
-│   ├── Antigravity/        skill e instaladores
-│   └── mcp/                servidor MCP (6 herramientas)
+├── CHANGELOG.md           cambios por versión
+├── protocols/             protocolos, guías y manual
+│   ├── ZNVE_PROTOCOL.md   los 6 modos
+│   └── COMMANDS.md        manual de comandos y MCP
+├── integrations/          una carpeta por asistente
+│   ├── claude/ gemini/ cursor/
+│   ├── deepseek/ ollama/ openrouter/
+│   ├── antigravity/       skill e instaladores
+│   └── mcp-server/        servidor MCP (6 herramientas)
+├── field-tests/           pruebas de campo archivadas
 ├── znve-auto/              fuente única + builder + tests
 └── index.html              esta página</pre>
 <pre data-l="en" lang="en">znve-spec/
 ├── README.md               bilingual front page
 ├── SPECIFICATION.md        formal technical standard
 ├── GLOSSARY.md             ES/EN glossary
-├── protocols/
-│   ├── ZNVE_PROTOCOL.md    the 6 modes
-│   ├── COMMANDS.md         command and MCP manual
-│   ├── agents/             Claude, Gemini, Copilot,
-│   │                       Cursor, DeepSeek, Ollama,
-│   │                       OpenRouter
-│   ├── Antigravity/        skill and installers
-│   └── mcp/                MCP server (6 tools)
+├── CHANGELOG.md           changes per version
+├── protocols/             protocols, guides and manual
+│   ├── ZNVE_PROTOCOL.md   the 6 modes
+│   └── COMMANDS.md        command and MCP manual
+├── integrations/          one folder per assistant
+│   ├── claude/ gemini/ cursor/
+│   ├── deepseek/ ollama/ openrouter/
+│   ├── antigravity/       skill and installers
+│   └── mcp-server/        MCP server (6 tools)
+├── field-tests/           archived field tests
 ├── znve-auto/              single source + builder + tests
 └── index.html              this page</pre>
         </div>
@@ -1110,7 +1114,7 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
           <h3 data-l="es">Mantener y desplegar</h3><h3 data-l="en" lang="en">Maintain and deploy</h3>
           <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span data-l="es">para colaboradores</span><span data-l="en" lang="en">for contributors</span></div>
 <pre id="cmd-build"><code data-lang="sh"># 1. edit znve-auto/master_spec.json
-python znve-auto/builder.py      # 25 artifacts
+python znve-auto/builder.py      # 30 artifacts
 python znve-auto/test_sync.py    # parity check
 git push                         # CI + GitHub Pages</code></pre><button class="copy" data-copy="cmd-build"></button></div>
           <p class="muted" data-l="es">Solo biblioteca estándar de Python. Los archivos generados llevan un aviso y no se editan a mano. Detalles en <a data-doc href="https://github.com/jeffryc6/znve-spec/tree/main/znve-auto">znve-auto/README.md</a>.</p>
@@ -1175,7 +1179,7 @@ git push                         # CI + GitHub Pages</code></pre><button class="
         <details><summary>¿Qué pasa si la IA ignora una regla?</summary><p>Tú eres el Director de Arquitectura: los 4 bloques y los encabezados fijos de cada comando hacen visible cualquier desvío. Con el servidor MCP, además, herramientas como <code>znve_surgical_write</code> rechazan físicamente un <code>catch</code> vacío.</p></details>
         <details><summary>¿Funciona con mi proyecto actual, no solo con proyectos nuevos?</summary><p>Sí. El modo 2 (<code>--delta</code>) añade capacidades sin romper contratos, el modo 3 atiende incidentes en producción y el modo 5 rescata código legacy sin tests.</p></details>
         <details><summary>¿Está disponible en inglés?</summary><p>Esta página, el README y el glosario son bilingües, y las reglas de Cursor están en inglés. El resto de documentos está en español: en modo inglés sus enlaces se abren a través del traductor de Google, y puedes pedirle a cualquier asistente que responda en inglés.</p></details>
-        <details><summary>¿Cuál es la licencia?</summary><p>La especificación y la documentación usan CC BY 4.0. Los protocolos (<code>/protocols</code>) se ofrecen a la vez bajo CC BY 4.0 y MIT. Las herramientas del repositorio, bajo MIT. Detalles en <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE">LICENSE</a>.</p></details>
+        <details><summary>¿Cuál es la licencia?</summary><p>La especificación y la documentación usan CC BY 4.0. Los protocolos y las integraciones (<code>/protocols</code> y <code>/integrations</code>) se ofrecen a la vez bajo CC BY 4.0 y MIT. Las herramientas del repositorio, bajo MIT. Detalles en <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE">LICENSE</a>.</p></details>
         <details><summary>¿Cómo propongo un cambio?</summary><p>Mediante una RFC: copia <code>rfcs/0000-template.md</code>, abre un pull request y, si modifica comandos o reglas, cambia <code>znve-auto/master_spec.json</code>. Guía en <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p></details>
       </div>
       <div data-l="en" lang="en">
@@ -1184,7 +1188,7 @@ git push                         # CI + GitHub Pages</code></pre><button class="
         <details><summary>What if the AI ignores a rule?</summary><p>You are the Director of Architecture: the 4 blocks and each command's fixed headers make any drift visible. With the MCP server, tools such as <code>znve_surgical_write</code> also physically reject an empty <code>catch</code>.</p></details>
         <details><summary>Does it work with my existing project, not just new ones?</summary><p>Yes. Mode 2 (<code>--delta</code>) adds features without breaking contracts, mode 3 handles production incidents and mode 5 rescues untested legacy code.</p></details>
         <details><summary>Is ZNVE available in English?</summary><p>This page, the README and the glossary are bilingual, and the Cursor rules are in English. The other documents are in Spanish; in English mode their links open through Google Translate, and you can ask any assistant to reply in English.</p></details>
-        <details><summary>What is the license?</summary><p>The specification and documentation use CC BY 4.0. The protocols (<code>/protocols</code>) are offered under both CC BY 4.0 and MIT. Repository tooling is MIT. Details in <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE">LICENSE</a>.</p></details>
+        <details><summary>What is the license?</summary><p>The specification and documentation use CC BY 4.0. The protocols and integrations (<code>/protocols</code> and <code>/integrations</code>) are offered under both CC BY 4.0 and MIT. Repository tooling is MIT. Details in <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/LICENSE">LICENSE</a>.</p></details>
         <details><summary>How do I propose a change?</summary><p>Through an RFC: copy <code>rfcs/0000-template.md</code>, open a pull request and, if it changes commands or rules, edit <code>znve-auto/master_spec.json</code>. Guide in <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/CONTRIBUTING.md">CONTRIBUTING.md</a>.</p></details>
       </div>
     </section>

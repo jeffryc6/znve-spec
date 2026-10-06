@@ -172,6 +172,7 @@ znve-spec/
 │   └── mcp-server/                    <-- stdio MCP server (6 tools) & Antigravity installer
 ├── rfcs/                              <-- Request for Comments
 ├── znve-auto/                         <-- Single source of truth: spec, builder & parity tests
+├── CHANGELOG.md                       <-- Version history & migration notes
 ├── CONTRIBUTING.md                    <-- Contribution guidelines
 ├── GLOSSARY.md                        <-- Technical glossary (ES/EN)
 ├── LICENSE                            <-- Dual license (CC BY 4.0 + MIT)
