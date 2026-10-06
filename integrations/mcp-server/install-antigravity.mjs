@@ -19,8 +19,10 @@ const SERVER_JS = path.join(HERE, "dist", "znve-mcp-server.js");
 const SPEC_PATH = path.join(REPO_ROOT, "znve-auto", "master_spec.json");
 
 // Rutas del config de Antigravity. La documentada (https://antigravity.google/docs/mcp) es la global
-// ~/.gemini/config/mcp_config.json; las otras dos son de instalaciones anteriores. La primera que exista gana y,
-// si no hay ninguna, se crea la documentada.
+// ~/.gemini/config/mcp_config.json; las otras dos son de instalaciones anteriores.
+// Reglas: (1) si el servidor ya está registrado en alguno, se actualiza ahí mismo (en todos los que lo tengan), para no
+// dejar una entrada antigua apuntando a una ruta que ya no existe; (2) si no, el primer config que exista;
+// (3) si no hay ninguno, se crea el documentado.
 const CONFIG_CANDIDATES = [
   path.join(os.homedir(), ".gemini", "config", "mcp_config.json"),
   path.join(os.homedir(), ".gemini", "antigravity-ide", "mcp_config.json"),
@@ -76,9 +78,20 @@ function expectedTools() {
   }
 }
 
-function resolveConfigPath(explicit) {
-  if (explicit) return explicit;
-  return CONFIG_CANDIDATES.find((p) => fs.existsSync(p)) ?? CONFIG_CANDIDATES[0];
+function registersServer(configPath, name) {
+  try {
+    const raw = fs.readFileSync(configPath, "utf-8").replace(/^﻿/, "").trim();
+    return Boolean(raw) && Object.hasOwn(JSON.parse(raw).mcpServers ?? {}, name);
+  } catch {
+    return false; // ilegible o inválido: no es un candidato; si hay que escribirlo, readConfig avisa
+  }
+}
+
+function resolveConfigPaths(explicit, name) {
+  if (explicit) return [explicit];
+  const registered = CONFIG_CANDIDATES.filter((p) => fs.existsSync(p) && registersServer(p, name));
+  if (registered.length > 0) return registered;
+  return [CONFIG_CANDIDATES.find((p) => fs.existsSync(p)) ?? CONFIG_CANDIDATES[0]];
 }
 
 function readConfig(configPath) {
@@ -173,14 +186,21 @@ function smokeTest(workspace) {
 
 async function main() {
   const opts = parseArgs(process.argv.slice(2));
-  const configPath = resolveConfigPath(opts.config);
+  const configPaths = resolveConfigPaths(opts.config, opts.name);
 
   if (opts.uninstall) {
-    const json = readConfig(configPath);
-    if (!json.mcpServers[opts.name]) return log(`'${opts.name}' no está registrado en ${configPath}. Nada que hacer.`);
-    delete json.mcpServers[opts.name];
-    writeConfig(configPath, json, opts.name, opts.dryRun);
-    return log("Desinstalado. Pulsa 'Refresh' en Manage MCP Servers de Antigravity.");
+    let removed = 0;
+    for (const configPath of configPaths) {
+      const json = readConfig(configPath);
+      if (!json.mcpServers[opts.name]) {
+        log(`'${opts.name}' no está registrado en ${configPath}. Nada que hacer.`);
+        continue;
+      }
+      delete json.mcpServers[opts.name];
+      writeConfig(configPath, json, opts.name, opts.dryRun);
+      removed++;
+    }
+    return removed > 0 ? log("Desinstalado. Pulsa 'Refresh' en Manage MCP Servers de Antigravity.") : undefined;
   }
 
   const [major] = process.versions.node.split(".").map(Number);
@@ -201,17 +221,19 @@ async function main() {
   }
   log(`OK: ${tools.length} herramientas -> ${tools.join(", ")}`);
 
-  const json = readConfig(configPath);
-  json.mcpServers[opts.name] = {
-    // Ruta absoluta a node: el IDE no siempre hereda el PATH del shell (nvm, fnm, Volta).
-    command: toPosix(process.execPath),
-    args: [toPosix(SERVER_JS)],
-    env: {
-      ZNVE_WORKSPACE: toPosix(opts.workspace),
-      NODE_ENV: "production",
-    },
-  };
-  writeConfig(configPath, json, opts.name, opts.dryRun);
+  for (const configPath of configPaths) {
+    const json = readConfig(configPath);
+    json.mcpServers[opts.name] = {
+      // Ruta absoluta a node: el IDE no siempre hereda el PATH del shell (nvm, fnm, Volta).
+      command: toPosix(process.execPath),
+      args: [toPosix(SERVER_JS)],
+      env: {
+        ZNVE_WORKSPACE: toPosix(opts.workspace),
+        NODE_ENV: "production",
+      },
+    };
+    writeConfig(configPath, json, opts.name, opts.dryRun);
+  }
 
   log("Listo. En Antigravity: panel Agent -> menú '...' -> MCP Servers -> Manage MCP Servers -> Refresh.");
 }

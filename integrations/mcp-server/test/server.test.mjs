@@ -756,6 +756,46 @@ describe("install-antigravity.mjs", () => {
     }
   });
 
+  test("si el servidor ya está registrado en un config anterior, lo actualiza ahí aunque exista el documentado vacío", () => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "znve-home-"));
+    try {
+      const documented = path.join(home, ".gemini", "config", "mcp_config.json");
+      const legacy = path.join(home, ".gemini", "antigravity-ide", "mcp_config.json");
+      for (const file of [documented, legacy]) fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(documented, '{"mcpServers":{}}');
+      fs.writeFileSync(legacy, JSON.stringify({ mcpServers: { otro: { command: "x" }, "znve-engine": { command: "node", args: ["/ruta/vieja/znve-mcp-server.js"] } } }));
+      const run = dryRun(home);
+      assert.equal(run.status, 0, run.stdout + run.stderr);
+      const targets = [...run.stdout.matchAll(/\[dry-run\] (.+?mcp_config\.json) ->/g)].map((m) => path.resolve(m[1]));
+      assert.deepEqual(targets, [legacy], "solo el config que ya lo registraba");
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
+    }
+  });
+
+  test("actualiza el servidor en todos los configs que ya lo registran y la desinstalación los limpia", () => {
+    const home = fs.mkdtempSync(path.join(os.tmpdir(), "znve-home-"));
+    try {
+      const files = [path.join(home, ".gemini", "config", "mcp_config.json"), path.join(home, ".gemini", "antigravity", "mcp_config.json")];
+      for (const file of files) {
+        fs.mkdirSync(path.dirname(file), { recursive: true });
+        fs.writeFileSync(file, JSON.stringify({ mcpServers: { "znve-engine": { command: "node", args: ["/vieja/znve-mcp-server.js"] } } }));
+      }
+      const env = { ...process.env, HOME: home, USERPROFILE: home };
+      const install = spawnSync(process.execPath, [INSTALLER, "--skip-build"], { env, encoding: "utf-8", timeout: 60_000 });
+      assert.equal(install.status, 0, install.stdout + install.stderr);
+      for (const file of files) {
+        assert.match(JSON.parse(fs.readFileSync(file, "utf-8")).mcpServers["znve-engine"].args[0], /dist\/znve-mcp-server\.js$/);
+        assert.ok(fs.readdirSync(path.dirname(file)).some((name) => name.includes(".bak-")), "hace backup");
+      }
+      const uninstall = spawnSync(process.execPath, [INSTALLER, "--uninstall"], { env, encoding: "utf-8", timeout: 60_000 });
+      assert.equal(uninstall.status, 0, uninstall.stdout + uninstall.stderr);
+      for (const file of files) assert.equal(JSON.parse(fs.readFileSync(file, "utf-8")).mcpServers["znve-engine"], undefined);
+    } finally {
+      fs.rmSync(home, { recursive: true, force: true });
+    }
+  });
+
   test("si existe el documentado y uno anterior, gana el documentado", () => {
     const home = fs.mkdtempSync(path.join(os.tmpdir(), "znve-home-"));
     try {

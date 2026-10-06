@@ -37,9 +37,10 @@ Qué hace, en orden (aborta en el primer fallo):
 1. `npm ci` (o `npm install` si no hay lockfile).
 2. `npm run build`, que genera `dist/znve-mcp-server.js`.
 3. **Smoke test MCP real**: arranca el servidor desde un cwd ajeno y envía `initialize` → `notifications/initialized` → `tools/list`. Exige exactamente las 6 herramientas que declara `znve-auto/master_spec.json` y que stdout no tenga ruido fuera de JSON-RPC.
-4. Localiza el `mcp_config.json` de Antigravity. Usa el primero que exista:
-   - `~/.gemini/config/mcp_config.json` (la ruta global documentada; se crea si no existe ninguno)
-   - `~/.gemini/antigravity-ide/mcp_config.json` y `~/.gemini/antigravity/mcp_config.json` (instalaciones anteriores)
+4. Localiza el `mcp_config.json` de Antigravity, en este orden:
+   - Si `znve-engine` ya está registrado en alguno, **lo actualiza ahí** (en todos los que lo tengan), para no dejar una entrada antigua apuntando a una ruta que ya no existe.
+   - Si no, usa el primero que exista entre `~/.gemini/config/mcp_config.json` (la ruta global documentada), `~/.gemini/antigravity-ide/mcp_config.json` y `~/.gemini/antigravity/mcp_config.json`.
+   - Si no hay ninguno, crea el documentado, `~/.gemini/config/mcp_config.json`.
 
    Para registrar el servidor solo en un proyecto, usa `--config <proyecto>/.agents/mcp_config.json` (la ruta de workspace documentada).
 5. Guarda un backup (`mcp_config.json.bak-<timestamp>`) y **fusiona** la entrada `znve-engine`. Los demás servidores quedan intactos.

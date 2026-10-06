@@ -28,7 +28,7 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 
 | Métrica | Valor |
 |---|---|
-| Pruebas | De 22 de paridad a **89 en Python y 128 en el servidor MCP** (1 omitida en cada suite si el sistema no permite crear enlaces simbólicos de archivo); 48 casos de conformidad comunes al servidor y a la skill de Python |
+| Pruebas | De 22 de paridad a **89 en Python y 130 en el servidor MCP** (1 omitida en cada suite si el sistema no permite crear enlaces simbólicos de archivo); 48 casos de conformidad comunes al servidor y a la skill de Python |
 | CI | Paridad en Python 3.11 y 3.14, suite del servidor en Node, comprobación de tipos y acciones fijadas a SHA |
 | Copias de las instrucciones de Copilot | De 3 a 1 |
 | Coste en tokens | Cada directiva crece entre unos 2,2 y 3,8 KB (presupuestos verificados por test) |
@@ -75,7 +75,7 @@ Reinstala la directiva de cada asistente desde su carpeta de `integrations/` (la
 - **`antigravity_sdk_example.py`:** pasa al servidor un entorno mínimo explícito (lo que node necesita más `ZNVE_WORKSPACE`), sin depender de cómo trate el SDK `env`, y usa sangría de 4 espacios.
 - **`test_sync.py`:** la heurística de versiones ya no confunde `ZNVE_OR_ERROR` y similares con una cita de versión; las comprobaciones de versión incluyen los `.ps1`; tests de escape por enlaces simbólicos en `znve_skill.py`.
 - **CI:** la verificación de paridad corre en una matriz de Python 3.11 y 3.14, y las acciones (`checkout`, `setup-python`, `setup-node`) están fijadas a un SHA de commit, con un test que lo exige.
-- **Instalador de Antigravity (`install-antigravity.mjs`):** el `mcp_config.json` que se crea por defecto es el de la ruta global documentada, `~/.gemini/config/mcp_config.json`; los de instalaciones anteriores (`~/.gemini/antigravity-ide/` y `~/.gemini/antigravity/`) se siguen usando si son los únicos que existen. Para un solo proyecto, `--config <proyecto>/.agents/mcp_config.json`.
+- **Instalador de Antigravity (`install-antigravity.mjs`):** si `znve-engine` ya está registrado en algún `mcp_config.json`, se actualiza ahí mismo (en todos los que lo tengan); si no, se usa el primero que exista y, si no hay ninguno, se crea el de la ruta global documentada, `~/.gemini/config/mcp_config.json`. La desinstalación lo retira de todos. Para un solo proyecto, `--config <proyecto>/.agents/mcp_config.json`.
 - **Guía de Antigravity:** indica la ruta global de skills de la CLI (`~/.gemini/antigravity-cli/skills/`), distinta de la del IDE.
 
 ### Servidor MCP 2.0.0 (cambios incompatibles)
