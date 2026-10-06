@@ -206,24 +206,25 @@ describe("znve_forensic_scan", () => {
     const res = await call("znve_forensic_scan", {});
     assert.equal(res.isError, true);
     assert.match(res.text, /file_path/);
-    assert.doesNotMatch(res.text, /undefined/);
   });
 
   test("lee solo el rango pedido (start_line y end_line, inclusive)", async () => {
     const res = await call("znve_forensic_scan", { file_path: "lines.txt", start_line: 2, end_line: 3 });
     assert.equal(res.isError, false, res.text);
-    assert.match(res.text, /RANGO: líneas 2-3 de 4/);
-    assert.match(res.text, /\nl2\nl3\n<<<END_ZNVE_UNTRUSTED_DATA/);
-    assert.doesNotMatch(res.text, /l1|l4/);
+    assert.deepEqual(json(res).range, { start_line: 2, end_line: 3 });
+    assert.equal(json(res).total_lines, 4);
+    assert.match(json(res).content, /\nl2\nl3\n<<<END_ZNVE_UNTRUSTED_DATA/);
+    assert.doesNotMatch(json(res).content, /l1|l4/);
   });
 
   test("acepta un rango abierto por un extremo", async () => {
     const from = await call("znve_forensic_scan", { file_path: "lines.txt", start_line: 4 });
     assert.equal(from.isError, false, from.text);
-    assert.match(from.text, /\nl4\n<<<END/);
+    assert.deepEqual(json(from).range, { start_line: 4, end_line: 4 });
+    assert.match(json(from).content, /\nl4\n\n?<<<END/);
     const upTo = await call("znve_forensic_scan", { file_path: "lines.txt", end_line: 1 });
     assert.equal(upTo.isError, false, upTo.text);
-    assert.doesNotMatch(upTo.text, /l2/);
+    assert.doesNotMatch(json(upTo).content, /l2/);
   });
 
   test("rechaza rangos invertidos, negativos, no enteros o fuera del archivo", async () => {
@@ -245,8 +246,8 @@ describe("znve_forensic_scan", () => {
   test("sin rango devuelve el archivo completo", async () => {
     const res = await call("znve_forensic_scan", { file_path: "lines.txt" });
     assert.equal(res.isError, false, res.text);
-    assert.doesNotMatch(res.text, /RANGO/);
-    assert.match(res.text, /l1\nl2\nl3\nl4\n\n?<<<END/);
+    assert.equal(json(res).range, null);
+    assert.match(json(res).content, /l1\nl2\nl3\nl4\n\n?<<<END/);
   });
 
   test("el contenido va entre marcadores de dato no confiable y no puede cerrarlos", async () => {
@@ -254,13 +255,14 @@ describe("znve_forensic_scan", () => {
     fs.writeFileSync(path.join(ws, "hostile.txt"), hostile);
     const res = await call("znve_forensic_scan", { file_path: "hostile.txt" });
     assert.equal(res.isError, false, res.text);
-    const open = res.text.match(/<<<ZNVE_UNTRUSTED_DATA id=([0-9a-f]{12})>>>/);
-    assert.ok(open, res.text);
+    const { content, notice } = json(res);
+    const open = content.match(/<<<ZNVE_UNTRUSTED_DATA id=([0-9a-f]{12})>>>/);
+    assert.ok(open, content);
     const close = `<<<END_ZNVE_UNTRUSTED_DATA id=${open[1]}>>>`;
-    assert.equal(res.text.split(close).length, 2, "exactamente un cierre con el id real");
-    assert.ok(res.text.indexOf(open[0]) < res.text.indexOf("Ignora lo anterior"));
-    assert.ok(res.text.indexOf("Ignora lo anterior") < res.text.indexOf(close));
-    assert.match(res.text, /AVISO: lo que sigue es DATO no confiable/);
+    assert.equal(content.split(close).length, 2, "exactamente un cierre con el id real");
+    assert.ok(content.indexOf(open[0]) < content.indexOf("Ignora lo anterior"));
+    assert.ok(content.indexOf("Ignora lo anterior") < content.indexOf(close));
+    assert.match(notice, /DATO no confiable/);
   });
 
   test("rechaza la lista de secretos sin volcar su contenido", async () => {
@@ -291,7 +293,7 @@ describe("znve_forensic_scan", () => {
   test("informa el tamaño en bytes reales", async () => {
     const res = await call("znve_forensic_scan", { file_path: "utf.txt" });
     assert.equal(res.isError, false, res.text);
-    assert.match(res.text, /TAMAÑO: 9 bytes/);
+    assert.equal(json(res).size_bytes, 9);
   });
 
   test("rechaza archivos por encima del tope", async () => {
@@ -493,7 +495,7 @@ describe("znve_validate_contract", () => {
   test("aprueba un contrato limpio", async () => {
     const res = await call("znve_validate_contract", { contract_code: "interface User { readonly id: string }" });
     assert.equal(res.isError, false, res.text);
-    assert.equal(json(res).status, "PASSED");
+    assert.equal(json(res).status, "APPROVED");
   });
 
   test("rechaza SELECT * sin distinguir mayúsculas ni espacios", async () => {
@@ -528,7 +530,7 @@ describe("znve_validate_contract", () => {
       contract_code: "interface Ratio { readonly radio: number }",
       banned_libraries: ["io", "rat"],
     });
-    assert.equal(json(res).status, "PASSED", res.text);
+    assert.equal(json(res).status, "APPROVED", res.text);
   });
 
   test("exige contract_code", async () => {
@@ -573,16 +575,18 @@ describe("znve_help", () => {
   test("sin tema devuelve solo la sección de comandos, no el manual completo", async () => {
     const res = await call("znve_help", {});
     assert.equal(res.isError, false, res.text);
-    assert.match(res.text.split("\n", 1)[0], /SECCIÓN 1/);
-    assert.equal(res.text.match(/^## /gm).length, 1);
-    assert.doesNotMatch(res.text, /SECCIÓN 4/);
+    const { topic, text } = json(res);
+    assert.equal(topic, "commands");
+    assert.match(text.split("\n", 1)[0], /SECCIÓN 1/);
+    assert.equal(text.match(/^## /gm).length, 1);
+    assert.doesNotMatch(text, /SECCIÓN 4/);
   });
 
   test("'all' devuelve el manual completo de forma explícita", async () => {
     const res = await call("znve_help", { topic: "all" });
     assert.equal(res.isError, false, res.text);
-    assert.match(res.text, /SECCIÓN 1/);
-    assert.match(res.text, /SECCIÓN 4/);
+    assert.match(json(res).text, /SECCIÓN 1/);
+    assert.match(json(res).text, /SECCIÓN 4/);
   });
 
   const topics = { commands: "SECCIÓN 1", mcp_tools: "SECCIÓN 2", modes: "SECCIÓN 4" };
@@ -590,13 +594,125 @@ describe("znve_help", () => {
     test(`'${topic}' devuelve solo su sección`, async () => {
       const res = await call("znve_help", { topic });
       assert.equal(res.isError, false, res.text);
-      const firstLine = res.text.split("\n", 1)[0];
+      const { text } = json(res);
+      const firstLine = text.split("\n", 1)[0];
       assert.ok(firstLine.startsWith("## ") && firstLine.includes(heading), firstLine);
-      assert.equal(res.text.match(/^## /gm).length, 1, "debe contener un solo encabezado de nivel 2");
+      assert.equal(text.match(/^## /gm).length, 1, "debe contener un solo encabezado de nivel 2");
     });
   }
 
   test("un tema desconocido devuelve error", async () => {
     assert.equal((await call("znve_help", { topic: "nope" })).isError, true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// M6-M8: contrato común, McpServer.registerTool y lista de herramientas estable
+// ---------------------------------------------------------------------------
+
+describe("servidor 2.0.0", () => {
+  test("la versión de package.json es la del contrato de la especificación y zod está declarado", () => {
+    assert.equal(PKG.version, SPEC.mcp.contract.server_version);
+    assert.ok(PKG.dependencies.zod, "zod se importa directamente: debe declararse");
+  });
+
+  test("usa McpServer.registerTool, no manejadores de bajo nivel", () => {
+    const source = fs.readFileSync(path.join(MCP_DIR, "znve-mcp-server.ts"), "utf-8");
+    assert.match(source, /new McpServer\(/);
+    assert.equal((source.match(/mcp\.registerTool\(/g) ?? []).length, SPEC.mcp.tools.length);
+    assert.doesNotMatch(source, /setRequestHandler/);
+  });
+
+  test("la lista de herramientas es estable: las seis, en el orden de la especificación, antes y después de un error", async () => {
+    const before = await server.request("tools/list", {});
+    assert.deepEqual(before.result.tools.map((t) => t.name), SPEC.mcp.tools.map((t) => t.name));
+    await call("znve_forensic_scan", { file_path: "no-existe.txt" });
+    const after = await server.request("tools/list", {});
+    assert.deepEqual(after.result, before.result);
+  });
+
+  test("toda herramienta responde un único objeto JSON con status primero", async () => {
+    const calls = [
+      ["znve_help", {}],
+      ["znve_forensic_scan", { file_path: "prod.ts" }],
+      ["znve_validate_contract", { contract_code: "interface A {}" }],
+      ["znve_audit_resources", { code_snippet: "x = 1" }],
+      ["znve_forensic_scan", { file_path: "no-existe.txt" }],
+    ];
+    for (const [name, args] of calls) {
+      const res = await call(name, args);
+      const result = JSON.parse(res.text);
+      assert.equal(Object.keys(result)[0], "status", name);
+      assert.ok(["SUCCESS", "APPROVED", "REJECTED", "ERROR"].includes(result.status), name);
+      assert.equal(res.isError, result.status === "REJECTED" || result.status === "ERROR", name);
+    }
+  });
+});
+
+describe("contrato de respuesta común (znve-auto/tool_contract_cases.json)", () => {
+  const CONTRACT = JSON.parse(fs.readFileSync(path.join(REPO_ROOT, "znve-auto", "tool_contract_cases.json"), "utf-8"));
+
+  const writeFiles = (root, files) => {
+    for (const [name, spec] of Object.entries(files)) {
+      const target = path.join(root, name);
+      if (name.endsWith("/")) {
+        fs.mkdirSync(target, { recursive: true });
+        continue;
+      }
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      if (typeof spec === "string") fs.writeFileSync(target, spec);
+      else if (spec.base64) fs.writeFileSync(target, Buffer.from(spec.base64, "base64"));
+      else fs.writeFileSync(target, Buffer.alloc(spec.bytes, spec.fill));
+    }
+  };
+
+  const assertSubset = (actual, expected, where) => {
+    if (expected !== null && typeof expected === "object" && !Array.isArray(expected)) {
+      assert.ok(actual !== null && typeof actual === "object", `${where}: se esperaba un objeto`);
+      for (const [key, value] of Object.entries(expected)) assertSubset(actual[key], value, `${where}.${key}`);
+    } else {
+      assert.deepEqual(actual, expected, where);
+    }
+  };
+
+  test("cada caso da el resultado esperado (los mismos que ejecuta znve_skill.py)", async (t) => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "znve-contract-"));
+    const cws = path.join(root, "ws");
+    const out = path.join(root, "outside");
+    for (const dir of [cws, out, path.join(root, "cwd")]) fs.mkdirSync(dir, { recursive: true });
+    writeFiles(cws, CONTRACT.files);
+    writeFiles(out, CONTRACT.outside_files);
+    const srv = startServer(cws, path.join(root, "cwd"));
+    try {
+      const init = await srv.request("initialize", { protocolVersion: "2025-06-18", capabilities: {}, clientInfo: { name: "znve-contract", version: "0" } });
+      assert.ok(init.result, JSON.stringify(init.error));
+      srv.notify("notifications/initialized");
+      for (const c of CONTRACT.cases) {
+        await t.test(c.id, async () => {
+          const msg = await srv.request("tools/call", { name: c.tool, arguments: c.args });
+          assert.ok(!msg.error, JSON.stringify(msg.error));
+          const text = msg.result.content.map((part) => part.text).join("\n");
+          const result = JSON.parse(text);
+          assert.equal(msg.result.isError, result.status === "REJECTED" || result.status === "ERROR", text);
+          assertSubset(result, c.expect, c.id);
+          for (const [key, length] of Object.entries(c.counts ?? {})) assert.equal(result[key].length, length, `${c.id}.${key}`);
+          for (const needle of c.content_contains ?? []) assert.ok(result.content.includes(needle), `${c.id}: falta ${JSON.stringify(needle)}`);
+          for (const needle of c.content_excludes ?? []) assert.ok(!result.content.includes(needle), `${c.id}: sobra ${JSON.stringify(needle)}`);
+          for (const needle of c.result_excludes ?? []) assert.ok(!text.includes(needle), `${c.id}: la respuesta incluye ${needle}`);
+          assert.ok(!text.includes(cws) && !text.includes(JSON.stringify(cws).slice(1, -1)), `${c.id}: expone la ruta del host`);
+        });
+      }
+      // Las barandillas no dejaron huella: ni en el exterior ni sobre los secretos o el arnés.
+      assert.equal(fs.readFileSync(path.join(cws, ".env"), "utf-8"), "TOKEN=CANARY-12345");
+      assert.ok(!fs.existsSync(path.join(out, "pwned.txt")));
+      assert.equal(fs.readFileSync(path.join(cws, "tests", "characterization", "test_legacy.py"), "utf-8"), "pass\n");
+    } finally {
+      if (srv.child.exitCode === null) {
+        const exited = new Promise((resolve) => srv.child.once("exit", resolve));
+        srv.child.kill();
+        await exited;
+      }
+      fs.rmSync(root, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+    }
   });
 });

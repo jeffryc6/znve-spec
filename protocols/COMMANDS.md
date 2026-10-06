@@ -260,7 +260,7 @@ El servidor `integrations/mcp-server/znve-mcp-server.ts` expone estas herramient
 - **Qué hace:** Devuelve una sección del manual `protocols/COMMANDS.md` (`commands` por defecto, `mcp_tools` o `modes`) o el manual completo con `all`.
 - **Parámetros:**
   - `topic` (enum, opcional): `commands` (por defecto), `mcp_tools`, `modes` o `all` (manual completo).
-- **Comportamiento:** Un `topic` desconocido es un error. Si el manual no existe, devuelve un catálogo corto de respaldo; cualquier otro error se informa.
+- **Comportamiento:** Responde `topic` y `text`. Un `topic` desconocido es un error. Si el manual no existe, `text` es un catálogo corto de respaldo (`fallback: true`); cualquier otro error se informa.
 
 ### 2. `znve_forensic_scan`
 
@@ -270,7 +270,7 @@ El servidor `integrations/mcp-server/znve-mcp-server.ts` expone estas herramient
   - `file_path` (string, obligatorio): Ruta del archivo, relativa a `ZNVE_WORKSPACE` (o absoluta dentro de él).
   - `start_line` (integer, opcional): Primera línea a leer (desde 1). Sin ella, desde el principio.
   - `end_line` (integer, opcional): Última línea a leer, inclusive. Sin ella, hasta el final.
-- **Comportamiento:** Rechaza rutas fuera de `ZNVE_WORKSPACE` (también a través de enlaces), directorios, binarios, archivos de más de 1 MiB y los de la lista de secretos denegada (`.env`, claves y credenciales; se permiten `.env.example` y similares). Un rango invertido, negativo o fuera del archivo es un error. Devuelve el contenido intacto y su tamaño entre marcadores que lo declaran dato no confiable, nunca instrucción; nunca escribe en disco.
+- **Comportamiento:** Rechaza rutas fuera de `ZNVE_WORKSPACE` (también a través de enlaces), directorios, binarios, archivos de más de 1 MiB y los de la lista de secretos denegada (`.env`, claves y credenciales; se permiten `.env.example` y similares). Un rango invertido o fuera del archivo es un error. Devuelve el contenido intacto entre marcadores que lo declaran dato no confiable, nunca instrucción, con su tamaño, efectos secundarios y zonas rojas; nunca escribe en disco.
 
 ### 3. `znve_validate_contract`
 
@@ -279,7 +279,7 @@ El servidor `integrations/mcp-server/znve-mcp-server.ts` expone estas herramient
 - **Parámetros:**
   - `contract_code` (string, obligatorio): Código de la interfaz, struct o DTO propuesto.
   - `banned_libraries` (string[], opcional): Librerías vetadas por el Anti-Bloat Fence.
-- **Comportamiento:** Rechaza el contrato si detecta `SELECT *` o `.find({})` (sin distinguir mayúsculas ni espacios) o la importación de una librería vetada (`import`, `require`, `from … import` o `using`).
+- **Comportamiento:** Rechaza el contrato si detecta `SELECT *` o `.find({})` (sin distinguir mayúsculas ni espacios) o la importación de una librería vetada (`import`, `require`, `from … import` o `using`). Sin `banned_libraries`, veta `lodash`, `axios`, `moment`, `requests` y `jquery`.
 
 ### 4. `znve_scaffold_harness`
 
@@ -308,6 +308,44 @@ El servidor `integrations/mcp-server/znve-mcp-server.ts` expone estas herramient
 - **Parámetros:**
   - `code_snippet` (string, obligatorio): Fragmento de código a evaluar.
 - **Comportamiento:** Marca `.Result`, `.Wait()` y `.GetAwaiter().GetResult()` (riesgo `HIGH`), `WakeLock.acquire()` (`HIGH`) y busy-waiting sin backoff (`MEDIUM`). `risk_level` es el mayor riesgo encontrado, o `CLEAN`.
+
+### Contrato de respuesta (servidor MCP 2.0.0 y `znve_skill.py`)
+
+Las seis herramientas responden **un objeto JSON compacto** con el mismo contrato en el servidor MCP y en `integrations/antigravity/znve_skill.py` (una suite de casos común lo comprueba). `status` va siempre primero; `isError` del protocolo MCP es verdadero cuando `status` es `REJECTED` o `ERROR`. Las rutas se devuelven relativas al workspace, nunca absolutas. Los errores de esquema de entrada (tipo equivocado, campo obligatorio ausente, valor fuera del enum) los detecta el SDK de MCP antes del manejador y no llevan `code`; en `znve_skill.py` esos mismos casos devuelven `BAD_ARGUMENT`.
+
+| `status` | Significado |
+|---|---|
+| `SUCCESS` | la herramienta hizo lo pedido. |
+| `APPROVED` | `znve_validate_contract` aprobó el contrato. |
+| `REJECTED` | una barandilla o un veredicto rechazó la petición; lleva `code` y `message`. |
+| `ERROR` | el entorno falló (el archivo no existe, error de E/S); lleva `code` y `message`. |
+
+| Herramienta | Campos de la respuesta |
+|---|---|
+| `znve_help` | `topic`, `text` (y `fallback: true` si falta el manual). |
+| `znve_forensic_scan` | `file`, `size_bytes`, `total_lines`, `range` (`null` o `{start_line, end_line}`), `side_effects` (`file_system_io`, `network_calls`, `database_mutations`), `red_zones` (`empty_catch_blocks`, `thread_blocking_calls`), `notice` y `content` entre marcadores de dato no confiable. |
+| `znve_validate_contract` | `passed`, `violations` y `message`. |
+| `znve_scaffold_harness` | `file` y `message`. |
+| `znve_surgical_write` | `file`, `bytes_written` y `message`. |
+| `znve_audit_resources` | `risk_level` (`CLEAN`, `MEDIUM` o `HIGH`), `clean`, `findings_count` y `findings`. |
+
+| `code` | `status` | Cuándo |
+|---|---|---|
+| `BAD_ARGUMENT` | `REJECTED` | argumento vacío, de tipo equivocado o con un valor no admitido. |
+| `BAD_RANGE` | `REJECTED` | rango de líneas invertido o fuera del archivo. |
+| `OUTSIDE_WORKSPACE` | `REJECTED` | la ruta queda fuera de `ZNVE_WORKSPACE`, también a través de enlaces. |
+| `NOT_FOUND` | `ERROR` | el archivo no existe. |
+| `NOT_A_FILE` | `REJECTED` | la ruta es un directorio. |
+| `TOO_LARGE` | `REJECTED` | el archivo supera el tope de 1 MiB. |
+| `BINARY_FILE` | `REJECTED` | el archivo es binario; solo se lee texto. |
+| `SECRET_DENIED` | `REJECTED` | el nombre está en la lista de secretos denegada. |
+| `PROTECTED_DIR` | `REJECTED` | escritura dentro de `.git/` o `node_modules/`. |
+| `NOT_HARNESS_DIR` | `REJECTED` | el arnés no está bajo `tests/` ni `sandbox/`. |
+| `ALREADY_EXISTS` | `REJECTED` | el arnés solo crea: el archivo ya existe. |
+| `SILENT_CATCH` | `REJECTED` | un `catch` o `except` silencia el error. |
+| `UNDISPOSED_RESOURCE` | `REJECTED` | abre flujos o sockets con `not_applicable`. |
+| `CONTRACT_VIOLATION` | `REJECTED` | el contrato tiene consultas ciegas o importa una librería vetada; `violations` las lista. |
+| `IO_ERROR` | `ERROR` | fallo de lectura o escritura del sistema de archivos. |
 
 ---
 

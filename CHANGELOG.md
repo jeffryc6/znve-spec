@@ -33,6 +33,23 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 - `integrations/README.md`: índice generado con el archivo que usar en cada asistente.
 - Este `CHANGELOG.md`.
 
+### Servidor MCP 2.0.0 (cambios incompatibles)
+
+El servidor pasa de 1.2.0 a **2.0.0**: unifica su contrato con `znve_skill.py`, migra a `McpServer.registerTool` y fija su lista de herramientas. La norma sigue en 2.3.0; esta ruptura afecta solo a quien consuma las respuestas del servidor o de la skill de Python.
+
+- **Contrato de respuesta común (M6).** Las seis herramientas responden un único objeto JSON compacto, con `status` primero (`SUCCESS`, `APPROVED`, `REJECTED` o `ERROR`) y, en rechazos y errores, `code` (15 códigos deterministas, p. ej. `OUTSIDE_WORKSPACE`, `SECRET_DENIED`, `BAD_RANGE`) y `message`. `isError` del protocolo es verdadero con `REJECTED` y `ERROR`. Las rutas son relativas al workspace. Documentado en `protocols/COMMANDS.md`, sección 2, y comprobado por 48 casos que ejecutan las dos implementaciones.
+- **`McpServer.registerTool` (M7)** en lugar de los manejadores de bajo nivel. Los esquemas se validan en el SDK: un tipo equivocado, un campo obligatorio ausente o un valor fuera del enum los rechaza el SDK (`isError`, texto del SDK, sin `code`); `znve_skill.py` devuelve `BAD_ARGUMENT` en esos casos. `zod` pasa a declararse como dependencia directa (el SDK ya lo exige como dependencia par; no añade paquetes).
+- **Lista de herramientas estable (M8):** las seis, siempre, en el orden de `master_spec.json`, con descripciones generadas y anotaciones de solo lectura o escritura.
+- **Migración de respuestas.**
+
+| Herramienta | Antes (1.x) | Ahora (2.0.0) |
+|---|---|---|
+| `znve_help` | texto Markdown | `{status, topic, text}`; en Python, dict en lugar de texto; Python admite `mcp_tools` |
+| `znve_forensic_scan` | MCP: texto con el contenido; Python: métricas sin contenido | los dos: `file`, `size_bytes`, `total_lines`, `range`, `side_effects`, `red_zones`, `notice` y `content` (con marcadores de dato no confiable); `file` es relativa (antes, en Python, absoluta) |
+| `znve_validate_contract` | MCP: `PASSED`/`valid_contract`; Python: `APPROVED`/`passed` | los dos: `APPROVED` o `REJECTED` con `passed` y `violations`; mismas librerías vetadas por defecto (`lodash`, `axios`, `moment`, `requests`, `jquery`) |
+| `znve_audit_resources` | MCP: `risk_level`; Python: `clean` | los dos: `risk_level`, `clean`, `findings_count` y `findings`, con los mismos textos |
+| `znve_scaffold_harness`, `znve_surgical_write` | texto en el MCP; `harness_file`/`file` absolutas en Python | `file` relativa, `message` y, al escribir, `bytes_written`; errores con `code` |
+
 ### Eliminado
 - `copilot-instructions.md` en la raíz y `protocols/agents/copilot-instrucctions.md` (copias que Copilot no lee; la segunda tenía una errata en el nombre).
 

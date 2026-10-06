@@ -390,10 +390,142 @@
 
   "mcp": {
     "server_file": "integrations/mcp-server/znve-mcp-server.ts",
+    "contract": {
+      "server_version": "2.0.0",
+      "intro_es": "Las seis herramientas responden **un objeto JSON compacto** con el mismo contrato en el servidor MCP y en `integrations/antigravity/znve_skill.py` (una suite de casos común lo comprueba). `status` va siempre primero; `isError` del protocolo MCP es verdadero cuando `status` es `REJECTED` o `ERROR`. Las rutas se devuelven relativas al workspace, nunca absolutas. Los errores de esquema de entrada (tipo equivocado, campo obligatorio ausente, valor fuera del enum) los detecta el SDK de MCP antes del manejador y no llevan `code`; en `znve_skill.py` esos mismos casos devuelven `BAD_ARGUMENT`.",
+      "statuses": [
+        {
+          "status": "SUCCESS",
+          "desc_es": "la herramienta hizo lo pedido."
+        },
+        {
+          "status": "APPROVED",
+          "desc_es": "`znve_validate_contract` aprobó el contrato."
+        },
+        {
+          "status": "REJECTED",
+          "desc_es": "una barandilla o un veredicto rechazó la petición; lleva `code` y `message`."
+        },
+        {
+          "status": "ERROR",
+          "desc_es": "el entorno falló (el archivo no existe, error de E/S); lleva `code` y `message`."
+        }
+      ],
+      "error_codes": [
+        {
+          "code": "BAD_ARGUMENT",
+          "status": "REJECTED",
+          "desc_es": "argumento vacío, de tipo equivocado o con un valor no admitido."
+        },
+        {
+          "code": "BAD_RANGE",
+          "status": "REJECTED",
+          "desc_es": "rango de líneas invertido o fuera del archivo."
+        },
+        {
+          "code": "OUTSIDE_WORKSPACE",
+          "status": "REJECTED",
+          "desc_es": "la ruta queda fuera de `ZNVE_WORKSPACE`, también a través de enlaces."
+        },
+        {
+          "code": "NOT_FOUND",
+          "status": "ERROR",
+          "desc_es": "el archivo no existe."
+        },
+        {
+          "code": "NOT_A_FILE",
+          "status": "REJECTED",
+          "desc_es": "la ruta es un directorio."
+        },
+        {
+          "code": "TOO_LARGE",
+          "status": "REJECTED",
+          "desc_es": "el archivo supera el tope de 1 MiB."
+        },
+        {
+          "code": "BINARY_FILE",
+          "status": "REJECTED",
+          "desc_es": "el archivo es binario; solo se lee texto."
+        },
+        {
+          "code": "SECRET_DENIED",
+          "status": "REJECTED",
+          "desc_es": "el nombre está en la lista de secretos denegada."
+        },
+        {
+          "code": "PROTECTED_DIR",
+          "status": "REJECTED",
+          "desc_es": "escritura dentro de `.git/` o `node_modules/`."
+        },
+        {
+          "code": "NOT_HARNESS_DIR",
+          "status": "REJECTED",
+          "desc_es": "el arnés no está bajo `tests/` ni `sandbox/`."
+        },
+        {
+          "code": "ALREADY_EXISTS",
+          "status": "REJECTED",
+          "desc_es": "el arnés solo crea: el archivo ya existe."
+        },
+        {
+          "code": "SILENT_CATCH",
+          "status": "REJECTED",
+          "desc_es": "un `catch` o `except` silencia el error."
+        },
+        {
+          "code": "UNDISPOSED_RESOURCE",
+          "status": "REJECTED",
+          "desc_es": "abre flujos o sockets con `not_applicable`."
+        },
+        {
+          "code": "CONTRACT_VIOLATION",
+          "status": "REJECTED",
+          "desc_es": "el contrato tiene consultas ciegas o importa una librería vetada; `violations` las lista."
+        },
+        {
+          "code": "IO_ERROR",
+          "status": "ERROR",
+          "desc_es": "fallo de lectura o escritura del sistema de archivos."
+        }
+      ],
+      "default_banned_libraries": [
+        "lodash",
+        "axios",
+        "moment",
+        "requests",
+        "jquery"
+      ],
+      "shapes": [
+        {
+          "tool": "znve_help",
+          "fields_es": "`topic`, `text` (y `fallback: true` si falta el manual)."
+        },
+        {
+          "tool": "znve_forensic_scan",
+          "fields_es": "`file`, `size_bytes`, `total_lines`, `range` (`null` o `{start_line, end_line}`), `side_effects` (`file_system_io`, `network_calls`, `database_mutations`), `red_zones` (`empty_catch_blocks`, `thread_blocking_calls`), `notice` y `content` entre marcadores de dato no confiable."
+        },
+        {
+          "tool": "znve_validate_contract",
+          "fields_es": "`passed`, `violations` y `message`."
+        },
+        {
+          "tool": "znve_scaffold_harness",
+          "fields_es": "`file` y `message`."
+        },
+        {
+          "tool": "znve_surgical_write",
+          "fields_es": "`file`, `bytes_written` y `message`."
+        },
+        {
+          "tool": "znve_audit_resources",
+          "fields_es": "`risk_level` (`CLEAN`, `MEDIUM` o `HIGH`), `clean`, `findings_count` y `findings`."
+        }
+      ]
+    },
     "tools": [
-      {"name": "znve_help", "phase": "Ayuda", "summary_es": "Devuelve una sección del manual `protocols/COMMANDS.md` (`commands` por defecto, `mcp_tools` o `modes`) o el manual completo con `all`.", "params": [{"name": "topic", "type": "enum", "required": false, "desc_es": "`commands` (por defecto), `mcp_tools`, `modes` o `all` (manual completo)."}], "behavior_es": "Un `topic` desconocido es un error. Si el manual no existe, devuelve un catálogo corto de respaldo; cualquier otro error se informa."},
-      {"name": "znve_forensic_scan", "phase": "Ingesta", "summary_es": "Lee un archivo del workspace en modo estrictamente de solo lectura.", "params": [{"name": "file_path", "type": "string", "required": true, "desc_es": "Ruta del archivo, relativa a `ZNVE_WORKSPACE` (o absoluta dentro de él)."}, {"name": "start_line", "type": "integer", "required": false, "desc_es": "Primera línea a leer (desde 1). Sin ella, desde el principio."}, {"name": "end_line", "type": "integer", "required": false, "desc_es": "Última línea a leer, inclusive. Sin ella, hasta el final."}], "behavior_es": "Rechaza rutas fuera de `ZNVE_WORKSPACE` (también a través de enlaces), directorios, binarios, archivos de más de 1 MiB y los de la lista de secretos denegada (`.env`, claves y credenciales; se permiten `.env.example` y similares). Un rango invertido, negativo o fuera del archivo es un error. Devuelve el contenido intacto y su tamaño entre marcadores que lo declaran dato no confiable, nunca instrucción; nunca escribe en disco."},
-      {"name": "znve_validate_contract", "phase": "Contrato", "summary_es": "Valida que un DTO o interfaz cumpla el Anti-Bloat Fence y la proyección de datos.", "params": [{"name": "contract_code", "type": "string", "required": true, "desc_es": "Código de la interfaz, struct o DTO propuesto."}, {"name": "banned_libraries", "type": "string[]", "required": false, "desc_es": "Librerías vetadas por el Anti-Bloat Fence."}], "behavior_es": "Rechaza el contrato si detecta `SELECT *` o `.find({})` (sin distinguir mayúsculas ni espacios) o la importación de una librería vetada (`import`, `require`, `from … import` o `using`)."},
+      {"name": "znve_help", "phase": "Ayuda", "summary_es": "Devuelve una sección del manual `protocols/COMMANDS.md` (`commands` por defecto, `mcp_tools` o `modes`) o el manual completo con `all`.", "params": [{"name": "topic", "type": "enum", "required": false, "desc_es": "`commands` (por defecto), `mcp_tools`, `modes` o `all` (manual completo)."}], "behavior_es": "Responde `topic` y `text`. Un `topic` desconocido es un error. Si el manual no existe, `text` es un catálogo corto de respaldo (`fallback: true`); cualquier otro error se informa."},
+      {"name": "znve_forensic_scan", "phase": "Ingesta", "summary_es": "Lee un archivo del workspace en modo estrictamente de solo lectura.", "params": [{"name": "file_path", "type": "string", "required": true, "desc_es": "Ruta del archivo, relativa a `ZNVE_WORKSPACE` (o absoluta dentro de él)."}, {"name": "start_line", "type": "integer", "required": false, "desc_es": "Primera línea a leer (desde 1). Sin ella, desde el principio."}, {"name": "end_line", "type": "integer", "required": false, "desc_es": "Última línea a leer, inclusive. Sin ella, hasta el final."}], "behavior_es": "Rechaza rutas fuera de `ZNVE_WORKSPACE` (también a través de enlaces), directorios, binarios, archivos de más de 1 MiB y los de la lista de secretos denegada (`.env`, claves y credenciales; se permiten `.env.example` y similares). Un rango invertido o fuera del archivo es un error. Devuelve el contenido intacto entre marcadores que lo declaran dato no confiable, nunca instrucción, con su tamaño, efectos secundarios y zonas rojas; nunca escribe en disco."},
+      {"name": "znve_validate_contract", "phase": "Contrato", "summary_es": "Valida que un DTO o interfaz cumpla el Anti-Bloat Fence y la proyección de datos.", "params": [{"name": "contract_code", "type": "string", "required": true, "desc_es": "Código de la interfaz, struct o DTO propuesto."}, {"name": "banned_libraries", "type": "string[]", "required": false, "desc_es": "Librerías vetadas por el Anti-Bloat Fence."}], "behavior_es": "Rechaza el contrato si detecta `SELECT *` o `.find({})` (sin distinguir mayúsculas ni espacios) o la importación de una librería vetada (`import`, `require`, `from … import` o `using`). Sin `banned_libraries`, veta `lodash`, `axios`, `moment`, `requests` y `jquery`."},
       {"name": "znve_scaffold_harness", "phase": "Aislamiento", "summary_es": "Crea una suite Golden Master en un directorio aislado sin tocar producción.", "params": [{"name": "harness_directory", "type": "string", "required": true, "desc_es": "Directorio aislado bajo `tests/` o `sandbox/` en la raíz de `ZNVE_WORKSPACE`."}, {"name": "test_filename", "type": "string", "required": true, "desc_es": "Nombre del archivo de prueba, sin rutas."}, {"name": "harness_code", "type": "string", "required": true, "desc_es": "Código de la prueba de caja negra."}], "behavior_es": "Solo crea: se niega a sobrescribir un archivo existente. Rechaza directorios fuera de `tests/` o `sandbox/`, nombres de archivo con rutas, archivos de la lista de secretos denegada y cualquier escape del workspace."},
       {"name": "znve_surgical_write", "phase": "Escritura", "summary_es": "Escribe un único `TARGET_FILE` tras aprobar el contrato.", "params": [{"name": "target_file", "type": "string", "required": true, "desc_es": "Ruta exacta del único archivo a escribir, dentro de `ZNVE_WORKSPACE`."}, {"name": "code_content", "type": "string", "required": true, "desc_es": "Contenido que satisface el contrato."}, {"name": "disposal_pattern", "type": "enum", "required": true, "desc_es": "`dispose`, `close`, `finally`, `autocloseable` o `not_applicable`."}], "behavior_es": "Rechaza rutas fuera de `ZNVE_WORKSPACE`, dentro de `.git/` y `node_modules/` o de la lista de secretos denegada (`.env`, claves y credenciales), y aborta si un `catch`/`except` silencia el error o si se abren sockets o flujos con `not_applicable`. Escribe de forma atómica (archivo temporal y renombrado)."},
       {"name": "znve_audit_resources", "phase": "Hardening", "summary_es": "Analiza un fragmento de código en busca de antipatrones de hilos, memoria y CPU.", "params": [{"name": "code_snippet", "type": "string", "required": true, "desc_es": "Fragmento de código a evaluar."}], "behavior_es": "Marca `.Result`, `.Wait()` y `.GetAwaiter().GetResult()` (riesgo `HIGH`), `WakeLock.acquire()` (`HIGH`) y busy-waiting sin backoff (`MEDIUM`). `risk_level` es el mayor riesgo encontrado, o `CLEAN`."}
@@ -429,7 +561,7 @@
     {"template": "ollama_modelfile.tmpl", "agent": "ollama", "output": "integrations/ollama/Modelfile", "max_bytes": 11520},
     {"template": "openrouter_system.md.tmpl", "agent": "openrouter", "output": "integrations/openrouter/system-prompt.md", "max_bytes": 11520},
     {"template": "antigravity_skill.md.tmpl", "agent": "antigravity", "output": "integrations/antigravity/SKILL.md", "max_bytes": 20480},
-    {"template": "commands_manual.md.tmpl", "output": "protocols/COMMANDS.md", "max_bytes": 30976},
+    {"template": "commands_manual.md.tmpl", "output": "protocols/COMMANDS.md", "max_bytes": 34304},
     {"template": "antigravity_install.md.tmpl", "agent": "antigravity", "output": "integrations/antigravity/INSTALL_ANTIGRAVITY.md", "max_bytes": 4608, "catalog": false},
     {"template": "gemini_skill.md.tmpl", "agent": "gemini", "output": "integrations/gemini/skills/znve/SKILL.md", "max_bytes": 21760},
     {"template": "chameleon_layer.md.tmpl", "output": "integrations/gemini/skills/znve/references/chameleon-layer.md", "max_bytes": 2048, "catalog": false},
@@ -443,6 +575,8 @@
     {"output": "integrations/mcp-server/znve-mcp-server.ts", "block": "mcp_ts_help_fallback", "name": "fallback"},
     {"output": "integrations/mcp-server/znve-mcp-server.ts", "block": "mcp_ts_tool_docs", "name": "tools"},
     {"output": "integrations/mcp-server/znve-mcp-server.ts", "block": "secrets_ts", "name": "secrets"},
+    {"output": "integrations/mcp-server/znve-mcp-server.ts", "block": "contract_ts", "name": "contract"},
+    {"output": "integrations/antigravity/znve_skill.py", "block": "contract_py", "name": "contract"},
     {"output": "integrations/antigravity/znve_skill.py", "block": "secrets_py", "name": "secrets"},
     {"output": "README.md", "block": "readme_commands_md"},
     {"output": "SPECIFICATION.md", "block": "spec_commands_md"},

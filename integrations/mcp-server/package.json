@@ -1,6 +1,6 @@
 {
   "name": "znve-mcp-server",
-  "version": "1.2.0",
+  "version": "2.0.0",
   "description": "ZNVE MCP Protocol Server",
   "type": "module",
   "main": "dist/znve-mcp-server.js",
@@ -19,7 +19,8 @@
     "uninstall:antigravity": "node install-antigravity.mjs --uninstall"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.32.0"
+    "@modelcontextprotocol/sdk": "^1.32.0",
+    "zod": "^3.25 || ^4.0"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

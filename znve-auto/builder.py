@@ -345,6 +345,38 @@ def agent_profiles_table_md(spec: dict) -> str:
     return "\n".join(rows)
 
 
+def mcp_contract_md(spec: dict) -> str:
+    """Contrato de respuesta común del servidor MCP y de znve_skill.py, para el manual."""
+    c = spec["mcp"]["contract"]
+    lines = [f"### Contrato de respuesta (servidor MCP {c['server_version']} y `znve_skill.py`)", "", c["intro_es"], ""]
+    lines += ["| `status` | Significado |", "|---|---|"]
+    lines += [f"| `{s['status']}` | {s['desc_es']} |" for s in c["statuses"]]
+    lines += ["", "| Herramienta | Campos de la respuesta |", "|---|---|"]
+    lines += [f"| `{s['tool']}` | {s['fields_es']} |" for s in c["shapes"]]
+    lines += ["", "| `code` | `status` | Cuándo |", "|---|---|---|"]
+    lines += [f"| `{e['code']}` | `{e['status']}` | {e['desc_es']} |" for e in c["error_codes"]]
+    return "\n".join(lines)
+
+
+def contract_ts(spec: dict) -> str:
+    """Estado de cada código de error y librerías vetadas por defecto del servidor MCP."""
+    c = spec["mcp"]["contract"]
+    status = ", ".join(f'{e["code"]}: "{e["status"]}"' for e in c["error_codes"])
+    banned = json.dumps(c["default_banned_libraries"], ensure_ascii=False)
+    return (
+        f'const ZNVE_VERSION = "{spec["version"]}";\n'
+        f'const ERROR_STATUS: Record<string, "REJECTED" | "ERROR"> = {{ {status} }};\n'
+        f"const DEFAULT_BANNED_LIBRARIES: string[] = {banned};"
+    )
+
+
+def contract_py(spec: dict) -> str:
+    c = spec["mcp"]["contract"]
+    status = ", ".join(f'"{e["code"]}": "{e["status"]}"' for e in c["error_codes"])
+    banned = json.dumps(c["default_banned_libraries"], ensure_ascii=False)
+    return f"ERROR_STATUS = {{{status}}}\nDEFAULT_BANNED_LIBRARIES = tuple({banned})"
+
+
 def secrets_ts(spec: dict) -> str:
     """Lista de secretos denegada del servidor MCP (misma fuente que la de Python)."""
     deny = json.dumps(spec["secrets"]["deny"], ensure_ascii=False)
@@ -464,6 +496,7 @@ def antigravity_py_constants(spec: dict) -> str:
         f"ZNVE_VERSION = {spec['version']!r}",
         f"ZNVE_SYSTEM_INSTRUCTION = {py_string(instruction)}",
         f"ZNVE_HELP_CATALOG = {py_string(help_block(spec))}",
+        f"ZNVE_MCP_TOOLS = {py_string(mcp_tools_list_md(spec))}",
         f"ZNVE_MODES = {py_string(modes)}",
         f"ZNVE_DEFAULT_FORMAT_SHORT = {default_format_short(spec)!r}",
     ])
@@ -542,6 +575,9 @@ def build_context(spec: dict) -> dict:
         "agent_profiles_table_md": agent_profiles_table_md(spec),
         "agent_phase_rule_md": spec["agent_layer"]["phase_rule_es"],
         "secrets_ts": secrets_ts(spec),
+        "contract_ts": contract_ts(spec),
+        "contract_py": contract_py(spec),
+        "mcp_contract_md": mcp_contract_md(spec),
         "secrets_py": secrets_py(spec),
         "next_guardrail_number": str(len(spec["guardrails"]) + 1),
         "commands_full_md": commands_full_md(spec),

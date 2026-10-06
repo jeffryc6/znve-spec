@@ -169,7 +169,7 @@ El servidor de referencia (`integrations/mcp-server/znve-mcp-server.ts`, transpo
 
 | Herramienta | Fase | Garantía |
 |---|---|---|
-| `znve_help` | Ayuda | Sirve el manual `protocols/COMMANDS.md`, completo o por tema. |
+| `znve_help` | Ayuda | Sirve una sección del manual `protocols/COMMANDS.md` (`commands` por defecto) o el manual completo con `all`. |
 | `znve_forensic_scan` | Ingesta | Lectura de texto (hasta 1 MiB, por rangos de líneas si se pide) sin escritura en disco. Deniega archivos con secretos y entrega el contenido marcado como dato no confiable. |
 | `znve_validate_contract` | Contrato | Rechaza `SELECT *`, `.find({})` y la importación de librerías vetadas. |
 | `znve_scaffold_harness` | Aislamiento | Solo escribe bajo `tests/` o `sandbox/`. |
@@ -177,6 +177,8 @@ El servidor de referencia (`integrations/mcp-server/znve-mcp-server.ts`, transpo
 | `znve_audit_resources` | Hardening | Detecta bloqueos síncronos, busy-waiting y `WakeLock.acquire()`. |
 
 Ninguna herramienta lee ni escribe fuera de `ZNVE_WORKSPACE`, tampoco a través de enlaces simbólicos.
+
+**Contrato de respuesta.** El servidor MCP (versión 2.0.0) y `integrations/antigravity/znve_skill.py` responden lo mismo: un objeto JSON compacto con `status` (`SUCCESS`, `APPROVED`, `REJECTED` o `ERROR`) y, en los rechazos y errores, un `code` determinista y un `message` sin rutas del host. La lista de códigos y los campos de cada herramienta están en la sección 2 de `protocols/COMMANDS.md`; una suite de casos común (`znve-auto/tool_contract_cases.json`) la ejecutan las dos implementaciones.
 
 ---
 

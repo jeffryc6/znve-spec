@@ -13,6 +13,7 @@ Uso:
 
 from __future__ import annotations
 
+import base64
 import contextlib
 import importlib.util
 import io
@@ -36,6 +37,7 @@ SEMVER = re.compile(r"^\d+\.\d+\.\d+$")
 ZNVE_VERSION_REF = re.compile(r"ZNVE[^\n\d]{0,40}?v?(\d+\.\d+\.\d+)")
 SKILL_KEYS = {"name", "description", "license", "allowed-tools", "metadata", "compatibility"}
 MCP_SERVER = REPO / "integrations" / "mcp-server" / "znve-mcp-server.ts"
+CONTRACT_CASES = REPO / "znve-auto" / "tool_contract_cases.json"
 OPENROUTER_SCHEMA = REPO / "integrations" / "openrouter" / "response-schema.json"
 # Instalador de la directiva global de DeepSeek Harness (el AGENTS.md que instala se genera).
 DSH_INSTALLER = REPO / "integrations" / "deepseek" / "harness" / "install-dsh.ps1"
@@ -350,7 +352,7 @@ class ExternalContractTests(unittest.TestCase):
 
     def test_mcp_tools_match_server(self):
         """Las herramientas MCP documentadas son las que expone el servidor."""
-        exposed = set(re.findall(r'name:\s*"(znve_\w+)"', self.server))
+        exposed = set(re.findall(r'registerTool\(\s*"(znve_\w+)"', self.server))
         documented = {t["name"] for t in self.spec["mcp"]["tools"]}
         self.assertEqual(documented, exposed)
 
@@ -388,7 +390,7 @@ class AntigravityPythonTests(unittest.TestCase):
         """znve_skill.py expone la versión, el nombre y el catálogo de la especificación."""
         self.assertEqual(self.skill.ZNVE_VERSION, self.spec["version"])
         self.assertEqual(self.skill.ZNVE_NAME, self.spec["name"])
-        self.assertEqual(self.skill.znve_help("commands"), builder.help_block(self.spec))
+        self.assertEqual(self.skill.znve_help("commands")["text"], builder.help_block(self.spec))
         for c in self.spec["commands"]:
             self.assertIn(c["name"], self.skill.ZNVE_SYSTEM_INSTRUCTION)
 
@@ -555,11 +557,11 @@ class SkillToolBehaviorTests(unittest.TestCase):
         whole = self.skill.znve_forensic_scan("lines.py")
         self.assertEqual(whole["status"], "SUCCESS", whole)
         self.assertTrue(whole["side_effects"]["file_system_io"])
-        self.assertIsNone(whole["scanned_range"])
+        self.assertIsNone(whole["range"])
         part = self.skill.znve_forensic_scan("lines.py", start_line=1, end_line=2)
         self.assertEqual(part["status"], "SUCCESS", part)
         self.assertFalse(part["side_effects"]["file_system_io"], "solo se analiza el rango pedido")
-        self.assertEqual(part["scanned_range"], {"start_line": 1, "end_line": 2})
+        self.assertEqual(part["range"], {"start_line": 1, "end_line": 2})
         self.assertEqual(part["total_lines"], 4)
         self.assertEqual(self.skill.znve_forensic_scan("lines.py", start_line=4)["status"], "SUCCESS")
 
@@ -595,11 +597,14 @@ class SkillToolBehaviorTests(unittest.TestCase):
 
     def test_help_defaults_to_commands(self):
         commands = self.skill.znve_help()
+        self.assertEqual(commands["topic"], "commands")
         self.assertEqual(commands, self.skill.znve_help("commands"))
-        self.assertNotIn("MODOS DE OPERACIÓN", commands)
-        everything = self.skill.znve_help("all")
-        self.assertIn(commands, everything)
+        self.assertNotIn("MODOS DE OPERACIÓN", commands["text"])
+        everything = self.skill.znve_help("all")["text"]
+        self.assertIn(commands["text"], everything)
         self.assertIn("MODOS DE OPERACIÓN", everything)
+        self.assertIn("znve_forensic_scan", self.skill.znve_help("mcp_tools")["text"])
+        self.assertRejected(self.skill.znve_help("nope"))
 
     def test_write_rejects_escape(self):
         result = self.skill.znve_surgical_write("../outside/pwned.txt", "x", "not_applicable")
@@ -781,6 +786,117 @@ class DshInstallerTests(unittest.TestCase):
         os.utime(new, (1_000_000_000, 1_000_000_000))  # la más reciente por nombre es la más antigua por fecha
         self.assertEqual(self.run_installer("-Uninstall").returncode, 0)
         self.assertEqual(self.agents.read_text(encoding="utf-8"), "Reglas nuevas.\n")
+
+
+class ToolContractTests(unittest.TestCase):
+    """Contrato de respuesta común (RFC 0004, paso 5): el servidor MCP y znve_skill.py responden lo mismo."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.spec = builder.load_spec()
+        cls.cases = json.loads(CONTRACT_CASES.read_text(encoding="utf-8"))
+        cls.skill = load_module("znve_skill_contract", ANTIGRAVITY_DIR / "znve_skill.py")
+        cls.codes = {e["code"]: e["status"] for e in cls.spec["mcp"]["contract"]["error_codes"]}
+
+    @staticmethod
+    def write_files(root: Path, files: dict) -> None:
+        for name, spec in files.items():
+            target = root / name
+            if name.endswith("/"):
+                target.mkdir(parents=True, exist_ok=True)
+                continue
+            target.parent.mkdir(parents=True, exist_ok=True)
+            if isinstance(spec, str):
+                target.write_text(spec, encoding="utf-8", newline="")
+            elif "base64" in spec:
+                target.write_bytes(base64.b64decode(spec["base64"]))
+            else:
+                target.write_bytes(spec["fill"].encode() * spec["bytes"])
+
+    def assert_subset(self, actual, expected, where: str) -> None:
+        if isinstance(expected, dict):
+            self.assertIsInstance(actual, dict, f"{where}: se esperaba un objeto")
+            for key, value in expected.items():
+                self.assertIn(key, actual, f"{where}.{key} falta")
+                self.assert_subset(actual[key], value, f"{where}.{key}")
+        else:
+            self.assertEqual(actual, expected, where)
+
+    def test_cases_match_the_shared_contract(self):
+        """Cada caso de tool_contract_cases.json da el resultado esperado (los mismos que ejecuta el servidor MCP)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp).resolve()
+            ws, outside, cwd = root / "ws", root / "outside", root / "cwd"
+            for folder in (ws, outside, cwd):
+                folder.mkdir()
+            self.write_files(ws, self.cases["files"])
+            self.write_files(outside, self.cases["outside_files"])
+            previous = os.getcwd()
+            os.chdir(cwd)
+            try:
+                with mock.patch.dict(os.environ, {"ZNVE_WORKSPACE": str(ws)}):
+                    for case in self.cases["cases"]:
+                        with self.subTest(case["id"]):
+                            result = getattr(self.skill, case["tool"])(**case["args"])
+                            text = json.dumps(result, ensure_ascii=False)
+                            self.assertEqual(list(result)[0], "status", text)
+                            self.assert_subset(result, case["expect"], case["id"])
+                            for key, length in case.get("counts", {}).items():
+                                self.assertEqual(len(result[key]), length, f"{case['id']}.{key}")
+                            for needle in case.get("content_contains", []):
+                                self.assertIn(needle, result["content"], case["id"])
+                            for needle in case.get("content_excludes", []):
+                                self.assertNotIn(needle, result["content"], case["id"])
+                            for needle in case.get("result_excludes", []):
+                                self.assertNotIn(needle, text, case["id"])
+                            self.assertNotIn(str(ws), text, f"{case['id']}: expone la ruta del host")
+                            self.assertNotIn(str(ws).replace("\\", "\\\\"), text)
+                    self.assertEqual((ws / ".env").read_text(encoding="utf-8"), "TOKEN=CANARY-12345")
+                    self.assertFalse((outside / "pwned.txt").exists())
+                    self.assertEqual((ws / "tests" / "characterization" / "test_legacy.py").read_text(encoding="utf-8"), "pass\n")
+            finally:
+                os.chdir(previous)
+
+    def test_every_code_has_the_status_the_spec_declares(self):
+        """Los casos compartidos cubren cada código de error y su status coincide con el de la especificación."""
+        covered = set()
+        for case in self.cases["cases"]:
+            code = case["expect"].get("code")
+            if code:
+                self.assertEqual(case["expect"]["status"], self.codes[code], case["id"])
+                covered.add(code)
+        self.assertEqual(covered, set(self.codes) - {"IO_ERROR"}, "códigos sin caso compartido")
+        self.assertEqual(self.skill.ERROR_STATUS, self.codes)
+
+    def test_both_implementations_use_the_same_codes(self):
+        """Los códigos usados en el servidor MCP y en znve_skill.py son los de la especificación, y los dos usan todos."""
+        usage = re.compile(r"(?:_?fail|_?failure|ZnveError)\(\s*[\"']([A-Z_]+)[\"']|code[\"']?\s*[:=]\s*[\"']([A-Z_]+)[\"']")
+
+        def used(path: Path) -> set:
+            return {a or b for a, b in usage.findall(path.read_text(encoding="utf-8"))}
+
+        server = used(MCP_SERVER)
+        python = used(ANTIGRAVITY_DIR / "znve_skill.py")
+        self.assertEqual(server, set(self.codes))
+        self.assertEqual(python, set(self.codes))
+
+    def test_default_banned_libraries_are_shared(self):
+        self.assertEqual(list(self.skill.DEFAULT_BANNED_LIBRARIES), self.spec["mcp"]["contract"]["default_banned_libraries"])
+        self.assertIn(json.dumps(self.spec["mcp"]["contract"]["default_banned_libraries"], ensure_ascii=False), MCP_SERVER.read_text(encoding="utf-8"))
+
+    def test_server_version_is_the_contract_version(self):
+        package = json.loads((MCP_SERVER.parent / "package.json").read_text(encoding="utf-8"))
+        self.assertEqual(package["version"], self.spec["mcp"]["contract"]["server_version"])
+        self.assertIn("zod", package["dependencies"])
+
+    def test_manual_documents_the_contract(self):
+        """COMMANDS.md (SECCIÓN 2) documenta los estados, los campos de cada herramienta y todos los códigos."""
+        manual = builder.render_targets(self.spec)["protocols/COMMANDS.md"]
+        self.assertIn("### Contrato de respuesta", manual)
+        for code in self.codes:
+            self.assertIn(f"`{code}`", manual)
+        for tool in self.spec["mcp"]["tools"]:
+            self.assertIn(f"| `{tool['name']}` |", manual)
 
 
 def stale_hand_maintained(spec: dict) -> list[str]:
