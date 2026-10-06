@@ -56,7 +56,8 @@ Además de las plantillas hay dos tipos de artefacto:
 
 - **Bloques gestionados (`regions`).** En un archivo escrito a mano, el builder solo reescribe lo que hay entre `>>> znve:generated[:nombre]` y `<<< znve:generated[:nombre]`; el resto se mantiene a mano.
   - `integrations/antigravity/znve_skill.py`: nombre, versión, instrucción de sistema, catálogo de `/znve-help` y modos. Las herramientas se mantienen a mano. `Auto_Installer.py` e `install_znve_global.py` importan esas constantes, así que no llevan copias propias.
-  - `integrations/mcp-server/znve-mcp-server.ts`: tres bloques. La cabecera (versión de ZNVE y axiomas, dentro de `/** ... */`), `fallback` (catálogo corto de `znve_help` si falta el manual) y `tools` (`TOOL_DOCS`: descripciones de las herramientas y de sus parámetros, desde `mcp.tools`).
+  - `integrations/mcp-server/znve-mcp-server.ts` y `integrations/antigravity/znve_skill.py`: el bloque `secrets` (lista de secretos denegada y permitida, de `secrets` en la especificación; una sola fuente para las dos implementaciones).
+  - `integrations/mcp-server/znve-mcp-server.ts`: tres bloques más. La cabecera (versión de ZNVE y axiomas, dentro de `/** ... */`), `fallback` (catálogo corto de `znve_help` si falta el manual) y `tools` (`TOOL_DOCS`: descripciones de las herramientas y de sus parámetros, desde `mcp.tools`).
   - `README.md`, `SPECIFICATION.md` e `index.html`: el catálogo de comandos.
 - **Paquetes (`bundles`).** `znve.zip` reúne la carpeta de la skill de Claude, reproducible byte a byte. Las cachés y los archivos ocultos (`__pycache__`, `*.pyc`, `.DS_Store`) nunca entran.
 - **Copias (`mirrors`).** `integrations/antigravity/.agents/skills/znve/` contiene `SKILL.md` y `scripts/znve_skill.py`, copias exactas de los originales: es el mismo árbol que deja `Auto_Installer.py` en cada proyecto.
@@ -68,6 +69,7 @@ Las plantillas que empiezan por `_` son fragmentos compartidos: se incluyen con 
 - La especificación: nombre `znve`, versión SemVer, comandos únicos y 6 modos más ayuda.
 - Que ningún artefacto se haya desviado de la especificación.
 - Que cada directiva mencione los 10 comandos y cite una sola versión de ZNVE.
+- Que cada directiva con guardrails los lleve todos y en orden, con la regla común de fases de la Capa de Agente, y que los ajustes de comandos (salida mínima, dos pasos, rangos, Zona Roja) estén en la especificación.
 - Que cada directiva con guardrails incluya el de Verificación Inviolable, que `SPECIFICATION.md`, `GLOSSARY.md` e `index.html` citen el número real de guardrails y que la salida de `/znve-harness` conserve el determinismo del Golden Master y la verificación en dos pasos.
 - Que no queden marcas `[cite: N]`, vallas ` ```markdown ` iniciales ni enlaces `utm_source`.
 - Que las skills de Claude y Gemini cumplan las reglas de subida (claves del frontmatter, nombre en minúsculas con guiones, descripción de hasta 1024 caracteres) y que sus enlaces a `references/` apunten a archivos generados.

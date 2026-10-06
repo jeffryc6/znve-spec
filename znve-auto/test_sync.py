@@ -147,6 +147,52 @@ class ArtifactTests(unittest.TestCase):
             )
         self.assertGreaterEqual(checked, 8, "se esperaban al menos 8 directivas con guardrails")
 
+    def test_guardrails_in_order_everywhere(self):
+        """Cada directiva que lista guardrails los lleva todos y en el orden de la especificación."""
+        checked = 0
+        for target in self.spec["targets"]:
+            text = self.rendered[target["output"]]
+            first = self.spec["guardrails"][0]
+            if first["text_es"] not in text and first["text_en"] not in text:
+                continue
+            checked += 1
+            positions = []
+            for g in self.spec["guardrails"]:
+                found = [text.find(t) for t in (g["text_es"], g["text_en"]) if t in text]
+                self.assertTrue(found, f"{target['output']} no incluye el guardrail '{g['title_es']}'")
+                positions.append(found[0])
+            self.assertEqual(positions, sorted(positions), f"{target['output']}: guardrails desordenados")
+        self.assertGreaterEqual(checked, 8)
+
+    def test_command_adjustments(self):
+        """Los ajustes de una frase de la Cerca de Contexto están en sus comandos (salida mínima, dos pasos, rangos...)."""
+        cmds = {c["id"]: c for c in self.spec["commands"]}
+        for cid, label in (("execute", "CÓDIGO QUIRÚRGICO"), ("hotfix", "CÓDIGO QUIRÚRGICO")):
+            out = {o["label_es"]: o["desc_es"] for o in cmds[cid]["outputs"]}[label]
+            self.assertIn("diff o edición acotada", out, cid)
+        for cid, label in (("execute", "VERIFICACIÓN ATÓMICA"), ("hotfix", "COMANDO DE VALIDACIÓN")):
+            out = {o["label_es"]: o["desc_es"] for o in cmds[cid]["outputs"]}[label]
+            for needle in ("dos pasos", "primer fallo", "FALLO <archivo>:<línea>", "conteo de fallos"):
+                self.assertIn(needle, out, f"{cid}: {needle}")
+        self.assertIn("`contracts/`", cmds["execute"]["activation_es"])
+        self.assertIn("Zona Roja", cmds["forensic"]["directive_es"])
+        self.assertIn("rangos", cmds["forensic"]["directive_es"])
+        self.assertIn("stack trace", cmds["triage"]["directive_es"])
+        self.assertIn("corte de sesión", cmds["legacy-rescue"]["directive_es"])
+        self.assertEqual(self.spec["contract_rules"]["stop_criterion"], "Contrato v1 sólido y cerrado. Listo para /znve-execute.")
+
+    def test_phase_rule_everywhere(self):
+        """Toda directiva con guardrails lleva la regla común de fases (en español o en inglés)."""
+        layer = self.spec["agent_layer"]
+        for target in self.spec["targets"]:
+            text = self.rendered[target["output"]]
+            if self.spec["guardrails"][0]["text_es"] not in text and self.spec["guardrails"][0]["text_en"] not in text:
+                continue
+            self.assertTrue(
+                layer["phase_rule_es"] in text or layer["phase_rule_en"] in text,
+                f"{target['output']} no incluye la regla común de fases",
+            )
+
     def test_harness_output_is_deterministic_and_verified(self):
         """El comando harness fija el determinismo del Golden Master y la verificación en dos pasos."""
         harness = next(c for c in self.spec["commands"] if c["id"] == "harness")
@@ -410,6 +456,59 @@ class SkillToolBehaviorTests(unittest.TestCase):
         folder = self.ws / "tests" / "characterization"
         self.assertEqual((folder / "test_legacy.py").read_text(encoding="utf-8"), "ORIGINAL\n")
         self.assertEqual([p.name for p in folder.iterdir()], ["test_legacy.py"], "sin temporales residuales")
+
+    # --- Cerca de Contexto por código (M1-M3) ---------------------------------
+
+    def test_forensic_range(self):
+        (self.ws / "lines.py").write_text("a = 1\nb = 2\nopen('x')\nd = 4\n", encoding="utf-8")
+        whole = self.skill.znve_forensic_scan("lines.py")
+        self.assertEqual(whole["status"], "SUCCESS", whole)
+        self.assertTrue(whole["side_effects"]["file_system_io"])
+        self.assertIsNone(whole["scanned_range"])
+        part = self.skill.znve_forensic_scan("lines.py", start_line=1, end_line=2)
+        self.assertEqual(part["status"], "SUCCESS", part)
+        self.assertFalse(part["side_effects"]["file_system_io"], "solo se analiza el rango pedido")
+        self.assertEqual(part["scanned_range"], {"start_line": 1, "end_line": 2})
+        self.assertEqual(part["total_lines"], 4)
+        self.assertEqual(self.skill.znve_forensic_scan("lines.py", start_line=4)["status"], "SUCCESS")
+
+    def test_forensic_rejects_bad_ranges(self):
+        (self.ws / "lines.py").write_text("a = 1\nb = 2\n", encoding="utf-8")
+        for kwargs in (
+            {"start_line": 2, "end_line": 1},
+            {"start_line": 0},
+            {"start_line": -3},
+            {"end_line": 1.5},
+            {"start_line": True},
+            {"start_line": 3},
+            {"end_line": 99},
+        ):
+            self.assertRejected(self.skill.znve_forensic_scan("lines.py", **kwargs), str(kwargs))
+
+    def test_secrets_are_denied_for_read_and_write(self):
+        for name in (".env", ".env.local", "id_rsa", "server.pem", "credentials.json", ".ENV"):
+            (self.ws / name).write_text("TOKEN=CANARY", encoding="utf-8")
+            result = self.skill.znve_forensic_scan(name)
+            self.assertRejected(result, name)
+            self.assertNotIn("CANARY", str(result))
+            self.assertRejected(self.skill.znve_surgical_write(name, "X=1", "not_applicable"), name)
+            self.assertEqual((self.ws / name).read_text(encoding="utf-8"), "TOKEN=CANARY", name)
+        self.assertRejected(self.skill.znve_surgical_write("deploy.key", "X=1", "not_applicable"))
+        self.assertFalse((self.ws / "deploy.key").exists())
+        self.assertRejected(self.skill.znve_scaffold_harness("tests/secretos", ".env", "X=1"))
+
+    def test_secret_templates_are_allowed(self):
+        (self.ws / ".env.example").write_text("TOKEN=changeme", encoding="utf-8")
+        self.assertEqual(self.skill.znve_forensic_scan(".env.example")["status"], "SUCCESS")
+        self.assertEqual(self.skill.znve_surgical_write(".env.sample", "X=", "not_applicable")["status"], "SUCCESS")
+
+    def test_help_defaults_to_commands(self):
+        commands = self.skill.znve_help()
+        self.assertEqual(commands, self.skill.znve_help("commands"))
+        self.assertNotIn("MODOS DE OPERACIÓN", commands)
+        everything = self.skill.znve_help("all")
+        self.assertIn(commands, everything)
+        self.assertIn("MODOS DE OPERACIÓN", everything)
 
     def test_write_rejects_escape(self):
         result = self.skill.znve_surgical_write("../outside/pwned.txt", "x", "not_applicable")

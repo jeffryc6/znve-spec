@@ -14,6 +14,8 @@ ZNVE resuelve estructuralmente el "bucle de degradación agéntica" (*AI agentic
 1. **Axioma 1 (Diseño Pesado, Ejecución Silenciosa):** *Inteligencia concentrada en la fase de diseño y contrato; huella física y computacional mínima en la ejecución.*
 2. **Axioma 2 (Ejecución de Contratos Deterministas):** *La IA no inventa arquitectura ni improvisa tipos; ejecuta contratos estrictos y preaprobados.*
 
+El Axioma 1 aplica también a la ejecución del propio agente: lo que lee (contexto) y lo que escribe (salida) es huella de ejecución, y se mantiene al mínimo (guardrail 8). El Axioma 2 incluye la verificación: el agente no altera las pruebas para obtener verde ni declara lo que no ejecutó (guardrail 9).
+
 ### 1.2 Roles
 * **Director de Arquitectura (humano):** delimita el perímetro, aprueba contratos y certifica la paridad.
 * **Ejecutor Táctico (IA):** produce sintaxis determinista que satisface el contrato, sin cambios estructurales no autorizados.
@@ -53,7 +55,7 @@ ZNVE resuelve estructuralmente el "bucle de degradación agéntica" (*AI agentic
 * Prohibidos los bloques `try/catch` vacíos o el silenciamiento de excepciones. Trazabilidad con `X-Run-ID`.
 
 ### 2.6 Guardrails operativos
-Las directivas de los asistentes traducen los 5 pilares en 8 guardrails que el agente aplica en cada respuesta:
+Las directivas de los asistentes traducen los 5 pilares en 9 guardrails que el agente aplica en cada respuesta:
 
 | # | Guardrail | Pilar |
 |---|---|---|
@@ -64,7 +66,8 @@ Las directivas de los asistentes traducen los 5 pilares en 8 guardrails que el a
 | 5 | Persistencia eficiente y agnóstica | 4 |
 | 6 | Cero supresión silenciosa | 5 |
 | 7 | Cero relleno conversacional | 1 |
-| 8 | Verificación Inviolable | 2 |
+| 8 | Cerca de Contexto (Context Fence) | 1 |
+| 9 | Verificación Inviolable | 2 |
 
 ---
 
@@ -167,7 +170,7 @@ El servidor de referencia (`integrations/mcp-server/znve-mcp-server.ts`, transpo
 | Herramienta | Fase | Garantía |
 |---|---|---|
 | `znve_help` | Ayuda | Sirve el manual `protocols/COMMANDS.md`, completo o por tema. |
-| `znve_forensic_scan` | Ingesta | Lectura de texto (hasta 1 MiB) sin escritura en disco. |
+| `znve_forensic_scan` | Ingesta | Lectura de texto (hasta 1 MiB, por rangos de líneas si se pide) sin escritura en disco. Deniega archivos con secretos y entrega el contenido marcado como dato no confiable. |
 | `znve_validate_contract` | Contrato | Rechaza `SELECT *`, `.find({})` y la importación de librerías vetadas. |
 | `znve_scaffold_harness` | Aislamiento | Solo escribe bajo `tests/` o `sandbox/`. |
 | `znve_surgical_write` | Escritura | Escritura atómica; rechaza `catch`/`except` que silencian errores, `.git/`, `node_modules/` y recursos abiertos sin patrón de desecho. |
@@ -185,7 +188,7 @@ La versión, los axiomas, los guardrails, los escenarios, los comandos, la Capa 
 ### 9.2 Conformidad
 Una directiva o herramienta es conforme con ZNVE v2.3.0 si:
 1. Expone los 10 comandos con los encabezados de salida definidos en `protocols/COMMANDS.md`.
-2. Aplica los 8 guardrails de la sección 2.6 y la Capa Camaleónica del stack detectado.
+2. Aplica los 9 guardrails de la sección 2.6 y la Capa Camaleónica del stack detectado.
 3. Respeta el criterio de parada de la sección 3.2 y el formato por defecto de la sección 7.
 4. Cita una única versión de ZNVE, la de esta especificación.
 

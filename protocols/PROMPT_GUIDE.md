@@ -7,6 +7,8 @@
 ## 🎯 PROPÓSITO
 Esta guía contiene las plantillas de prompts optimizadas para ejecutar los comandos del estándar **ZNVE**. Cada prompt establece de manera estricta el **perímetro de acción**, las **restricciones absolutas**, el **objetivo atómico (`TARGET_FILE`)** y los **criterios de parada** para eliminar el "bucle de muerte de la IA" (*AI agentic drift*), evitar la inyección de código parásito y asegurar entregas deterministas.
 
+**Determinismo.** El determinismo de ZNVE viene del contrato y de los tests, no de los parámetros de muestreo: en modo de razonamiento varios proveedores ignoran `temperature`, y dos peticiones idénticas pueden responder distinto aunque una se sirva desde la caché. Bajar la temperatura reduce la variación, no la garantiza; lo que se verifica es el resultado contra el contrato.
+
 Los formatos de salida exactos de cada comando están en [COMMANDS.md](COMMANDS.md). Los comandos se pueden escribir como `/znve-contract`, `/znve contract` o `/znve -contract`.
 
 ---

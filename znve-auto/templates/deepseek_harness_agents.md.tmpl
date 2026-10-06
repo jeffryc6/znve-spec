@@ -15,9 +15,13 @@ Fuente de la norma completa: `SPECIFICATION.md` y `protocols/COMMANDS.md` del re
 
 {{guardrails_md}}
 
-## 3. Catálogo de comandos
+## 3. Capa de Agente
 
-Formas equivalentes de invocar un comando: `/znve-contract`, `/znve contract`, `/znve -contract`. Sin comando, toda respuesta técnica usa el formato de 4 bloques de la sección 4.
+{{agent_layer_body_md}}
+
+## 4. Catálogo de comandos
+
+Formas equivalentes de invocar un comando: `/znve-contract`, `/znve contract`, `/znve -contract`. Sin comando, toda respuesta técnica usa el formato de 4 bloques de la sección 5.
 
 {{commands_compact_h4}}
 
@@ -29,7 +33,7 @@ Si el mensaje es solo `/znve`, `/znve ?` o `/znve help`, responde como `/znve-he
 {{help_block}}
 ```
 
-## 4. Formato por defecto (4 bloques)
+## 5. Formato por defecto (4 bloques)
 
 Toda consulta técnica sin comando se responde en 4 bloques cerrados:
 
@@ -37,19 +41,19 @@ Toda consulta técnica sin comando se responde en 4 bloques cerrados:
 
 {{default_format_note}}
 
-## 5. Modos operativos
+## 6. Modos operativos
 
 {{modes_list_md}}
 
 En el modo 5 no se avanza de fase sin que la anterior esté verificada.
 
-## 6. Capa Camaleónica (restricciones por stack)
+## 7. Capa Camaleónica (restricciones por stack)
 
 {{chameleon_intro}}
 
 {{chameleon_bullets_md}}
 
-## 7. Límites reales de esta directiva
+## 8. Límites reales de esta directiva
 
 Esto importa más que todo lo anterior, así que no lo omitas:
 
@@ -59,7 +63,7 @@ Esto importa más que todo lo anterior, así que no lo omitas:
 4. **Deja que el proyecto mande.** Un `AGENTS.md` en la raíz del repositorio es más específico y tiene prioridad sobre este archivo. Si el proyecto define sus propias convenciones (estilo, comandos de verificación, stack), síguelas y usa ZNVE solo para lo que no contradigan.
 5. **Si una regla no se puede cumplir, dilo.** No improvises ni la rodees en silencio: informa la imposibilidad y propón la alternativa mínima.
 
-## 8. Regla de parada
+## 9. Regla de parada
 
 Al cerrar un contrato, emite exactamente:
 

@@ -274,6 +274,36 @@ def chameleon_bullets(spec: dict, bold: bool = True) -> str:
     )
 
 
+def agent_layer_body_md(spec: dict) -> str:
+    return spec["agent_layer"]["phase_rule_es"]
+
+
+def agent_layer_md(spec: dict) -> str:
+    return f"## 🧠 {spec['agent_layer']['title_es']}\n\n{agent_layer_body_md(spec)}"
+
+
+def agent_layer_plain(spec: dict) -> str:
+    return f"🧠 {spec['agent_layer']['title_es'].upper()}:\n{agent_layer_body_md(spec)}"
+
+
+def agent_layer_en(spec: dict) -> str:
+    layer = spec["agent_layer"]
+    return f"## {layer['title_en'].upper()}:\n{layer['phase_rule_en']}"
+
+
+def secrets_ts(spec: dict) -> str:
+    """Lista de secretos denegada del servidor MCP (misma fuente que la de Python)."""
+    deny = json.dumps(spec["secrets"]["deny"], ensure_ascii=False)
+    allow = json.dumps(spec["secrets"]["allow"], ensure_ascii=False)
+    return f"const SECRET_DENY: string[] = {deny};\nconst SECRET_ALLOW: string[] = {allow};"
+
+
+def secrets_py(spec: dict) -> str:
+    deny = json.dumps(spec["secrets"]["deny"], ensure_ascii=False)
+    allow = json.dumps(spec["secrets"]["allow"], ensure_ascii=False)
+    return f"SECRET_DENY = tuple({deny})\nSECRET_ALLOW = tuple({allow})"
+
+
 def quick_reference_table_md(spec: dict) -> str:
     rows = ["| Comando / Herramienta | Tipo | Modos o fase |", "|---|---|---|"]
     for c in spec["commands"]:
@@ -455,6 +485,12 @@ def build_context(spec: dict) -> dict:
         "invocation_md": invocation_md(spec),
         "invocation_fallback": spec["invocation"]["fallback_es"],
         "stop_criterion": spec["contract_rules"]["stop_criterion"],
+        "agent_layer_body_md": agent_layer_body_md(spec),
+        "agent_layer_md": agent_layer_md(spec),
+        "agent_layer_plain": agent_layer_plain(spec),
+        "agent_layer_en": agent_layer_en(spec),
+        "secrets_ts": secrets_ts(spec),
+        "secrets_py": secrets_py(spec),
         "next_guardrail_number": str(len(spec["guardrails"]) + 1),
         "commands_full_md": commands_full_md(spec),
         "commands_compact_md": commands_compact(spec, "es", "###"),
