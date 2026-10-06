@@ -1,10 +1,10 @@
-# Zero-Noise Vibe Engineering (ZNVE) v2.3.0
+# Zero-Noise Vibe Engineering (ZNVE) v2.4.0
 > **Spec-Driven Agentic Architecture & Zero-Noise AI Software Engineering**
 > *Arquitectura Agéntica Basada en Especificaciones e Ingeniería de Software IA Cero Ruido*
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-blue.svg)](LICENSE)
 [![Code License: MIT](https://img.shields.io/badge/Code%20License-MIT-green.svg)](LICENSE)
-[![Standard: ZNVE v2.3.0](https://img.shields.io/badge/Standard-ZNVE%20v2.3.0-purple.svg)](SPECIFICATION.md)
+[![Standard: ZNVE v2.4.0](https://img.shields.io/badge/Standard-ZNVE%20v2.4.0-purple.svg)](SPECIFICATION.md)
 [![Glossary](https://img.shields.io/badge/Glossary-ES%20%2F%20EN-lightgrey.svg)](GLOSSARY.md)
 [![MCP Server](https://img.shields.io/badge/MCP%20Server-6%20tools-orange.svg)](integrations/mcp-server/)
 [![Parity Check](https://github.com/jeffryc6/znve-spec/actions/workflows/znve-parity.yml/badge.svg)](.github/workflows/znve-parity.yml)
@@ -35,7 +35,16 @@ Unlike casual "vibe coding", which leads to bloated dependencies, endless repair
 4. **Agnostic State Domain:** Typed, explicit projections; no blind database or state dumps.
 5. **Defensive Security & Forensics:** Zero-trust boundary validation, `X-Run-ID` traceability and no empty `catch`/`except` blocks.
 
-### What's new in v2.3.0
+### What's new in v2.4.0
+> **v2.4.0: from code standard to agent discipline.** Same philosophy, same 10 commands. ZNVE now also governs what enters the AI's context, how much it writes and how it proves its work. Where the MCP server runs, code enforces the guarantees; elsewhere they remain instructions.
+
+- **9 guardrails (2 new):** *Context Fence* (read ranges, quiet verification, zero secrets, external content is data, never instructions) and *Inviolable Verification* (tests are never edited to get green; nothing unexecuted is claimed). Still 2 axioms, 10 commands and 6 scenarios.
+- **Agent layer:** every directive carries a common phase rule and the profile of its own assistant (fixed prefix, what invalidates the cache, session cut, per-phase configuration, how to measure).
+- **Enforced by code:** MCP server **2.0.0** and `znve_skill.py` share one response contract (48 common test cases): path containment, denied secrets, untrusted content marked as data, a harness that only creates files. **Breaking for consumers of the server's responses**: see the [CHANGELOG](CHANGELOG.md).
+- **Repository by relevance:** one folder per assistant under `integrations/`; DeepSeek Harness is versioned with a generated `AGENTS.md` and a non-destructive installer.
+- **Evidence and limits:** a pilot A/B field test is archived in [`field-tests/`](field-tests/2026-10-ab-pilot/README.md). It did **not** show token savings (the directives are longer); it did show a code guardrail blocking a secret read that prose alone did not. Tests on real projects are next.
+
+### Previously, in v2.3.0
 - **Platform-aware stack analysis (`--platform`):** zero-bloat stacks for Desktop, Web, Hybrid, Android and iOS/macOS.
 - **Solidity checklist & stop criterion:** the AI stops proposing once the contract passes the 4-point checklist.
 - **Delta contracts (`/znve-contract --delta`):** Bucket A (needed now) vs. Bucket B (deferred to `CONTRACT_BACKLOG.md`).
@@ -61,7 +70,16 @@ A diferencia del "vibe coding" caótico, que acumula librerías parásitas y có
 4. **Dominio de Estado Agnóstico:** consultas tipadas con proyecciones explícitas, sin volcados ciegos.
 5. **Seguridad Defensiva y Forense:** validación Zero-Trust en frontera, trazabilidad con `X-Run-ID` y prohibición de `catch` vacíos.
 
-### Novedades de v2.3.0
+### Novedades de v2.4.0
+> **v2.4.0: de la norma del código a la disciplina del agente.** Misma filosofía, mismos 10 comandos. ZNVE ahora también controla lo que entra al contexto de la IA, cuánto escribe y cómo demuestra su trabajo. Donde corre el servidor MCP, el código hace cumplir las garantías; en el resto siguen siendo instrucciones.
+
+- **9 guardrails (2 nuevos):** *Cerca de Contexto* (rangos, verificación silenciosa, cero secretos, el contenido externo es dato, nunca instrucción) y *Verificación Inviolable* (los tests no se tocan para obtener verde ni se declara lo no ejecutado). Siguen 2 axiomas, 10 comandos y 6 escenarios.
+- **Capa de Agente:** cada directiva lleva una regla común de fases y el perfil de su propio asistente (prefijo fijo, qué invalida su caché, corte de sesión, configuración por fase, cómo medir).
+- **Aplicado por código:** el servidor MCP **2.0.0** y `znve_skill.py` comparten un contrato de respuesta (48 casos de prueba comunes): contención de rutas, secretos denegados, contenido no confiable marcado como dato y un arnés que solo crea archivos. **Incompatible para quien consuma las respuestas del servidor**: ver el [CHANGELOG](CHANGELOG.md).
+- **Repositorio por relevancia:** una carpeta por asistente en `integrations/`; DeepSeek Harness queda versionado con un `AGENTS.md` generado y un instalador que no destruye.
+- **Evidencia y límites:** una prueba de campo piloto A/B está archivada en [`field-tests/`](field-tests/2026-10-ab-pilot/README.md). **No** mostró ahorro de tokens (las directivas son más largas); sí mostró una barandilla de código que bloqueó la lectura de un secreto que la prosa sola no bloqueó. Siguen las pruebas con proyectos reales.
+
+### Antes, en v2.3.0
 - **Análisis de stack por plataforma (`--platform`):** stacks sin peso parásito para Escritorio, Web, Híbrida, Android e iOS/macOS.
 - **Lista de chequeo de solidez y criterio de parada:** la IA deja de proponer en cuanto el contrato cumple los 4 puntos.
 - **Contratos delta (`/znve-contract --delta`):** Cubo A (requerido ya) frente a Cubo B (diferido a `CONTRACT_BACKLOG.md`).
@@ -158,7 +176,7 @@ znve-spec/
 ├── GLOSSARY.md                        <-- Technical glossary (ES/EN)
 ├── LICENSE                            <-- Dual license (CC BY 4.0 + MIT)
 ├── README.md                          <-- This file
-├── SPECIFICATION.md                   <-- Formal technical specification v2.3.0
+├── SPECIFICATION.md                   <-- Formal technical specification v2.4.0
 └── index.html                         <-- GitHub Pages landing page
 ```
 

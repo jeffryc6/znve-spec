@@ -2,7 +2,7 @@
 
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
-Este documento explica cómo integrar el Skill **Zero-Noise Vibe Engineering (ZNVE v2.3.0)** en Google Antigravity, por proyecto o de forma global, y cómo usarlo desde el Antigravity SDK.
+Este documento explica cómo integrar el Skill **Zero-Noise Vibe Engineering (ZNVE v2.4.0)** en Google Antigravity, por proyecto o de forma global, y cómo usarlo desde el Antigravity SDK.
 
 Referencia: [Agent Skills en Antigravity](https://antigravity.google/docs/skills).
 
@@ -29,7 +29,7 @@ Crea la skill en la ruta de workspace que lee Antigravity (IDE, Antigravity 2.0 
 
 ```text
 <proyecto>/.agents/skills/znve/
-├── SKILL.md                 <-- skill znve v2.3.0
+├── SKILL.md                 <-- skill znve v2.4.0
 └── scripts/znve_skill.py    <-- instrucción de sistema y 6 herramientas para el SDK
 ```
 
@@ -72,7 +72,7 @@ asyncio.run(main())
 
 1. Recarga la ventana de Antigravity.
 2. Escribe `/skills`: debe aparecer `znve` (no `zero-noise-vibe-engineering`).
-3. Escribe `/znve-help`: debe imprimir el catálogo de ZNVE v2.3.0.
+3. Escribe `/znve-help`: debe imprimir el catálogo de ZNVE v2.4.0.
 
 ## 6. Mantenimiento
 

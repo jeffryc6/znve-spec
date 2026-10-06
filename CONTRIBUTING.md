@@ -11,8 +11,14 @@ Agradecemos las contribuciones de la comunidad. Para garantizar que ZNVE manteng
 5. **Revisión y Discusión:** La comunidad y los mantenedores evaluarán si la propuesta cumple con el principio de *Cero Ruido*, mínima huella y respeto a los 6 Modos Operativos.
 6. **Aprobación / Fusión:** Una vez consensuada, el mantenedor principal fusionará el RFC y se incorporará a la siguiente versión semántica (SemVer) de la especificación.
 
+## 🧱 Criterio de gobernanza: las garantías, como código
+
+Toda garantía que pueda verificarse con código se implementa **como código** (el builder, un test o el servidor MCP), no solo como prosa en una directiva. Una regla que solo vive en una directiva es una instrucción: el modelo puede ignorarla, y la prueba de campo piloto lo mostró (la misma prosa no impidió leer un `.env`; la barandilla de código sí). Por eso una RFC que proponga una regla debe indicar qué parte de ella se puede comprobar de forma determinista y cómo (test, builder o herramienta MCP), y dejar como prosa solo lo que no se pueda.
+
+Las afirmaciones de eficiencia o de calidad se publican **con su metodología y sus límites**, o no se publican: demostrar, no declarar.
+
 ## ⚖️ Criterios de Aceptación
 - No debe añadir dependencias externas innecesarias ni sobreingeniería de contexto.
 - Si aborda aplicaciones modernas o incidentes, debe alinearse con [`protocols/ZNVE_MODERN_APPS_PROTOCOL.md`](protocols/ZNVE_MODERN_APPS_PROTOCOL.md) (aislamiento de radio de impacto y adaptadores anti-corrupción).
-- Debe incluir un arnés, prueba atómica o comando terminal reproducible que valide la propuesta.
+- Debe incluir un arnés, prueba atómica o comando terminal reproducible que valide la propuesta, y aplicar por código toda garantía verificable (ver el criterio de gobernanza).
 - Debe preservar los axiomas maestros: *"Inteligencia pesada en el diseño; huella casi nula en la ejecución"* y *"La IA no inventa arquitectura; ejecuta contratos deterministas"*.

@@ -1,7 +1,7 @@
-# ZNVE v2.3.0 — Zero-Noise Vibe Engineering (directiva global)
+# ZNVE v2.4.0 — Zero-Noise Vibe Engineering (directiva global)
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
-Estándar activo: **Zero-Noise Vibe Engineering (ZNVE) v2.3.0**.
+Estándar activo: **Zero-Noise Vibe Engineering (ZNVE) v2.4.0**.
 Roles: el humano es **Director de Arquitectura** (delimita, aprueba, certifica). Tú eres **Ejecutor Táctico**: produces sintaxis determinista que satisface contratos aprobados; no inventas arquitectura.
 
 Fuente de la norma completa: `SPECIFICATION.md` y `protocols/COMMANDS.md` del repositorio `znve-spec`. Esta directiva es un resumen operativo.
@@ -65,7 +65,7 @@ Si el mensaje es solo `/znve`, `/znve ?` o `/znve help`, responde como `/znve-he
 `/znve-help` imprime exactamente este bloque:
 
 ```text
-🛠️ CATÁLOGO DE COMANDOS ZNVE v2.3.0:
+🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.0:
 • /znve-help         : Manual operativo e índice de comandos.
 • /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
 • /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.

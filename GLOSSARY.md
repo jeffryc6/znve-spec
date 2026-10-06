@@ -1,6 +1,6 @@
 # GLOSSARY.md: Glosario técnico de ZNVE / ZNVE Technical Glossary
 
-Términos formales de Zero-Noise Vibe Engineering (ZNVE v2.3.0) en español e inglés. La norma completa está en [SPECIFICATION.md](SPECIFICATION.md) y el catálogo de comandos en [protocols/COMMANDS.md](protocols/COMMANDS.md).
+Términos formales de Zero-Noise Vibe Engineering (ZNVE v2.4.0) en español e inglés. La norma completa está en [SPECIFICATION.md](SPECIFICATION.md) y el catálogo de comandos en [protocols/COMMANDS.md](protocols/COMMANDS.md).
 
 ---
 

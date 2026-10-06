@@ -1,6 +1,6 @@
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
-# Integraciones de ZNVE v2.3.0
+# Integraciones de ZNVE v2.4.0
 
 Una carpeta por asistente. Las directivas, skills y guías se generan desde `znve-auto/master_spec.json`; el código (servidor MCP, cliente de OpenRouter, instaladores) y la integración de DeepSeek Harness se mantienen a mano.
 

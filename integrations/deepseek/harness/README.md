@@ -1,6 +1,6 @@
 # ZNVE para DeepSeek Harness (DSH)
 
-Integración **global** de Zero-Noise Vibe Engineering (ZNVE) v2.3.0 en DeepSeek Harness. Una vez instalada, ZNVE aplica a **toda sesión de DSH, en cualquier proyecto**, sin configuración por repositorio.
+Integración **global** de Zero-Noise Vibe Engineering (ZNVE) v2.4.0 en DeepSeek Harness. Una vez instalada, ZNVE aplica a **toda sesión de DSH, en cualquier proyecto**, sin configuración por repositorio.
 
 ## Qué problema resuelve
 

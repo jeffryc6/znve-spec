@@ -3,7 +3,7 @@
  * ==============================================================================
  * ZNVE MCP SERVER: Spec-Driven Model Context Protocol Server for Antigravity
  * >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano)
- * Framework: Zero-Noise Vibe Engineering (ZNVE) v2.3.0
+ * Framework: Zero-Noise Vibe Engineering (ZNVE) v2.4.0
  * Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
  * Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
  * <<< znve:generated
@@ -41,7 +41,7 @@ const HELP_TOPIC_HEADINGS: Record<string, string> = {
 
 // >>> znve:generated:fallback (znve-auto/builder.py desde master_spec.json; no editar a mano)
 const HELP_FALLBACK =
-  "[ZNVE_HELP_FALLBACK] protocols/COMMANDS.md no disponible. Comandos ZNVE v2.3.0: /znve-help, /znve-contract, /znve-execute, /znve-triage, /znve-hotfix, /znve-upgrade, /znve-forensic, /znve-harness, /znve-legacy-rescue, /znve-audit.";
+  "[ZNVE_HELP_FALLBACK] protocols/COMMANDS.md no disponible. Comandos ZNVE v2.4.0: /znve-help, /znve-contract, /znve-execute, /znve-triage, /znve-hotfix, /znve-upgrade, /znve-forensic, /znve-harness, /znve-legacy-rescue, /znve-audit.";
 // <<< znve:generated:fallback
 
 // >>> znve:generated:tools (znve-auto/builder.py desde master_spec.json; no editar a mano)
@@ -93,7 +93,7 @@ const TOOL_DOCS: Record<string, { description: string; params: Record<string, st
 // <<< znve:generated:tools
 
 // >>> znve:generated:contract (znve-auto/builder.py desde master_spec.json; no editar a mano)
-const ZNVE_VERSION = "2.3.0";
+const ZNVE_VERSION = "2.4.0";
 const ERROR_STATUS: Record<string, "REJECTED" | "ERROR"> = { BAD_ARGUMENT: "REJECTED", BAD_RANGE: "REJECTED", OUTSIDE_WORKSPACE: "REJECTED", NOT_FOUND: "ERROR", NOT_A_FILE: "REJECTED", TOO_LARGE: "REJECTED", BINARY_FILE: "REJECTED", SECRET_DENIED: "REJECTED", PROTECTED_DIR: "REJECTED", NOT_HARNESS_DIR: "REJECTED", ALREADY_EXISTS: "REJECTED", SILENT_CATCH: "REJECTED", UNDISPOSED_RESOURCE: "REJECTED", CONTRACT_VIOLATION: "REJECTED", IO_ERROR: "ERROR" };
 const DEFAULT_BANNED_LIBRARIES: string[] = ["lodash", "axios", "moment", "requests", "jquery"];
 // <<< znve:generated:contract

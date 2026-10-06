@@ -1,4 +1,4 @@
-# Manual de comandos y herramientas ZNVE v2.3.0
+# Manual de comandos y herramientas ZNVE v2.4.0
 
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
@@ -50,7 +50,7 @@ Sin comando, toda respuesta técnica sigue los 4 bloques: [1] Blueprint y Contra
 - **Salida:** el catálogo de comandos:
 
 ```text
-🛠️ CATÁLOGO DE COMANDOS ZNVE v2.3.0:
+🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.0:
 • /znve-help         : Manual operativo e índice de comandos.
 • /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
 • /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.

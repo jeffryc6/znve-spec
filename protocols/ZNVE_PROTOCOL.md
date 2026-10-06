@@ -1,7 +1,7 @@
 # ==============================================================================
 # ZERO-NOISE VIBE ENGINEERING (ZNVE) — PROTOCOLO OPERATIVO UNIVERSAL
 # Archivo: protocols/ZNVE_PROTOCOL.md
-# Versión: 2.3.0
+# Versión: 2.4.0
 # Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
 # Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
 # ==============================================================================

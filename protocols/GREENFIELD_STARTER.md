@@ -1,6 +1,6 @@
 # GREENFIELD STARTER: ZERO-NOISE VIBE ENGINEERING (ZNVE)
 **Plantilla de Inicio Rápido para Proyectos Nuevos (Día 0)**
-*Versión: 2.3.0 | Estándar: Spec-Driven Agentic Architecture | Modo 1 de [ZNVE_PROTOCOL.md](ZNVE_PROTOCOL.md)*
+*Versión: 2.4.0 | Estándar: Spec-Driven Agentic Architecture | Modo 1 de [ZNVE_PROTOCOL.md](ZNVE_PROTOCOL.md)*
 
 ---
 

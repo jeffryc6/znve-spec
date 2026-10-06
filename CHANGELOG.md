@@ -2,7 +2,44 @@
 
 Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de migración. El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones, [SemVer](https://semver.org/lang/es/) (ver `SPECIFICATION.md` §10).
 
-## [2.4.0] — en desarrollo
+## [2.4.0] — 2026-10-05
+
+> **Antes**, ZNVE le decía a la IA cómo debía ser el código que entrega.
+> **Después**, también gobierna cómo trabaja la IA: qué lee, cuánto escribe y cómo demuestra que terminó.
+>
+> *Before, ZNVE told the AI what good code looks like. Now it also governs how the AI works: what it reads, how much it writes, and how it proves it's done.*
+
+### Antes y después
+
+| Eje | Antes (2.3.0) | Después (2.4.0) |
+|---|---|---|
+| **Alcance** | Norma para el software que produce la IA | Norma para el software y para el propio agente (Axioma 1 aplicado a su ejecución) |
+| **Contexto** | Sin reglas: la IA podía volcar logs y archivos completos | Cerca de Contexto: rangos, verificación silenciosa, contratos por ruta |
+| **Salida** | «Código mínimo» sin forma definida | Diffs en lugar de reescrituras y un formato atómico de fallo |
+| **Sesiones** | Una conversación larga para todo | Una fase por sesión, razonamiento alto para diseñar y rápido para ejecutar |
+| **Asistentes** | Mismo texto adaptado de formato | Mismo núcleo más un perfil por asistente |
+| **Verificación** | «Entrega un comando para verificar» | Verificación Inviolable: no se tocan los tests para obtener verde ni se declara lo no ejecutado |
+| **Seguridad** | Garantías en prosa; las herramientas MCP no las cumplían | En el servidor MCP y en la skill de Python las aplica el código: contención de rutas, secretos denegados, contenido marcado como dato, arnés que solo crea. En el resto de asistentes siguen siendo instrucciones |
+| **Golden Master** | «100 % en verde», pero intermitente | El comando exige semilla, zona horaria y reloj fijos y campos volátiles enmascarados |
+
+**Lo que no cambia:** los 2 axiomas, los 10 comandos, los 6 escenarios y `master_spec.json` como fuente única. Crece la profundidad, no la superficie: de 7 a 9 guardrails y 3 conceptos con nombre (Capa de Agente, Cerca de Contexto, Verificación Inviolable), con 0 comandos nuevos. Ningún paquete nuevo en el árbol de dependencias (`zod`, que el SDK de MCP ya exige, se declara como dependencia directa).
+
+### Cifras
+
+| Métrica | Valor |
+|---|---|
+| Pruebas | De 22 de paridad a **89 en Python y 128 en el servidor MCP** (1 omitida en cada suite si el sistema no permite crear enlaces simbólicos de archivo); 48 casos de conformidad comunes al servidor y a la skill de Python |
+| CI | Paridad en Python 3.11 y 3.14, suite del servidor en Node, comprobación de tipos y acciones fijadas a SHA |
+| Copias de las instrucciones de Copilot | De 3 a 1 |
+| Coste en tokens | Cada directiva crece entre unos 2,2 y 3,8 KB (presupuestos verificados por test) |
+
+### Evidencia y límites
+
+La mejora de **eficiencia** (menos tokens por turno) **no está demostrada**: una prueba piloto A/B parcial (27 ejecuciones, muestras muy pequeñas, dos proveedores) mostró lo contrario en entrada por turno, porque las directivas son más largas. Sí indicó que aplicar una garantía por código (secretos) funciona donde la misma prosa no bastó, y detectó una laguna: la Verificación Inviolable no cubre «cambiar el código para darle la razón a un test erróneo». Los datos, el script y sus límites están en [`field-tests/2026-10-ab-pilot/`](field-tests/2026-10-ab-pilot/README.md). La v2.4.0 se evaluará ahora con proyectos reales en Claude Desktop y Antigravity.
+
+### Cómo actualizar
+
+Reinstala la directiva de cada asistente desde su carpeta de `integrations/` (la skill de Claude, `znve.zip`; la de Gemini; `install_znve_global.py` y `install-dsh.ps1`, que conservan tu contenido; el servidor MCP con su instalador). Revisa las tablas de migración de rutas y de respuestas del servidor más abajo.
 
 ### Cambiado
 - **Reestructuración por relevancia.** Las integraciones de cada asistente salen de `protocols/` y pasan a `integrations/`, con una carpeta por asistente. `protocols/` queda solo para los protocolos de trabajo y el manual de comandos.
@@ -43,7 +80,7 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 
 ### Servidor MCP 2.0.0 (cambios incompatibles)
 
-El servidor pasa de 1.2.0 a **2.0.0**: unifica su contrato con `znve_skill.py`, migra a `McpServer.registerTool` y fija su lista de herramientas. La norma sigue en 2.3.0; esta ruptura afecta solo a quien consuma las respuestas del servidor o de la skill de Python.
+El servidor pasa de 1.2.0 a **2.0.0**: unifica su contrato con `znve_skill.py`, migra a `McpServer.registerTool` y fija su lista de herramientas. La norma sube a 2.4.0 y el servidor lleva su propia versión; esta ruptura afecta solo a quien consuma las respuestas del servidor o de la skill de Python.
 
 - **Contrato de respuesta común (M6).** Las seis herramientas responden un único objeto JSON compacto, con `status` primero (`SUCCESS`, `APPROVED`, `REJECTED` o `ERROR`) y, en rechazos y errores, `code` (15 códigos deterministas, p. ej. `OUTSIDE_WORKSPACE`, `SECRET_DENIED`, `BAD_RANGE`) y `message`. `isError` del protocolo es verdadero con `REJECTED` y `ERROR`. Las rutas son relativas al workspace. Documentado en `protocols/COMMANDS.md`, sección 2, y comprobado por 48 casos que ejecutan las dos implementaciones.
 - **`McpServer.registerTool` (M7)** en lugar de los manejadores de bajo nivel. Los esquemas se validan en el SDK: un tipo equivocado, un campo obligatorio ausente o un valor fuera del enum los rechaza el SDK (`isError`, texto del SDK, sin `code`); `znve_skill.py` devuelve `BAD_ARGUMENT` en esos casos. `zod` pasa a declararse como dependencia directa (el SDK ya lo exige como dependencia par; no añade paquetes).

@@ -1,5 +1,5 @@
 # SPECIFICATION.md: Zero-Noise Vibe Engineering (ZNVE)
-**Norma Técnica Universal y Gobernanza Agéntica v2.3.0**
+**Norma Técnica Universal y Gobernanza Agéntica v2.4.0**
 *Status: Standard | Classification: Spec-Driven Agentic Software Architecture*
 
 ---
@@ -188,7 +188,7 @@ Ninguna herramienta lee ni escribe fuera de `ZNVE_WORKSPACE`, tampoco a través 
 La versión, los axiomas, los guardrails, los escenarios, los comandos, la Capa Camaleónica y las herramientas MCP se declaran una sola vez en `znve-auto/master_spec.json`. El compilador `znve-auto/builder.py` (biblioteca estándar de Python) genera a partir de ella las directivas de Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter y Antigravity, los manuales de comandos y los bloques gestionados de esta especificación, el README y la página web.
 
 ### 9.2 Conformidad
-Una directiva o herramienta es conforme con ZNVE v2.3.0 si:
+Una directiva o herramienta es conforme con ZNVE v2.4.0 si:
 1. Expone los 10 comandos con los encabezados de salida definidos en `protocols/COMMANDS.md`.
 2. Aplica los 9 guardrails de la sección 2.6 y la Capa Camaleónica del stack detectado.
 3. Respeta el criterio de parada de la sección 3.2 y el formato por defecto de la sección 7.

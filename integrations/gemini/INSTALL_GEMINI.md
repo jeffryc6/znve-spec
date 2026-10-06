@@ -1,6 +1,6 @@
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
-# ZNVE v2.3.0: skill para Gemini
+# ZNVE v2.4.0: skill para Gemini
 
 La skill sigue el formato abierto Agent Skills: una carpeta con `SKILL.md` en la raíz (frontmatter `name` y `description`) y recursos opcionales. La misma carpeta sirve para la app de Gemini (web y Mac) y para Gemini CLI.
 
@@ -79,7 +79,7 @@ Dentro de la sesión, `/skills list` debe mostrar `znve` como activa. Para pausa
 `znve-help`, `znve help` y `/znve-help` (en la app) devuelven el catálogo completo:
 
 ```text
-🛠️ CATÁLOGO DE COMANDOS ZNVE v2.3.0:
+🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.0:
 • /znve-help         : Manual operativo e índice de comandos.
 • /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
 • /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.
