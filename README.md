@@ -120,6 +120,7 @@ Full manual with output formats, MCP tools and per-assistant setup / Manual comp
 | **Claude Code** | Copy / Copia [`integrations/claude/skills/znve/`](integrations/claude/skills/znve/) to `~/.claude/skills/` |
 | **Claude Projects** | Paste / Pega [`project-instructions.md`](integrations/claude/project-instructions.md) in *Project Instructions* |
 | **Gemini (app & CLI)** | Upload / Sube [`gemini/skills/znve/`](integrations/gemini/skills/znve/) in *Settings → Skills* · CLI: `gemini skills install` ([`INSTALL_GEMINI.md`](integrations/gemini/INSTALL_GEMINI.md)) |
+| **Grok (desktop)** | Copy / Copia [`grok/skills/znve/`](integrations/grok/skills/znve/) to / a `~/.grok/skills/znve/` and enable it / y actívala |
 | **GitHub Copilot** | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) (already in place / ya incluido) |
 | **Cursor / Windsurf** | Copy / Copia [`cursorrules.md`](integrations/cursor/cursorrules.md) as / como `.cursorrules` |
 | **DeepSeek** | [`directive.md`](integrations/deepseek/directive.md) as the `system` message / como mensaje `system` |
@@ -164,6 +165,7 @@ znve-spec/
 ├── integrations/                      <-- One folder per assistant (index: integrations/README.md)
 │   ├── claude/                        <-- Skill + znve.zip, Claude Projects / CLAUDE.md (generated)
 │   ├── gemini/                        <-- Gemini app & Gemini CLI skill (generated)
+│   ├── grok/                          <-- Grok desktop skill, flat frontmatter (generated)
 │   ├── antigravity/                   <-- Antigravity skill, SDK module & installers
 │   ├── cursor/cursorrules.md          <-- Cursor / Windsurf rules (generated)
 │   ├── deepseek/                      <-- directive.md (generated) & harness/ (DeepSeek Harness)

@@ -390,11 +390,18 @@ ollama run znve-agent
 - Invocación: `znve-contract …` sin barra en Gemini CLI (la CLI reserva `/`); en la app también vale `/znve-contract …`.
 - Guía completa: `integrations/gemini/INSTALL_GEMINI.md`.
 
-### 7. OpenRouter
+### 7. Grok (app de escritorio)
+
+- Copia la carpeta `integrations/grok/skills/znve/` a `~/.grok/skills/znve/` (en Windows, `%USERPROFILE%\.grok\skills\znve\`), o crea la skill desde la app pegando `SKILL.md`.
+- Actívala en el editor de skills de Grok: desactivada no aparece en el selector de `/`.
+- El frontmatter usa solo pares `clave: valor` de una línea, como exige el validador de Grok.
+- Invocación: `/znve-contract …`, `/znve contract …` o `znve-contract …`.
+
+### 8. OpenRouter
 
 - Usa `integrations/openrouter/system-prompt.md` como prompt de sistema y `response-schema.json` como `response_format`.
 
-### 8. Antigravity y otros clientes MCP (Claude Desktop, Cursor, Windsurf)
+### 9. Antigravity y otros clientes MCP (Claude Desktop, Cursor, Windsurf)
 
 - Antigravity: el instalador compila el servidor, verifica sus herramientas y registra `znve-engine`:
 
@@ -487,4 +494,5 @@ Cada directiva lleva solo su perfil; esta tabla los reúne todos. Solo describen
 | **Ollama (modelos locales)** | `SYSTEM` del Modelfile | cambiar el `SYSTEM`, el modelo o `num_ctx` (recarga el modelo); alternar modelos que lo expulsan de memoria | `ollama run` nuevo al cerrar cada fase | un modelo por fase y uno por sesión | `prompt_eval_count` |
 | **OpenRouter** | prompt de sistema | cambiar de modelo, de nivel de razonamiento o de esquema de salida (`response-schema.json`); saltar entre proveedores, cada uno con su caché | nuevo arreglo de mensajes al cerrar cada fase | modelo y nivel de razonamiento fijos durante la sesión | `usage.prompt_tokens_details.cached_tokens` |
 | **Cursor y Windsurf** | `.cursorrules` | editar las reglas con el chat abierto; cambiar de modelo | chat nuevo al cerrar cada fase | selector de modelo al abrir el chat | no visible en el cliente |
+| **Grok (app de escritorio)** | skill `znve` (en `~/.grok/skills/znve/`) | editar la skill con el chat abierto; activar o desactivar skills; cambiar de modelo | chat nuevo al cerrar cada fase | elige el modelo al abrir el chat y no lo cambies dentro de él | no visible en el cliente |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | editar las instrucciones con el chat abierto; cambiar de modelo | chat nuevo al cerrar cada fase | selector de modelo al abrir el chat | no visible en el cliente |

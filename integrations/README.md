@@ -8,6 +8,7 @@ Una carpeta por asistente. Las directivas, skills y guías se generan desde `znv
 |---|---|---|
 | [`claude/`](claude/) | Claude (claude.ai, Claude Code y Claude Projects) | `skills/znve/`, `skills/znve.zip` o `project-instructions.md` |
 | [`gemini/`](gemini/) | Gemini (app y Gemini CLI) | `skills/znve/` y `INSTALL_GEMINI.md` |
+| [`grok/`](grok/) | Grok (app de escritorio) | `skills/znve/` (frontmatter plano, como exige Grok) |
 | [`antigravity/`](antigravity/) | Google Antigravity (IDE, CLI y SDK) | `SKILL.md`, `INSTALL_ANTIGRAVITY.md` e instaladores |
 | [`cursor/`](cursor/) | Cursor y Windsurf | `cursorrules.md` |
 | [`deepseek/`](deepseek/) | DeepSeek (web, API y DeepSeek Harness) | `directive.md` y `harness/` |
@@ -58,11 +59,18 @@ ollama run znve-agent
 - Invocación: `znve-contract …` sin barra en Gemini CLI (la CLI reserva `/`); en la app también vale `/znve-contract …`.
 - Guía completa: `integrations/gemini/INSTALL_GEMINI.md`.
 
-### 7. OpenRouter
+### 7. Grok (app de escritorio)
+
+- Copia la carpeta `integrations/grok/skills/znve/` a `~/.grok/skills/znve/` (en Windows, `%USERPROFILE%\.grok\skills\znve\`), o crea la skill desde la app pegando `SKILL.md`.
+- Actívala en el editor de skills de Grok: desactivada no aparece en el selector de `/`.
+- El frontmatter usa solo pares `clave: valor` de una línea, como exige el validador de Grok.
+- Invocación: `/znve-contract …`, `/znve contract …` o `znve-contract …`.
+
+### 8. OpenRouter
 
 - Usa `integrations/openrouter/system-prompt.md` como prompt de sistema y `response-schema.json` como `response_format`.
 
-### 8. Antigravity y otros clientes MCP (Claude Desktop, Cursor, Windsurf)
+### 9. Antigravity y otros clientes MCP (Claude Desktop, Cursor, Windsurf)
 
 - Antigravity: el instalador compila el servidor, verifica sus herramientas y registra `znve-engine`:
 

@@ -2,6 +2,11 @@
 
 Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de migración. El formato sigue [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/) y las versiones, [SemVer](https://semver.org/lang/es/) (ver `SPECIFICATION.md` §10).
 
+## [Sin publicar]
+
+### Añadido
+- **Grok (app de escritorio):** skill `znve` generada en `integrations/grok/skills/znve/`, con frontmatter plano (una línea `clave: valor` por campo), que es lo que admite el validador de skills de Grok; la de Gemini lleva `metadata` anidado y Grok la rechaza. Perfil `grok` en la Capa de Agente y test que exige el frontmatter plano.
+
 ## [2.4.0] — 2026-10-05
 
 > **Antes**, ZNVE le decía a la IA cómo debía ser el código que entrega.

@@ -49,6 +49,9 @@ SKILL_FILES = (
     "integrations/gemini/skills/znve/SKILL.md",
 )
 ANTIGRAVITY_DIR = REPO / "integrations" / "antigravity"
+# Grok solo admite frontmatter plano: una línea `clave: valor` por campo, sin YAML anidado.
+GROK_SKILL = "integrations/grok/skills/znve/SKILL.md"
+GROK_KEYS = {"name", "description", "license", "version", "author", "source"}
 # field-tests conserva datos archivados (directivas y transcripciones de versiones anteriores): no se actualizan.
 HAND_MAINTAINED_SKIP = {".git", "node_modules", "dist", "znve-auto", "field-tests"}
 # Presupuestos en bytes (RFC 0002 §3, medidos): un guardrail es una línea del prefijo de cada petición.
@@ -320,6 +323,24 @@ class ArtifactTests(unittest.TestCase):
                 self.assertLessEqual(len(keys["name"]), 64)
                 self.assertLessEqual(len(keys["description"]), 1024)
                 self.assertNotRegex(keys["description"], r"[<>]")
+
+    def test_grok_skill_has_flat_frontmatter(self):
+        """La skill de Grok pasa su validador: frontmatter de una línea por clave, sin anidar, y enlaces existentes."""
+        text = self.rendered[GROK_SKILL]
+        match = re.match(r"^---\n(.*?)\n---\n", text, re.S)
+        self.assertTrue(match, "falta el frontmatter")
+        keys = []
+        for line in match.group(1).splitlines():
+            self.assertRegex(line, r"^[a-z][a-z0-9_-]*: \S", f"línea no plana en el frontmatter: {line!r}")
+            keys.append(line.split(":", 1)[0])
+        self.assertLessEqual(set(keys), GROK_KEYS)
+        self.assertEqual(len(keys), len(set(keys)), "claves repetidas")
+        fm = frontmatter(text)
+        self.assertRegex(fm["name"], r"^[a-z0-9]+(-[a-z0-9]+)*$")
+        self.assertLessEqual(len(fm["description"]), 1024)
+        self.assertEqual(fm["version"], self.spec["version"])
+        for link in re.findall(r"\]\((references/[^)]+)\)", text):
+            self.assertIn(f"integrations/grok/skills/znve/{link}", self.rendered)
 
     def test_skill_references_exist(self):
         """Cada enlace relativo de una skill apunta a un archivo generado dentro de su carpeta."""
