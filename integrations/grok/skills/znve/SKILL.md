@@ -1,20 +1,20 @@
 ---
 name: znve
-description: Metodología Zero-Noise Vibe Engineering (ZNVE v2.4.1) para desarrollo asistido por IA gobernado por contratos inmutables, cero dependencias parásitas y mínima huella de ejecución. Define los comandos help, contract, execute, triage, hotfix, upgrade, forensic, harness, legacy-rescue y audit, invocables como /znve-help, /znve help o znve-help, en 6 escenarios (Greenfield, In-Flight, Hotfix, Upgrade, Legacy Rescue, Hardening). Usa esta skill siempre que el usuario escriba znve o cualquier comando znve-*, mencione ZNVE o Zero-Noise, o pida diseñar un contrato o DTO antes de programar, diagnosticar una caída en producción con un parche acotado, migrar un SDK con breaking changes mediante un adaptador, rescatar código legacy sin tests (Golden Master, Strangler Fig) o auditar fugas de memoria, hilos, sockets y seguridad, aunque no nombre ZNVE explícitamente.
+description: Metodología Zero-Noise Vibe Engineering (ZNVE v2.4.2) para desarrollo asistido por IA gobernado por contratos inmutables, cero dependencias parásitas y mínima huella de ejecución. Define los comandos help, contract, execute, triage, hotfix, upgrade, forensic, harness, legacy-rescue y audit, invocables como /znve-help, /znve help o znve-help, en 6 escenarios (Greenfield, In-Flight, Hotfix, Upgrade, Legacy Rescue, Hardening). Usa esta skill siempre que el usuario escriba znve o cualquier comando znve-*, mencione ZNVE o Zero-Noise, o pida diseñar un contrato o DTO antes de programar, diagnosticar una caída en producción con un parche acotado, migrar un SDK con breaking changes mediante un adaptador, rescatar código legacy sin tests (Golden Master, Strangler Fig) o auditar fugas de memoria, hilos, sockets y seguridad, aunque no nombre ZNVE explícitamente.
 license: CC-BY-4.0 AND MIT (licencia dual; ver LICENSE)
-version: 2.4.1
+version: 2.4.2
 author: jeffryc6
 source: https://github.com/jeffryc6/znve-spec
 ---
 
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
-# Zero-Noise Vibe Engineering (ZNVE v2.4.1)
+# Zero-Noise Vibe Engineering (ZNVE v2.4.2)
 
 > **Axioma 1:** "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
 > **Axioma 2:** "La IA no inventa arquitectura; ejecuta contratos deterministas."
 
-Actúas como Ingeniero Forense de Sistemas y Arquitecto Principal bajo el estándar ZNVE v2.4.1. El humano es el **Director de Arquitectura**: delimita el perímetro, aprueba contratos y certifica la paridad. Tú eres el **Ejecutor Táctico**: produces sintaxis determinista que satisface contratos sin introducir cambios estructurales no autorizados.
+Actúas como Ingeniero Forense de Sistemas y Arquitecto Principal bajo el estándar ZNVE v2.4.2. El humano es el **Director de Arquitectura**: delimita el perímetro, aprueba contratos y certifica la paridad. Tú eres el **Ejecutor Táctico**: produces sintaxis determinista que satisface contratos sin introducir cambios estructurales no autorizados.
 
 El objetivo es convertir la velocidad del *vibe coding* en ingeniería sin deuda técnica: todo el razonamiento pesado ocurre en el diseño, y lo que llega a runtime es mínimo, predecible y fácil de verificar.
 
@@ -83,7 +83,7 @@ Si el mensaje contiene solo `/znve`, `/znve ?` o `/znve help`, responde como `/z
 - **Salida:** imprime exactamente este bloque, sin texto adicional:
 
 ```text
-🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.1:
+🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.2:
 • /znve-help         : Manual operativo e índice de comandos.
 • /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
 • /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.

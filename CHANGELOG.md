@@ -4,6 +4,27 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 
 ## [Sin publicar]
 
+## [2.4.2] — 2026-10-23
+
+> Parche (SemVer §10: sin comandos, axiomas ni pilares nuevos): corrige detectores que no cumplían lo que la especificación promete, con la medición que lo motivó. Notas de la versión y evidencia de verificación en [`releases/2.4.2/`](releases/2.4.2/README.md).
+
+### Cambiado
+- **Versión 2.4.2** en `master_spec.json` (fuente única), en los 20 artefactos regenerados y en las cabeceras de README, SPECIFICATION, GLOSSARY, `index.html`, los protocolos y la integración de DeepSeek Harness.
+- **Cifras al día:** README y `znve-auto/README.md` citaban 48 casos de conformidad comunes (eran 50 antes de este parche y son 63 ahora); `index.html` citaba 89 pruebas de paridad (son 91).
+
+### Corregido
+- **`znve_validate_contract` (Pilar 4):** ya rechaza las formas de `SELECT *` que se escapaban: `SELECT DISTINCT *`, `SELECT ALL *`, `SELECT TOP n *`, `alias.*`, un `*` tras otras columnas (`SELECT a.id, b.*`) y comentarios intercalados (`SELECT /* x */ *`). Mantiene aprobados `COUNT(*)`, `a*b` y `find({}, { campo: 1 })`. `.find({})` se detecta sin distinguir mayúsculas, como ya prometía el manual.
+- **`znve_audit_resources` y `znve_forensic_scan`:** el servidor MCP y la skill de Python tomaban `Thread.sleep` como busy-waiting solo con esa grafía exacta; `Thread.Sleep` (C#) y `time.sleep` (Python) daban `CLEAN` en la auditoría, mientras la exploración forense sí contaba `time.sleep` como llamada bloqueante. Ahora las dos herramientas usan la misma definición, sin distinguir mayúsculas, y la auditoría también marca el bucle vacío `for (;;) {}`. `Task.Delay` sigue sin marcarse (no bloquea).
+- La descripción de las dos herramientas (`master_spec.json`, regenerada en `COMMANDS.md` y en el servidor) lista ahora exactamente lo que detectan.
+
+### Añadido
+- **`integrations/mcp-server/test/security-gaps.test.mjs`** (66 tests, ahora parte de `npm test`): contención de rutas, enlaces que escapan del workspace o de `tests/`, directorios protegidos (`.git`, `node_modules`) sin distinguir mayúsculas, lista de secretos, tope de 1 MiB, rangos de `znve_forensic_scan`, `disposal_pattern` y `except` con líneas en blanco. Nació de una medición con mutation testing (Stryker) sobre el servidor: la suite anterior detectaba el 64,8 % de las mutaciones (83,2 % si se excluyen mensajes y expresiones regulares) y dejaba sin cubrir justo estas condiciones. Con los tests nuevos, en su alcance (233 mutaciones comparables) la suite pasa del 70,4 % al 78,1 %. Las 51 restantes parecen equivalentes, inalcanzables o dependientes de plataforma; no se demostró su equivalencia una a una.
+- 13 casos de conformidad compartidos (`znve-auto/tool_contract_cases.json`) que ejecutan el servidor y la skill de Python: variantes de `SELECT *`, falsos positivos evitados, `Thread.Sleep`, `time.sleep`, `for (;;)`, `Task.Delay` y una exploración forense con grafías mixtas.
+
+### Límites conocidos
+- La medición con Stryker cubre solo `znve-mcp-server.ts` (dos tercios del archivo, una ejecución). La skill de Python no se ha medido con mutation testing.
+- Parte de las pruebas con enlaces depende de la plataforma: la condición del nombre de archivo del harness solo se mata de forma completa en POSIX.
+
 ## [2.4.1] — 2026-10-23
 
 > Parche (SemVer §10: sin comandos, axiomas ni pilares nuevos): endurece un guardrail existente, añade Grok y corrige textos desactualizados.

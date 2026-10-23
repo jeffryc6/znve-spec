@@ -1,4 +1,4 @@
-# Manual de comandos y herramientas ZNVE v2.4.1
+# Manual de comandos y herramientas ZNVE v2.4.2
 
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
@@ -50,7 +50,7 @@ Sin comando, toda respuesta técnica sigue los 4 bloques: [1] Blueprint y Contra
 - **Salida:** el catálogo de comandos:
 
 ```text
-🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.1:
+🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.2:
 • /znve-help         : Manual operativo e índice de comandos.
 • /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
 • /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.
@@ -279,7 +279,7 @@ El servidor `integrations/mcp-server/znve-mcp-server.ts` expone estas herramient
 - **Parámetros:**
   - `contract_code` (string, obligatorio): Código de la interfaz, struct o DTO propuesto.
   - `banned_libraries` (string[], opcional): Librerías vetadas por el Anti-Bloat Fence.
-- **Comportamiento:** Rechaza el contrato si detecta `SELECT *` o `.find({})` (sin distinguir mayúsculas ni espacios) o la importación de una librería vetada (`import`, `require`, `from … import` o `using`). Sin `banned_libraries`, veta `lodash`, `axios`, `moment`, `requests` y `jquery`.
+- **Comportamiento:** Rechaza el contrato si detecta `SELECT *` (también con `DISTINCT`, `ALL`, `TOP n`, `alias.*`, comentarios intercalados o `*` tras otras columnas) o `.find({})` (sin distinguir mayúsculas ni espacios) o la importación de una librería vetada (`import`, `require`, `from … import` o `using`). Sin `banned_libraries`, veta `lodash`, `axios`, `moment`, `requests` y `jquery`.
 
 ### 4. `znve_scaffold_harness`
 
@@ -307,7 +307,7 @@ El servidor `integrations/mcp-server/znve-mcp-server.ts` expone estas herramient
 - **Qué hace:** Analiza un fragmento de código en busca de antipatrones de hilos, memoria y CPU.
 - **Parámetros:**
   - `code_snippet` (string, obligatorio): Fragmento de código a evaluar.
-- **Comportamiento:** Marca `.Result`, `.Wait()` y `.GetAwaiter().GetResult()` (riesgo `HIGH`), `WakeLock.acquire()` (`HIGH`) y busy-waiting sin backoff (`MEDIUM`). `risk_level` es el mayor riesgo encontrado, o `CLEAN`.
+- **Comportamiento:** Marca `.Result`, `.Wait()` y `.GetAwaiter().GetResult()` (riesgo `HIGH`), `WakeLock.acquire()` (`HIGH`) y busy-waiting sin backoff (`MEDIUM`): `Thread.sleep`/`Thread.Sleep` y `time.sleep` (sin distinguir mayúsculas), bucles vacíos (`while (true) {}`, `for (;;) {}`, `while True: pass`) y `setTimeout` junto a `while`. `risk_level` es el mayor riesgo encontrado, o `CLEAN`.
 
 ### Contrato de respuesta (servidor MCP 2.0.0 y `znve_skill.py`)
 

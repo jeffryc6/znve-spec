@@ -22,9 +22,9 @@ from typing import Dict, Any, List, Optional
 
 # >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano)
 ZNVE_NAME = 'znve'
-ZNVE_VERSION = '2.4.1'
+ZNVE_VERSION = '2.4.2'
 ZNVE_SYSTEM_INSTRUCTION = """
-Eres el Agente Principal de Arquitectura, Ingeniería Forense y Ejecución Quirúrgica bajo el estándar ZNVE v2.4.1.
+Eres el Agente Principal de Arquitectura, Ingeniería Forense y Ejecución Quirúrgica bajo el estándar ZNVE v2.4.2.
 Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
 Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
 Tu objetivo es garantizar contratos deterministas inmutables, cero dependencias parásitas, mínima huella de ejecución (CPU/RAM/I/O) y cero ruido operativo.
@@ -71,7 +71,7 @@ BLOQUE 3: TAREAS ATÓMICAS DE IMPLEMENTACIÓN (`TARGET_FILE` único, acción qui
 BLOQUE 4: VERIFICACIÓN ATÓMICA (comando de terminal determinista o prueba reproducible)
 """.strip()
 ZNVE_HELP_CATALOG = """
-🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.1:
+🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.2:
 • /znve-help         : Manual operativo e índice de comandos.
 • /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
 • /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.
@@ -265,10 +265,24 @@ _SILENT_CATCH = (
     re.compile(r"\.catch\(\s*(?:\(\s*\w*\s*\)|\w+)\s*=>\s*\{(?:\s|//[^\n]*|/\*[\s\S]*?\*/)*\}\s*\)"),
 )
 _EXCEPT = re.compile(r"^([ \t]*)except\b[^:]*:(.*)$")
-_BLIND_QUERY = (re.compile(r"\bselect\s+\*", re.IGNORECASE), re.compile(r"\.find\(\s*\{\s*\}\s*\)"))
+# SELECT con proyección ciega: `*` o `alias.*` (también tras DISTINCT/ALL/TOP n, con comentarios intercalados
+# o detrás de otras columnas) y find({}) sin proyección. Mismos patrones que znve-mcp-server.ts.
+_SQL_GAP = r"(?:\s|/\*[\s\S]*?\*/)"
+_BLIND_QUERY = (
+    re.compile(
+        rf"\bselect{_SQL_GAP}+(?:(?:distinct|all){_SQL_GAP}+)?(?:top{_SQL_GAP}*\(?{_SQL_GAP}*\d+{_SQL_GAP}*\)?{_SQL_GAP}+(?:percent{_SQL_GAP}+)?)?(?:\w+\.)?\*"
+        rf"|\bselect\b[^;()]*?,{_SQL_GAP}*(?:\w+\.)?\*{_SQL_GAP}*(?:,|\bfrom\b|;|$)",
+        re.IGNORECASE,
+    ),
+    re.compile(r"\.find\(\s*\{\s*\}\s*\)", re.IGNORECASE),
+)
 _BLOCKING_TASK = re.compile(r"\.Result\b(?!\s*\()|\.Wait\s*\(|\.GetAwaiter\(\)\s*\.GetResult\(\)")
 _WAKELOCK = re.compile(r"wakelock\w*\.acquire\s*\(", re.IGNORECASE)
-_BUSY_WAIT = re.compile(r"\bThread\.sleep\b|while\s*\(\s*true\s*\)\s*\{\s*\}|while\s+True\s*:\s*pass\b")
+_SLEEP_CALL = re.compile(r"\b(?:Thread|time)\.sleep\b", re.IGNORECASE)
+_BUSY_WAIT = re.compile(
+    r"\b(?:Thread|time)\.sleep\b|while\s*\(\s*true\s*\)\s*\{\s*\}|for\s*\(\s*;\s*;\s*\)\s*\{\s*\}|while\s+True\s*:\s*pass\b",
+    re.IGNORECASE,
+)
 _DB_MUTATION = re.compile(
     r"\b(?:INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|MERGE\s+INTO|DROP\s+TABLE|TRUNCATE\s+TABLE)\b"
     r"|\.(?:insert|update|delete|replace)(?:One|Many)\s*\(|\.bulkWrite\s*\(",
@@ -404,7 +418,7 @@ def znve_forensic_scan(file_path: str, start_line: Optional[int] = None, end_lin
         },
         "red_zones": {
             "empty_catch_blocks": _silent_error_blocks(content),
-            "thread_blocking_calls": len(_BLOCKING_TASK.findall(content)) + len(re.findall(r"\b(?:Thread|time)\.sleep\b", content)),
+            "thread_blocking_calls": len(_BLOCKING_TASK.findall(content)) + len(_SLEEP_CALL.findall(content)),
         },
         "notice": UNTRUSTED_NOTICE,
         "content": f"<<<ZNVE_UNTRUSTED_DATA id={marker_id}>>>\n{content}\n<<<END_ZNVE_UNTRUSTED_DATA id={marker_id}>>>",

@@ -3,7 +3,7 @@
  * ==============================================================================
  * ZNVE MCP SERVER: Spec-Driven Model Context Protocol Server for Antigravity
  * >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano)
- * Framework: Zero-Noise Vibe Engineering (ZNVE) v2.4.1
+ * Framework: Zero-Noise Vibe Engineering (ZNVE) v2.4.2
  * Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
  * Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
  * <<< znve:generated
@@ -41,7 +41,7 @@ const HELP_TOPIC_HEADINGS: Record<string, string> = {
 
 // >>> znve:generated:fallback (znve-auto/builder.py desde master_spec.json; no editar a mano)
 const HELP_FALLBACK =
-  "[ZNVE_HELP_FALLBACK] protocols/COMMANDS.md no disponible. Comandos ZNVE v2.4.1: /znve-help, /znve-contract, /znve-execute, /znve-triage, /znve-hotfix, /znve-upgrade, /znve-forensic, /znve-harness, /znve-legacy-rescue, /znve-audit.";
+  "[ZNVE_HELP_FALLBACK] protocols/COMMANDS.md no disponible. Comandos ZNVE v2.4.2: /znve-help, /znve-contract, /znve-execute, /znve-triage, /znve-hotfix, /znve-upgrade, /znve-forensic, /znve-harness, /znve-legacy-rescue, /znve-audit.";
 // <<< znve:generated:fallback
 
 // >>> znve:generated:tools (znve-auto/builder.py desde master_spec.json; no editar a mano)
@@ -61,7 +61,7 @@ const TOOL_DOCS: Record<string, { description: string; params: Record<string, st
     }
   },
   "znve_validate_contract": {
-    "description": "Valida que un DTO o interfaz cumpla el Anti-Bloat Fence y la proyección de datos. Rechaza el contrato si detecta `SELECT *` o `.find({})` (sin distinguir mayúsculas ni espacios) o la importación de una librería vetada (`import`, `require`, `from … import` o `using`). Sin `banned_libraries`, veta `lodash`, `axios`, `moment`, `requests` y `jquery`.",
+    "description": "Valida que un DTO o interfaz cumpla el Anti-Bloat Fence y la proyección de datos. Rechaza el contrato si detecta `SELECT *` (también con `DISTINCT`, `ALL`, `TOP n`, `alias.*`, comentarios intercalados o `*` tras otras columnas) o `.find({})` (sin distinguir mayúsculas ni espacios) o la importación de una librería vetada (`import`, `require`, `from … import` o `using`). Sin `banned_libraries`, veta `lodash`, `axios`, `moment`, `requests` y `jquery`.",
     "params": {
       "contract_code": "Código de la interfaz, struct o DTO propuesto.",
       "banned_libraries": "Librerías vetadas por el Anti-Bloat Fence."
@@ -84,7 +84,7 @@ const TOOL_DOCS: Record<string, { description: string; params: Record<string, st
     }
   },
   "znve_audit_resources": {
-    "description": "Analiza un fragmento de código en busca de antipatrones de hilos, memoria y CPU. Marca `.Result`, `.Wait()` y `.GetAwaiter().GetResult()` (riesgo `HIGH`), `WakeLock.acquire()` (`HIGH`) y busy-waiting sin backoff (`MEDIUM`). `risk_level` es el mayor riesgo encontrado, o `CLEAN`.",
+    "description": "Analiza un fragmento de código en busca de antipatrones de hilos, memoria y CPU. Marca `.Result`, `.Wait()` y `.GetAwaiter().GetResult()` (riesgo `HIGH`), `WakeLock.acquire()` (`HIGH`) y busy-waiting sin backoff (`MEDIUM`): `Thread.sleep`/`Thread.Sleep` y `time.sleep` (sin distinguir mayúsculas), bucles vacíos (`while (true) {}`, `for (;;) {}`, `while True: pass`) y `setTimeout` junto a `while`. `risk_level` es el mayor riesgo encontrado, o `CLEAN`.",
     "params": {
       "code_snippet": "Fragmento de código a evaluar."
     }
@@ -93,7 +93,7 @@ const TOOL_DOCS: Record<string, { description: string; params: Record<string, st
 // <<< znve:generated:tools
 
 // >>> znve:generated:contract (znve-auto/builder.py desde master_spec.json; no editar a mano)
-const ZNVE_VERSION = "2.4.1";
+const ZNVE_VERSION = "2.4.2";
 const ERROR_STATUS: Record<string, "REJECTED" | "ERROR"> = { BAD_ARGUMENT: "REJECTED", BAD_RANGE: "REJECTED", OUTSIDE_WORKSPACE: "REJECTED", NOT_FOUND: "ERROR", NOT_A_FILE: "REJECTED", TOO_LARGE: "REJECTED", BINARY_FILE: "REJECTED", SECRET_DENIED: "REJECTED", PROTECTED_DIR: "REJECTED", NOT_HARNESS_DIR: "REJECTED", ALREADY_EXISTS: "REJECTED", SILENT_CATCH: "REJECTED", UNDISPOSED_RESOURCE: "REJECTED", CONTRACT_VIOLATION: "REJECTED", IO_ERROR: "ERROR" };
 const DEFAULT_BANNED_LIBRARIES: string[] = ["lodash", "axios", "moment", "requests", "jquery"];
 // <<< znve:generated:contract
@@ -305,7 +305,17 @@ function importsLibrary(code: string, lib: string): boolean {
   ].some((re) => re.test(code));
 }
 
-const BLIND_QUERY = [/\bselect\s+\*/i, /\.find\(\s*\{\s*\}\s*\)/];
+// SELECT con proyección ciega: `*` o `alias.*` (también tras DISTINCT/ALL/TOP n, con comentarios intercalados
+// o detrás de otras columnas) y find({}) sin proyección. Mismos patrones que znve_skill.py.
+const SQL_GAP = String.raw`(?:\s|/\*[\s\S]*?\*/)`;
+const BLIND_QUERY = [
+  new RegExp(
+    String.raw`\bselect${SQL_GAP}+(?:(?:distinct|all)${SQL_GAP}+)?(?:top${SQL_GAP}*\(?${SQL_GAP}*\d+${SQL_GAP}*\)?${SQL_GAP}+(?:percent${SQL_GAP}+)?)?(?:\w+\.)?\*` +
+      String.raw`|\bselect\b[^;()]*?,${SQL_GAP}*(?:\w+\.)?\*${SQL_GAP}*(?:,|\bfrom\b|;|$)`,
+    "i"
+  ),
+  /\.find\(\s*\{\s*\}\s*\)/i,
+];
 
 // Efectos secundarios y zonas rojas de znve_forensic_scan (mismos patrones que znve_skill.py).
 const FS_IO = /\b(open|readFile|writeFile|fs\.|std::fs|Path\.)/;
@@ -313,7 +323,9 @@ const NETWORK = /\b(fetch|http|socket|requests|urllib|curl)/i;
 const DB_MUTATION =
   /\b(?:INSERT\s+INTO|UPDATE\s+\w+\s+SET|DELETE\s+FROM|MERGE\s+INTO|DROP\s+TABLE|TRUNCATE\s+TABLE)\b|\.(?:insert|update|delete|replace)(?:One|Many)\s*\(|\.bulkWrite\s*\(/i;
 const BLOCKING_TASK = /\.Result\b(?!\s*\()|\.Wait\s*\(|\.GetAwaiter\(\)\s*\.GetResult\(\)/g;
-const SLEEP_CALL = /\b(?:Thread|time)\.sleep\b/g;
+const SLEEP_CALL = /\b(?:Thread|time)\.sleep\b/gi;
+// Busy-waiting: retardo bloqueante o bucle vacío. Sin bandera `g`, porque se usa con .test().
+const BUSY_WAIT = /\b(?:Thread|time)\.sleep\b|while\s*\(\s*true\s*\)\s*\{\s*\}|for\s*\(\s*;\s*;\s*\)\s*\{\s*\}|while\s+True\s*:\s*pass\b/i;
 // Recursos que exigen un patrón de desecho explícito en znve_surgical_write.
 const RESOURCE_HANDLE = /\b(open|socket|connect|createReadStream|HttpClient)\b/;
 
@@ -331,9 +343,7 @@ const AUDIT_RULES: { risk: Risk; test: (code: string) => boolean; finding: strin
   },
   {
     risk: "MEDIUM",
-    test: (code) =>
-      /\bThread\.sleep\b|while\s*\(\s*true\s*\)\s*\{\s*\}|while\s+True\s*:\s*pass\b/.test(code) ||
-      (/\bsetTimeout\b/.test(code) && /\bwhile\b/.test(code)),
+    test: (code) => BUSY_WAIT.test(code) || (/\bsetTimeout\b/.test(code) && /\bwhile\b/.test(code)),
     finding: "Riesgo de bloqueo o busy-waiting sin jitter ni backoff.",
   },
 ];

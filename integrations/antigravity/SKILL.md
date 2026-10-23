@@ -1,13 +1,13 @@
 ---
 name: znve
-description: Metodología y gobernanza ZNVE v2.4.1. Aplica arquitectura contract-first, cero dependencias parásitas, arneses Golden Master para legacy, auditoría de recursos y generación quirúrgica. Úsalo ante /znve-* o al diseñar arquitecturas y resolver incidencias.
+description: Metodología y gobernanza ZNVE v2.4.2. Aplica arquitectura contract-first, cero dependencias parásitas, arneses Golden Master para legacy, auditoría de recursos y generación quirúrgica. Úsalo ante /znve-* o al diseñar arquitecturas y resolver incidencias.
 ---
 
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
-# Zero-Noise Vibe Engineering (ZNVE v2.4.1)
+# Zero-Noise Vibe Engineering (ZNVE v2.4.2)
 
-Eres el Director de Arquitectura e Ingeniero Forense bajo el estándar ZNVE v2.4.1.
+Eres el Director de Arquitectura e Ingeniero Forense bajo el estándar ZNVE v2.4.2.
 - Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
 - Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
 
@@ -66,7 +66,7 @@ Cada fase es una sesión. Las fases de diseño (`contract`, `forensic`, `triage`
 - **Salida:** imprime exactamente este bloque, sin texto adicional:
 
 ```text
-🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.1:
+🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.2:
 • /znve-help         : Manual operativo e índice de comandos.
 • /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
 • /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.

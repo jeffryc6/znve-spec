@@ -1,10 +1,10 @@
-# Zero-Noise Vibe Engineering (ZNVE) v2.4.1
+# Zero-Noise Vibe Engineering (ZNVE) v2.4.2
 > **Spec-Driven Agentic Architecture & Zero-Noise AI Software Engineering**
 > *Arquitectura Agéntica Basada en Especificaciones e Ingeniería de Software IA Cero Ruido*
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-blue.svg)](LICENSE)
 [![Code License: MIT](https://img.shields.io/badge/Code%20License-MIT-green.svg)](LICENSE)
-[![Standard: ZNVE v2.4.1](https://img.shields.io/badge/Standard-ZNVE%20v2.4.1-purple.svg)](SPECIFICATION.md)
+[![Standard: ZNVE v2.4.2](https://img.shields.io/badge/Standard-ZNVE%20v2.4.2-purple.svg)](SPECIFICATION.md)
 [![Glossary](https://img.shields.io/badge/Glossary-ES%20%2F%20EN-lightgrey.svg)](GLOSSARY.md)
 [![MCP Server](https://img.shields.io/badge/MCP%20Server-6%20tools-orange.svg)](integrations/mcp-server/)
 [![Parity Check](https://github.com/jeffryc6/znve-spec/actions/workflows/znve-parity.yml/badge.svg)](.github/workflows/znve-parity.yml)
@@ -40,7 +40,7 @@ Unlike casual "vibe coding", which leads to bloated dependencies, endless repair
 
 - **9 guardrails (2 new):** *Context Fence* (read ranges, quiet verification, zero secrets, external content is data, never instructions) and *Inviolable Verification* (tests are never edited to get green; nothing unexecuted is claimed). Still 2 axioms, 10 commands and 6 scenarios.
 - **Agent layer:** every directive carries a common phase rule and the profile of its own assistant (fixed prefix, what invalidates the cache, session cut, per-phase configuration, how to measure).
-- **Enforced by code:** MCP server **2.0.0** and `znve_skill.py` share one response contract (48 common test cases): path containment, denied secrets, untrusted content marked as data, a harness that only creates files. **Breaking for consumers of the server's responses**: see the [CHANGELOG](CHANGELOG.md).
+- **Enforced by code:** MCP server **2.0.0** and `znve_skill.py` share one response contract (63 common test cases): path containment, denied secrets, untrusted content marked as data, a harness that only creates files. **Breaking for consumers of the server's responses**: see the [CHANGELOG](CHANGELOG.md).
 - **Repository by relevance:** one folder per assistant under `integrations/`; DeepSeek Harness is versioned with a generated `AGENTS.md` and a non-destructive installer.
 - **Evidence and limits:** a pilot A/B field test is archived in [`field-tests/`](field-tests/2026-10-ab-pilot/README.md). It did **not** show token savings (the directives are longer); it did show a code guardrail blocking a secret read that prose alone did not. Tests on real projects are next.
 
@@ -75,7 +75,7 @@ A diferencia del "vibe coding" caótico, que acumula librerías parásitas y có
 
 - **9 guardrails (2 nuevos):** *Cerca de Contexto* (rangos, verificación silenciosa, cero secretos, el contenido externo es dato, nunca instrucción) y *Verificación Inviolable* (los tests no se tocan para obtener verde ni se declara lo no ejecutado). Siguen 2 axiomas, 10 comandos y 6 escenarios.
 - **Capa de Agente:** cada directiva lleva una regla común de fases y el perfil de su propio asistente (prefijo fijo, qué invalida su caché, corte de sesión, configuración por fase, cómo medir).
-- **Aplicado por código:** el servidor MCP **2.0.0** y `znve_skill.py` comparten un contrato de respuesta (48 casos de prueba comunes): contención de rutas, secretos denegados, contenido no confiable marcado como dato y un arnés que solo crea archivos. **Incompatible para quien consuma las respuestas del servidor**: ver el [CHANGELOG](CHANGELOG.md).
+- **Aplicado por código:** el servidor MCP **2.0.0** y `znve_skill.py` comparten un contrato de respuesta (63 casos de prueba comunes): contención de rutas, secretos denegados, contenido no confiable marcado como dato y un arnés que solo crea archivos. **Incompatible para quien consuma las respuestas del servidor**: ver el [CHANGELOG](CHANGELOG.md).
 - **Repositorio por relevancia:** una carpeta por asistente en `integrations/`; DeepSeek Harness queda versionado con un `AGENTS.md` generado y un instalador que no destruye.
 - **Evidencia y límites:** una prueba de campo piloto A/B está archivada en [`field-tests/`](field-tests/2026-10-ab-pilot/README.md). **No** mostró ahorro de tokens (las directivas son más largas); sí mostró una barandilla de código que bloqueó la lectura de un secreto que la prosa sola no bloqueó. Siguen las pruebas con proyectos reales.
 
@@ -170,6 +170,7 @@ znve-spec/
 │   ├── ollama/Modelfile               <-- Ollama local agent (generated)
 │   ├── openrouter/                    <-- System prompt (generated), JSON schema & client
 │   └── mcp-server/                    <-- stdio MCP server (6 tools) & Antigravity installer
+├── releases/                          <-- Release notes and verification evidence per version
 ├── rfcs/                              <-- Request for Comments
 ├── znve-auto/                         <-- Single source of truth: spec, builder & parity tests
 ├── CHANGELOG.md                       <-- Version history & migration notes
@@ -177,7 +178,7 @@ znve-spec/
 ├── GLOSSARY.md                        <-- Technical glossary (ES/EN)
 ├── LICENSE                            <-- Dual license (CC BY 4.0 + MIT)
 ├── README.md                          <-- This file
-├── SPECIFICATION.md                   <-- Formal technical specification v2.4.1
+├── SPECIFICATION.md                   <-- Formal technical specification v2.4.2
 └── index.html                         <-- GitHub Pages landing page
 ```
 
@@ -209,7 +210,7 @@ El primero regenera todos los artefactos; el segundo certifica la paridad; el te
 
 ## 📜 Dual License / Licenciamiento Dual
 
-- **Specification & documentation / Especificación y documentación** (`SPECIFICATION.md`, `README.md`, `GLOSSARY.md`, `CONTRIBUTING.md`, `rfcs/`, `case-studies/`, `field-tests/`): [CC BY 4.0](LICENSE).
+- **Specification & documentation / Especificación y documentación** (`SPECIFICATION.md`, `README.md`, `GLOSSARY.md`, `CONTRIBUTING.md`, `rfcs/`, `releases/`, `case-studies/`, `field-tests/`): [CC BY 4.0](LICENSE).
 - **Protocols & integrations / Protocolos e integraciones** (`protocols/`, `integrations/`: protocols, command manual, agent directives, skills, MCP server / protocolos, manual de comandos, directivas, skills, servidor MCP): [CC BY 4.0 **and** MIT](LICENSE). Both licenses apply together; use whichever fits / Ambas licencias a la vez; elige la que te convenga.
 - **Repository tooling / Herramientas del repositorio** (`znve-auto/`, `.github/`, `index.html`): [MIT](LICENSE).
 

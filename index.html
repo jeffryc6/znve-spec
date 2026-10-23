@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Zero-Noise Vibe Engineering (ZNVE) v2.4.1: metodología abierta para programar con IA sin dependencias parásitas, sin logs de relleno y sin deuda técnica. Open methodology for AI-assisted development without parasitic dependencies, noise or technical debt.">
+  <meta name="description" content="Zero-Noise Vibe Engineering (ZNVE) v2.4.2: metodología abierta para programar con IA sin dependencias parásitas, sin logs de relleno y sin deuda técnica. Open methodology for AI-assisted development without parasitic dependencies, noise or technical debt.">
   <title>Zero-Noise Vibe Engineering (ZNVE) | Spec-Driven Agentic Architecture</title>
   <link rel="alternate" hreflang="es" href="https://jeffryc6.github.io/znve-spec/?lang=es">
   <link rel="alternate" hreflang="en" href="https://jeffryc6.github.io/znve-spec/?lang=en">
@@ -406,7 +406,7 @@
         <p class="lead" data-l="es">ZNVE es una metodología abierta que convierte a tu asistente de IA (Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter, Antigravity o Grok) en un ejecutor disciplinado. Primero se diseña un <strong>contrato</strong>; después la IA escribe solo el código necesario, sin dependencias parásitas, sin logs de relleno y sin errores silenciados.</p>
         <p class="lead" data-l="en" lang="en">ZNVE is an open methodology that turns your AI assistant (Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter, Antigravity or Grok) into a disciplined executor. First you design a <strong>contract</strong>; then the AI writes only the code that is needed, with no parasitic dependencies, no filler logs and no swallowed errors.</p>
         <div class="badges">
-          <span class="badge"><span data-l="es">Norma v2.4.1</span><span data-l="en" lang="en">Standard v2.4.1</span></span>
+          <span class="badge"><span data-l="es">Norma v2.4.2</span><span data-l="en" lang="en">Standard v2.4.2</span></span>
           <span class="badge"><span data-l="es">10 comandos /znve-*</span><span data-l="en" lang="en">10 /znve-* commands</span></span>
           <span class="badge"><span data-l="es">8 asistentes sincronizados</span><span data-l="en" lang="en">8 assistants in sync</span></span>
           <span class="badge"><span data-l="es">Servidor MCP · 6 herramientas</span><span data-l="en" lang="en">MCP server · 6 tools</span></span>
@@ -933,8 +933,8 @@ def test_golden_master():  # ✓ must pass 100% against the intact code
           <p data-l="en" lang="en">The dashboard emitted one event per request. The contract came first (one row per JA4 fingerprint + User-Agent, capped at 200), then the code: <b>600 identical requests produced 1 event</b> instead of 600.</p>
         </div>
       </div>
-      <p class="muted" data-l="es">En el propio repositorio, la retrospectiva registró 30 hallazgos, de los que 28 ya están resueltos, entre ellos 89 pruebas automáticas y 30 artefactos generados desde una sola especificación.</p>
-      <p class="muted" data-l="en" lang="en">In this very repository, the retrospective logged 30 findings, 28 of them already resolved, backed by 89 automated tests and 30 artifacts generated from a single specification.</p>
+      <p class="muted" data-l="es">En el propio repositorio, la retrospectiva registró 30 hallazgos, de los que 28 ya están resueltos, entre ellos 91 pruebas automáticas y 30 artefactos generados desde una sola especificación.</p>
+      <p class="muted" data-l="en" lang="en">In this very repository, the retrospective logged 30 findings, 28 of them already resolved, backed by 91 automated tests and 30 artifacts generated from a single specification.</p>
     </section>
 
     <!-- ============================== INSTALACIÓN ============================== -->
@@ -1070,7 +1070,7 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
         <div class="arrow">→</div>
         <div class="step"><b data-l="es">30 artefactos</b><b data-l="en" lang="en">30 artifacts</b><small data-l="es">Skills, directivas, manual, MCP, esta web</small><small data-l="en" lang="en">Skills, directives, manual, MCP, this site</small></div>
         <div class="arrow">→</div>
-        <div class="step"><b>test_sync.py</b><small data-l="es">89 pruebas de paridad y comportamiento</small><small data-l="en" lang="en">89 parity and behavior tests</small></div>
+        <div class="step"><b>test_sync.py</b><small data-l="es">91 pruebas de paridad y comportamiento</small><small data-l="en" lang="en">91 parity and behavior tests</small></div>
         <div class="arrow">→</div>
         <div class="step"><b>GitHub Actions</b><small data-l="es">Falla si algo se desvía</small><small data-l="en" lang="en">Fails on any drift</small></div>
       </div>
