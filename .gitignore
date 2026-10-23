@@ -1,3 +1,7 @@
 # Cachés de Python (cualquier carpeta)
 __pycache__/
 *.py[cod]
+
+# Dependencias y compilados reproducibles (cualquier carpeta, incl. field-tests/)
+node_modules/
+dist/

@@ -181,6 +181,14 @@ class ArtifactTests(unittest.TestCase):
             for c in self.spec["commands"]:
                 self.assertIn(c["name"], text, f"{c['name']} falta en {target['output']}")
 
+    def test_directives_fit_the_render_budget(self):
+        """Ninguna directiva generada supera el presupuesto de render de DeepSeek Harness (65.536 bytes)."""
+        for output, text in self.rendered.items():
+            if output.endswith(".html"):
+                continue  # la página web no es una directiva
+            size = len(text.encode("utf-8"))
+            self.assertLessEqual(size, 65536, f"{output} pesa {size} B")
+
     def test_inviolable_verification_everywhere(self):
         """Cada directiva de agente lleva el guardrail de Verificación Inviolable (en español o en inglés)."""
         guard = next(g for g in self.spec["guardrails"] if g["title_es"] == "Verificación Inviolable")

@@ -7,6 +7,17 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 ### Añadido
 - **Grok (app de escritorio):** skill `znve` generada en `integrations/grok/skills/znve/`, con frontmatter plano (una línea `clave: valor` por campo), que es lo que admite el validador de skills de Grok; la de Gemini lleva `metadata` anidado y Grok la rechaza. Perfil `grok` en la Capa de Agente y test que exige el frontmatter plano.
 
+### Cambiado
+- **Verificación Inviolable:** si un test contradice el contrato o parece incorrecto, el agente no adapta el código para satisfacerlo: lo reporta y se detiene. Cierra la brecha que mostró el piloto A/B (el agente cambiaba el código para darle la razón a un test erróneo sin avisar).
+- **Instalador global de Antigravity:** ya no registra el workflow `/znve-help` (Antigravity retiró los workflows el 19 de octubre de 2026 y la ruta `global_workflows` no era la de su documentación); el catálogo se obtiene con `/znve help` desde la skill. La skill se copia byte a byte (sin CRLF en Windows) y `GEMINI.md` conserva sus saltos de línea.
+- **CI:** `actions/checkout` v7.0.1, `actions/setup-python` v7.1.0 y `actions/setup-node` v7.1.0, fijadas a SHA (Node 20 se retira).
+- Test nuevo: ninguna directiva generada supera 65.536 bytes.
+- Contrato compartido de `znve_audit_resources`: casos nuevos para `.Wait()` y `.GetAwaiter().GetResult()`, y un caso que fija que `SELECT *` y los listeners no se marcan (la descripción solo promete lo que detecta). `.gitignore` ignora `node_modules/` y `dist/` en cualquier carpeta.
+- RFC 0002 (Implemented, con los criterios de eficiencia e integridad sin cumplir) y RFC 0003 (registro histórico) pasan a publicarse.
+
+### Eliminado
+- **Caso de estudio 02** (`case-studies/`): sus cifras ("100 % bit a bit", "−65 %") no tenían datos de respaldo y el PDF adjunto era un contrato de otro proyecto (sistema escolar). Las pruebas de campo reales viven en `field-tests/`.
+
 ## [2.4.0] — 2026-10-05
 
 > **Antes**, ZNVE le decía a la IA cómo debía ser el código que entrega.
