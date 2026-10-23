@@ -472,7 +472,7 @@ class AntigravityPythonTests(unittest.TestCase):
             installed = home / ".gemini" / "config" / "skills" / "znve" / "SKILL.md"
             self.assertEqual(installed.read_text(encoding="utf-8"), (ANTIGRAVITY_DIR / "SKILL.md").read_text(encoding="utf-8"))
             self.assertFalse(legacy.exists())
-            self.assertTrue((home / ".gemini" / "config" / "global_workflows" / "znve-help.md").exists())
+            self.assertFalse((home / ".gemini" / "config" / "global_workflows").exists())
             self.assertEqual((home / ".gemini" / "GEMINI.md").read_text(encoding="utf-8").count("znve:start"), 1)
 
     def test_global_gemini_block_is_static_and_minimal(self):

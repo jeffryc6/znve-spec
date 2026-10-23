@@ -93,7 +93,7 @@ def run_installer(workspace_root: Path | None = None) -> Path:
     except ImportError:
         print("[i] 'google-antigravity' no está instalado. Solo lo necesitas para el SDK: pip install google-antigravity")
 
-    print(f"\n[ok] Skill ZNVE v{ZNVE_VERSION} instalada. Recarga Antigravity y prueba con '/znve-help'.")
+    print(f"\n[ok] Skill ZNVE v{ZNVE_VERSION} instalada. Recarga Antigravity y prueba con '/znve help'.")
     return target_dir
 
 
