@@ -151,8 +151,6 @@ znve-spec/
 ├── .github/
 │   ├── copilot-instructions.md        <-- GitHub Copilot directive (generated)
 │   └── workflows/znve-parity.yml      <-- CI: spec parity & drift check
-├── case-studies/
-│   └── 02-legacy-monolith-rescue/     <-- Golden Master legacy modernization
 ├── field-tests/
 │   └── 2026-10-ab-pilot/              <-- Pilot A/B field test (v2.3.0 vs v2.4.0 directives)
 ├── protocols/
