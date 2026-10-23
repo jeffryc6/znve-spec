@@ -61,8 +61,8 @@
     },
     {
       "title_es": "Verificación Inviolable",
-      "text_es": "No modifiques tests, snapshots ni la configuración de pruebas existentes para obtener verde. Si un test parece incorrecto, repórtalo y detente hasta que el humano lo apruebe. No declares un resultado que no ejecutaste: entrega el comando y, solo si lo ejecutaste, su salida real.",
-      "text_en": "NEVER modify existing tests, snapshots or test configuration to get a green run; report a suspect test and stop for approval. NEVER claim a result you did not execute."
+      "text_es": "No modifiques tests, snapshots ni la configuración de pruebas existentes para obtener verde. Si un test contradice el contrato o parece incorrecto, no adaptes el código para satisfacerlo: repórtalo y detente hasta que el humano lo apruebe. No declares un resultado que no ejecutaste: entrega el comando y, solo si lo ejecutaste, su salida real.",
+      "text_en": "NEVER modify existing tests, snapshots or test configuration to get a green run; report a test that contradicts the contract or looks wrong, never bend the code to satisfy it, and stop for approval. NEVER claim a result you did not execute."
     }
   ],
 
