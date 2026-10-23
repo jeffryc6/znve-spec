@@ -54,8 +54,8 @@ GROK_SKILL = "integrations/grok/skills/znve/SKILL.md"
 GROK_KEYS = {"name", "description", "license", "version", "author", "source"}
 # field-tests conserva datos archivados (directivas y transcripciones de versiones anteriores): no se actualizan.
 HAND_MAINTAINED_SKIP = {".git", "node_modules", "dist", "znve-auto", "field-tests"}
-# Presupuestos en bytes (RFC 0002 §3, medidos): un guardrail es una línea del prefijo de cada petición.
-GUARDRAIL_MAX_BYTES = {"Cerca de Contexto (Context Fence)": 700, "Verificación Inviolable": 400}
+# Presupuestos en bytes (RFC 0002 §3, medidos; Verificación Inviolable sube de 400 a 700 B al absorber la regla anti-simulacro): un guardrail es una línea del prefijo de cada petición.
+GUARDRAIL_MAX_BYTES = {"Cerca de Contexto (Context Fence)": 700, "Verificación Inviolable": 700}
 # Regla común de fases más el perfil del asistente. La RFC proponía 900 B; la regla sola ya pesa más de 600 B.
 AGENT_BLOCK_MAX_BYTES = 1400
 # Descripciones de las herramientas MCP: viajan en el prefijo de cada petición (línea base v2.3.0: unos 2 KiB).

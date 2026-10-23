@@ -4,11 +4,17 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 
 ## [Sin publicar]
 
+## [2.4.1] — 2026-10-23
+
+> Parche (SemVer §10: sin comandos, axiomas ni pilares nuevos): endurece un guardrail existente, añade Grok y corrige textos desactualizados.
+
 ### Añadido
 - **Grok (app de escritorio):** skill `znve` generada en `integrations/grok/skills/znve/`, con frontmatter plano (una línea `clave: valor` por campo), que es lo que admite el validador de skills de Grok; la de Gemini lleva `metadata` anidado y Grok la rechaza. Perfil `grok` en la Capa de Agente y test que exige el frontmatter plano.
 
 ### Cambiado
 - **Verificación Inviolable:** si un test contradice el contrato o parece incorrecto, el agente no adapta el código para satisfacerlo: lo reporta y se detiene. Cierra la brecha que mostró el piloto A/B (el agente cambiaba el código para darle la razón a un test erróneo sin avisar).
+- **Verificación Inviolable (anti-simulacro):** el agente no sustituye por mock, stub o simulador un motor o dependencia real que el contrato nombra (salvo en tests aislados); si falta, el adaptador falla con error explícito de inicialización en vez de degradar en silencio, y «Integrado» exige un smoke test ejecutado contra el binario real, o se declara NO INTEGRADO. Cierra la brecha observada en Antigravity/Gemini (suite en verde sobre un motor Servo simulado). Presupuesto del guardrail: 400 → 700 B; Modelfile de Ollama y prompt de OpenRouter: 11.520 → 11.648 B.
+- **Documentos a mano al día:** `ZNVE_PROTOCOL.md` (Pilar 2: dependencias reales, no simuladas), `ZNVE_LEGACY_PROTOCOL.md` (un mock no sustituye al sistema bajo caracterización), `SPECIFICATION.md` y `GLOSSARY.md` recogen la regla anti-simulacro; Grok se añade a las listas de asistentes de README, `index.html`, `SPECIFICATION.md` y los protocolos. Versión 2.4.1 en cabeceras, README, SPECIFICATION, GLOSSARY e `index.html`.
 - **Instalador global de Antigravity:** ya no registra el workflow `/znve-help` (Antigravity retiró los workflows el 19 de octubre de 2026 y la ruta `global_workflows` no era la de su documentación); el catálogo se obtiene con `/znve help` desde la skill. La skill se copia byte a byte (sin CRLF en Windows) y `GEMINI.md` conserva sus saltos de línea.
 - **CI:** `actions/checkout` v7.0.1, `actions/setup-python` v7.1.0 y `actions/setup-node` v7.1.0, fijadas a SHA (Node 20 se retira).
 - Test nuevo: ninguna directiva generada supera 65.536 bytes.

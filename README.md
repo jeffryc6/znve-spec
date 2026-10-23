@@ -1,10 +1,10 @@
-# Zero-Noise Vibe Engineering (ZNVE) v2.4.0
+# Zero-Noise Vibe Engineering (ZNVE) v2.4.1
 > **Spec-Driven Agentic Architecture & Zero-Noise AI Software Engineering**
 > *Arquitectura Agéntica Basada en Especificaciones e Ingeniería de Software IA Cero Ruido*
 
 [![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-blue.svg)](LICENSE)
 [![Code License: MIT](https://img.shields.io/badge/Code%20License-MIT-green.svg)](LICENSE)
-[![Standard: ZNVE v2.4.0](https://img.shields.io/badge/Standard-ZNVE%20v2.4.0-purple.svg)](SPECIFICATION.md)
+[![Standard: ZNVE v2.4.1](https://img.shields.io/badge/Standard-ZNVE%20v2.4.1-purple.svg)](SPECIFICATION.md)
 [![Glossary](https://img.shields.io/badge/Glossary-ES%20%2F%20EN-lightgrey.svg)](GLOSSARY.md)
 [![MCP Server](https://img.shields.io/badge/MCP%20Server-6%20tools-orange.svg)](integrations/mcp-server/)
 [![Parity Check](https://github.com/jeffryc6/znve-spec/actions/workflows/znve-parity.yml/badge.svg)](.github/workflows/znve-parity.yml)
@@ -22,7 +22,7 @@
 ### What is ZNVE?
 **Zero-Noise Vibe Engineering (ZNVE)** is an open, deterministic technical standard and agentic governance framework designed to eliminate **AI agentic drift** and **AI death loops** in AI-assisted software development.
 
-Unlike casual "vibe coding", which leads to bloated dependencies, endless repair loops and degraded context windows, ZNVE establishes a **contract-first architecture**. Human developers act as **Directors of Architecture**, while AI models (Claude, Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity) operate as **surgical tactical executors**.
+Unlike casual "vibe coding", which leads to bloated dependencies, endless repair loops and degraded context windows, ZNVE establishes a **contract-first architecture**. Human developers act as **Directors of Architecture**, while AI models (Claude, Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity, Grok) operate as **surgical tactical executors**.
 
 ### Core Axioms
 1. **Axiom 1 (Asymmetric Efficiency):** *Heavy intelligence in design; near-zero footprint during execution.*
@@ -57,7 +57,7 @@ Unlike casual "vibe coding", which leads to bloated dependencies, endless repair
 ### ¿Qué es ZNVE?
 **Zero-Noise Vibe Engineering (ZNVE)** es un estándar técnico abierto y un marco de gobernanza agéntica diseñado para eliminar la **degradación del contexto de la IA** (*agentic drift*) y los **bucles infinitos de reparación** en el desarrollo asistido por IA.
 
-A diferencia del "vibe coding" caótico, que acumula librerías parásitas y código frágil, ZNVE establece una **arquitectura basada en contratos**. El desarrollador humano actúa como **Director de Arquitectura** y los modelos de IA (Claude, Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity) como **ejecutores tácticos quirúrgicos**.
+A diferencia del "vibe coding" caótico, que acumula librerías parásitas y código frágil, ZNVE establece una **arquitectura basada en contratos**. El desarrollador humano actúa como **Director de Arquitectura** y los modelos de IA (Claude, Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity, Grok) como **ejecutores tácticos quirúrgicos**.
 
 ### Axiomas centrales
 1. **Axioma 1 (Eficiencia Asimétrica):** *Inteligencia pesada en el diseño; huella casi nula en la ejecución.*
@@ -177,7 +177,7 @@ znve-spec/
 ├── GLOSSARY.md                        <-- Technical glossary (ES/EN)
 ├── LICENSE                            <-- Dual license (CC BY 4.0 + MIT)
 ├── README.md                          <-- This file
-├── SPECIFICATION.md                   <-- Formal technical specification v2.4.0
+├── SPECIFICATION.md                   <-- Formal technical specification v2.4.1
 └── index.html                         <-- GitHub Pages landing page
 ```
 

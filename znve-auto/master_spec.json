@@ -2,7 +2,7 @@
   "spec_format": 1,
   "name": "znve",
   "title": "Zero-Noise Vibe Engineering",
-  "version": "2.4.0",
+  "version": "2.4.1",
   "author": "jeffryc6",
   "license": "CC-BY-4.0 AND MIT (licencia dual; ver LICENSE)",
   "source": "https://github.com/jeffryc6/znve-spec",
@@ -61,8 +61,8 @@
     },
     {
       "title_es": "Verificación Inviolable",
-      "text_es": "No modifiques tests, snapshots ni la configuración de pruebas existentes para obtener verde. Si un test contradice el contrato o parece incorrecto, no adaptes el código para satisfacerlo: repórtalo y detente hasta que el humano lo apruebe. No declares un resultado que no ejecutaste: entrega el comando y, solo si lo ejecutaste, su salida real.",
-      "text_en": "NEVER modify existing tests, snapshots or test configuration to get a green run; report a test that contradicts the contract or looks wrong, never bend the code to satisfy it, and stop for approval. NEVER claim a result you did not execute."
+      "text_es": "No modifiques tests, snapshots ni la configuración de pruebas existentes para obtener verde. Si un test contradice el contrato o parece incorrecto, no adaptes el código para satisfacerlo: repórtalo y detente hasta que el humano lo apruebe. No declares un resultado que no ejecutaste: entrega el comando y, solo si lo ejecutaste, su salida real. Nunca sustituyas por mock, stub o simulador un motor o dependencia real que el contrato nombra (solo en tests aislados); si falta, el adaptador falla con error explícito de inicialización, sin degradar en silencio. «Integrado» exige un smoke test ejecutado contra el binario real (versión, símbolo o salida real); sin él, declara NO INTEGRADO.",
+      "text_en": "NEVER modify existing tests, snapshots or test configuration to get a green run; report a test that contradicts the contract or looks wrong, never bend the code to satisfy it, and stop for approval. NEVER claim a result you did not execute. NEVER replace a real engine or dependency named by the contract with a mock, stub or simulator outside isolated tests; if absent, the adapter fails with an explicit init error, never degrading silently. \"Integrated\" requires an executed smoke test against the real binary (version, symbol or real output); otherwise report NOT INTEGRATED."
     }
   ],
 
@@ -560,8 +560,8 @@
     {"template": "cursor_rules.md.tmpl", "agent": "cursor", "output": "integrations/cursor/cursorrules.md", "max_bytes": 8960},
     {"template": "deepseek_directive.md.tmpl", "agent": "deepseek", "output": "integrations/deepseek/directive.md", "max_bytes": 13312},
     {"template": "deepseek_harness_agents.md.tmpl", "agent": "deepseek", "output": "integrations/deepseek/harness/AGENTS.md", "max_bytes": 16384},
-    {"template": "ollama_modelfile.tmpl", "agent": "ollama", "output": "integrations/ollama/Modelfile", "max_bytes": 11520},
-    {"template": "openrouter_system.md.tmpl", "agent": "openrouter", "output": "integrations/openrouter/system-prompt.md", "max_bytes": 11520},
+    {"template": "ollama_modelfile.tmpl", "agent": "ollama", "output": "integrations/ollama/Modelfile", "max_bytes": 11648},
+    {"template": "openrouter_system.md.tmpl", "agent": "openrouter", "output": "integrations/openrouter/system-prompt.md", "max_bytes": 11648},
     {"template": "antigravity_skill.md.tmpl", "agent": "antigravity", "output": "integrations/antigravity/SKILL.md", "max_bytes": 20480},
     {"template": "commands_manual.md.tmpl", "output": "protocols/COMMANDS.md", "max_bytes": 34304},
     {"template": "antigravity_install.md.tmpl", "agent": "antigravity", "output": "integrations/antigravity/INSTALL_ANTIGRAVITY.md", "max_bytes": 4864, "catalog": false},

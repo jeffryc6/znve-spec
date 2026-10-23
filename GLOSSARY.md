@@ -1,6 +1,6 @@
 # GLOSSARY.md: Glosario técnico de ZNVE / ZNVE Technical Glossary
 
-Términos formales de Zero-Noise Vibe Engineering (ZNVE v2.4.0) en español e inglés. La norma completa está en [SPECIFICATION.md](SPECIFICATION.md) y el catálogo de comandos en [protocols/COMMANDS.md](protocols/COMMANDS.md).
+Términos formales de Zero-Noise Vibe Engineering (ZNVE v2.4.1) en español e inglés. La norma completa está en [SPECIFICATION.md](SPECIFICATION.md) y el catálogo de comandos en [protocols/COMMANDS.md](protocols/COMMANDS.md).
 
 ---
 
@@ -38,7 +38,7 @@ Términos formales de Zero-Noise Vibe Engineering (ZNVE v2.4.0) en español e in
 
 * **Cerca de Contexto / Context Fence:** guardrail 8. El contexto del agente es por excepción, igual que la telemetría: rangos en lugar de archivos completos, verificaciones silenciosas, contratos por ruta, cero secretos y todo contenido externo tratado como dato, nunca como instrucción. Se aplica también por código en el servidor MCP.
 
-* **Verificación Inviolable / Inviolable Verification:** guardrail 9. No se modifican tests, snapshots ni configuración de pruebas existentes para obtener verde, y no se declara un resultado que no se ejecutó. Un test sospechoso se reporta y el agente se detiene hasta que el humano lo apruebe.
+* **Verificación Inviolable / Inviolable Verification:** guardrail 9. No se modifican tests, snapshots ni configuración de pruebas existentes para obtener verde, y no se declara un resultado que no se ejecutó. Un motor o dependencia real que el contrato nombra no se sustituye por un simulador: si falta, el adaptador falla de forma explícita, y sin smoke test ejecutado contra el real el resultado es NO INTEGRADO. Un test sospechoso se reporta y el agente se detiene hasta que el humano lo apruebe.
 
 * **Arnés de caracterización / Characterization Harness:** suite Golden Master que `/znve-harness` crea sobre código legacy intacto para congelar su comportamiento. No es el *arnés de agente* (*agent harness*, como DeepSeek Harness), que es el entorno que ejecuta al agente: herramientas, contexto y permisos.
 

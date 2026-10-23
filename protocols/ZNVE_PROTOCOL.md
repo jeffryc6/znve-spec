@@ -1,14 +1,14 @@
 # ==============================================================================
 # ZERO-NOISE VIBE ENGINEERING (ZNVE) — PROTOCOLO OPERATIVO UNIVERSAL
 # Archivo: protocols/ZNVE_PROTOCOL.md
-# Versión: 2.4.0
+# Versión: 2.4.1
 # Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
 # Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
 # ==============================================================================
 
 Este documento es el protocolo operativo que rige el trabajo entre el humano
 (Director de Arquitectura) y los agentes de Inteligencia Artificial (Claude,
-Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity). La norma
+Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity, Grok). La norma
 formal está en [SPECIFICATION.md](../SPECIFICATION.md) y el catálogo de comandos
 en [COMMANDS.md](COMMANDS.md).
 
@@ -39,6 +39,7 @@ Protocolos especializados:
   - En UI/Plataforma: Interfaces de eventos, contratos de estado (State Machines) o protocolos de enlace IPC.
 - El código generado debe satisfacer el contrato al 100%, sin agregar propiedades inventadas, abstracciones prematuras ni lógica especulativa.
 - **Poda de Contexto:** el agente trabaja solo con el contrato activo y el archivo objetivo (`TARGET_FILE`).
+- **Dependencias reales, no simuladas:** un motor o dependencia que el contrato nombra no se sustituye por mock, stub o simulador fuera de tests aislados (`tests/` o `sandbox/`). Si falta en el entorno, el adaptador falla con error explícito de inicialización. «Integrado» exige un smoke test ejecutado contra el binario real (versión, símbolo o salida real); sin él, el resultado es NO INTEGRADO.
 
 ### 3. Eficiencia Asimétrica y Mínima Huella de Recursos
 - **"Cerebro en el diseño, reflejo en el dispositivo":**

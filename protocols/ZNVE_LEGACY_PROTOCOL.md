@@ -1,7 +1,7 @@
 # ==============================================================================
 # ZERO-NOISE VIBE ENGINEERING (ZNVE) — PROTOCOLO DE RESCATE LEGACY
 # Archivo: protocols/ZNVE_LEGACY_PROTOCOL.md
-# Versión: 2.4.0
+# Versión: 2.4.1
 # Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
 # Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
 # ==============================================================================
@@ -21,7 +21,7 @@ y cualquier motor de datos (SQL, NoSQL, Key-Value, archivos locales o memoria).
 1. **Modo Solo Lectura Estricto:** Durante las Fases 1 a 4, queda terminantemente prohibido modificar, renombrar, mover o eliminar líneas del código original existente.
 2. **Cero Dependencias Nuevas en el Código Base:** No se instalarán paquetes o bibliotecas en el runtime de producción para facilitar la inspección.
 3. **Respeto a los "Equilibrios Accidentales":** Comportamientos aparentemente contradictorios, código redundante o errores silenciados no se consideran bugs por defecto; se asumen como comportamientos emergentes requeridos por la operación activa hasta demostrar lo contrario.
-4. **Pruebas Siempre en Aislamiento:** Toda prueba unitaria, script de caracterización o mock se construye en un directorio aislado (`tests/characterization/` o `sandbox/`), nunca dentro de las fuentes originales.
+4. **Pruebas Siempre en Aislamiento:** Toda prueba unitaria, script de caracterización o mock se construye en un directorio aislado (`tests/characterization/` o `sandbox/`), nunca dentro de las fuentes originales. Un mock aísla efectos externos (red, reloj, disco); nunca sustituye al sistema bajo caracterización: el Golden Master se captura contra el código legacy real.
 5. **Sin Saltos de Fase:** No se avanza a una fase sin que la anterior esté verificada. En particular, no hay Shadow Run ni Strangler Fig sin un Golden Master al 100% en verde.
 
 ---
