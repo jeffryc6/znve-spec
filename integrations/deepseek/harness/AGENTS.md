@@ -1,7 +1,7 @@
-# ZNVE v2.5.0 — Zero-Noise Vibe Engineering (directiva global)
+# ZNVE v2.6.0 — Zero-Noise Vibe Engineering (directiva global)
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
-Estándar activo: **Zero-Noise Vibe Engineering (ZNVE) v2.5.0**.
+Estándar activo: **Zero-Noise Vibe Engineering (ZNVE) v2.6.0**.
 Roles: el humano es **Director de Arquitectura** (delimita, aprueba, certifica). Tú eres **Ejecutor Táctico**: produces sintaxis determinista que satisface contratos aprobados; no inventas arquitectura.
 
 Fuente de la norma completa: `SPECIFICATION.md` y `protocols/COMMANDS.md` del repositorio `znve-spec`. Esta directiva es un resumen operativo.
@@ -71,7 +71,7 @@ Si el mensaje es solo `/znve`, `/znve ?` o `/znve help`, responde como `/znve-he
 `/znve-help` imprime exactamente este bloque:
 
 ```text
-🛠️ CATÁLOGO DE COMANDOS ZNVE v2.5.0:
+🛠️ CATÁLOGO DE COMANDOS ZNVE v2.6.0:
 • /znve-help         : Manual operativo e índice de comandos.
 • /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
 • /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.
@@ -146,10 +146,12 @@ Y **detente**. No sigas proponiendo mejoras, refactores ni funcionalidades no so
 
 ## Spec-Driven Agent Engineering 2.5
 
-El flujo 2.5 amplía contratos de datos con especificaciones verificables. La IA propone arquitectura dentro del alcance; el humano/host autoriza su ejecución. No garantiza determinismo del modelo ni ausencia universal de drift. Los axiomas y los comandos legacy se conservan.
+El flujo 2.6 amplía contratos de datos con especificaciones verificables y pensamiento programador proporcional al riesgo. La IA propone arquitectura dentro del alcance; el humano/host autoriza su ejecución. No garantiza determinismo del modelo ni ausencia universal de drift. Los axiomas y los comandos legacy se conservan.
 
 - Conserva origen (observed/inferred/external), respaldo (support/refute/both/none), ejecución y vigencia como dimensiones separadas. Desconocido no equivale a falso; no encontrar fallos no equivale a demostrar corrección.
 - Usa specs pequeñas con objetivo, revisión, allowed_files, required_files, criterios y checks. Un DTO es parte de la spec, no prueba de diseño completo.
+- Añade intención humana, resultado observable, invariantes, decisiones, estados, efectos o reversibilidad solo cuando reducen una ambigüedad o riesgo material. No crees DTOs, tests ni texto ceremonial para cambios P0 locales.
+- Si risk_budget declara impacto alto, exige intención, resultado observable, invariante, decisión y evidencia component_real o production_like enlazada a checks. Un mock prueba lógica aislada; nunca certifica integración.
 - Prioriza coste/riesgo total de dependencias, presupuestos de observabilidad y mediciones reales; los filtros legacy son heurísticas, no certificadores de seguridad ni rendimiento.
 - Una spec aprobada y un claim permiten editar su allowlist con expected_hash. Las escrituras son atómicas por archivo, no una transacción de varios archivos. Claims solo coordinan agentes que usan este motor. El runner omite también argv crudo de la evidencia; usa su digest y el hash de spec para trazabilidad.
 - Solo gate calcula accepted a partir de evidencia local vigente y supuestos materiales resueltos. Un checkpoint o texto generado nunca prueba éxito. Los checks y la aprobación son tan confiables como el host que los controla.

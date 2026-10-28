@@ -1,4 +1,4 @@
-# ZNVE v2.5.0 — Spec-Driven Agent Engineering
+# ZNVE v2.6.0 — Programmer-Grounded Spec Engineering
 
 Norma de gobernanza para reducir drift, acotar acciones y mantener trazabilidad. La IA propone; humano/host autoriza el alcance; herramientas comprueban las propiedades que pueden observar. Ninguna directiva garantiza determinismo del modelo ni ausencia de defectos.
 
@@ -82,6 +82,6 @@ Paridad de artefactos no demuestra conducta del modelo. La conformidad ejecutabl
 
 ## 9. Versionado y fuente única
 
-`znve-auto/master_spec.json` gobierna versión, comandos, modelos de datos y generación. Norma 2.5.0; MCP 2.1.0, con herramientas legacy sin ruptura. OpenRouter añade un campo de reporte obligatorio y documenta su migración; ese texto del modelo no es evidencia.
+`znve-auto/master_spec.json` gobierna versión, comandos, modelos de datos y generación. Norma 2.6.0; MCP 2.1.0, con herramientas legacy sin ruptura. OpenRouter añade un campo de reporte obligatorio y documenta su migración; ese texto del modelo no es evidencia.
 
 Mayor: cambios incompatibles de axiomas/semántica. Menor: capacidades optativas compatibles. Parche: correcciones. No se introducen cálculos especulativos ni dependencias de memoria para esta versión. Ver `protocols/` y las notas de entrega para procedimientos y límites.

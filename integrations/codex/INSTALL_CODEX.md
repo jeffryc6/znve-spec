@@ -1,6 +1,6 @@
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
-# ZNVE v2.5.0: skill, plugin y servidor MCP para Codex y ChatGPT
+# ZNVE v2.6.0: skill, plugin y servidor MCP para Codex y ChatGPT
 
 La integración tiene tres piezas, todas en este repositorio:
 

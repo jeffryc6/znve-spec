@@ -4,6 +4,25 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 
 ## [Sin publicar]
 
+## [2.6.0] — 2026-10-28
+
+> Programmer-Grounded Spec Engineering (menor, SemVer §10: capacidades optativas compatibles). La spec puede registrar el razonamiento de un programador y el motor lo enlaza a evidencia. Sin comandos ni herramientas MCP nuevas; las specs 2.5.0 siguen siendo válidas.
+
+### Añadido
+- **Campos opcionales en `schemas/specification.schema.json`:** `human_intent`, `observable_outcomes` (con `criterion_ids`), `invariants` (con `check_ids`), `decision_records` (`chosen`, `alternatives_rejected`, `rationale`, `reopen_when` y `lens` opcional), `state_transitions`, `allowed_effects`, `reversibility` y `risk_budget` (`impact`, `uncertainty`, `minimum_evidence`).
+- **`evidence_kind` por check:** `local`, `component_real` o `production_like`.
+- **Validación en `spec_validate`:** referencias a checks y criterios inexistentes, IDs duplicados y resultados observables enlazados a criterios no obligatorios se rechazan. Con `impact: high` se exigen intención, resultado observable, invariante y decisión, `minimum_evidence` de al menos `component_real` y checks de invariante con un `evidence_kind` suficiente. Con `uncertainty: high` se exige un supuesto material.
+- **`gate`:** no acepta mientras un check de invariante carezca de evidencia vigente y lo informa en `unresolved_invariants`.
+- Reglas de proporcionalidad en las directivas generadas: los campos nuevos solo se añaden si reducen una ambigüedad o un riesgo material; un cambio P0 local no requiere DTO, tests ni texto ceremonial. Un mock prueba lógica aislada y nunca certifica integración.
+- Dos tests de flujo en `test/workflow.test.mjs`: spec de alto riesgo con evidencia `component_real` enlazada y rechazo de afirmaciones sin evidencia enlazada.
+
+### Cambiado
+- Versión 2.6.0 en `master_spec.json`, los 43 artefactos regenerados, README, SPECIFICATION, GLOSSARY e `index.html`. El servidor MCP mantiene la versión 2.1.0 de paquete.
+
+### Límites conocidos
+- `evidence_kind` es una declaración revisada por quien aprueba el hash de la spec: el motor comprueba su coherencia, no que el entorno sea realmente production-like.
+- El drift de intención solo se detecta si el resultado observable está enlazado a un criterio con check. No hay medición conductual de la 2.6.0.
+
 ## [2.5.0] — 2026-10-27
 
 > Spec-Driven Agent Engineering. Notas de la versión y evidencia de verificación en [`releases/2.5.0/`](releases/2.5.0/README.md).

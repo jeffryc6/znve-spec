@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Zero-Noise Vibe Engineering (ZNVE) v2.5.0: metodología abierta para programar con IA sin dependencias parásitas, sin logs de relleno y sin deuda técnica. Open methodology for AI-assisted development without parasitic dependencies, noise or technical debt.">
-  <title>Zero-Noise Vibe Engineering (ZNVE) | Spec-Driven Agentic Architecture</title>
+  <meta name="description" content="Zero-Noise Vibe Engineering (ZNVE) v2.6.0: metodología abierta para programar con IA sin dependencias parásitas, sin logs de relleno y sin deuda técnica. Open methodology for AI-assisted development without parasitic dependencies, noise or technical debt.">
+  <title>Zero-Noise Vibe Engineering (ZNVE) | Programmer-Grounded Spec Engineering</title>
   <link rel="alternate" hreflang="es" href="https://jeffryc6.github.io/znve-spec/?lang=es">
   <link rel="alternate" hreflang="en" href="https://jeffryc6.github.io/znve-spec/?lang=en">
   <style>
@@ -372,7 +372,7 @@
   </style>
 </head>
 <body>
-<aside style="padding:1rem;text-align:center" aria-label="Version status">ZNVE 2.5.0 · Spec-Driven Agent Engineering · Specs, evidence, checkpoints and one shared MCP. Local release: no universal drift or token-saving claims. <a href="protocols/SPEC_DRIVEN.md">2.5 workflow</a></aside>
+<aside style="padding:1rem;text-align:center" aria-label="Version status">ZNVE 2.6.0 · Programmer-Grounded Spec Engineering · Specs, evidence, checkpoints and one shared MCP. Local release: no universal drift or token-saving claims. <a href="protocols/SPEC_DRIVEN.md">2.6 workflow</a></aside>
   <canvas id="node-canvas" aria-hidden="true"></canvas>
 
   <nav class="top" aria-label="Secciones / Sections">
@@ -407,7 +407,7 @@
         <p class="lead" data-l="es">ZNVE es una metodología abierta que convierte a tu asistente de IA (Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter, Antigravity o Grok) en un ejecutor disciplinado. Primero se diseña un <strong>contrato</strong>; después la IA escribe solo el código necesario, sin dependencias parásitas, sin logs de relleno y sin errores silenciados.</p>
         <p class="lead" data-l="en" lang="en">ZNVE is an open methodology that turns your AI assistant (Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter, Antigravity or Grok) into a disciplined executor. First you design a <strong>contract</strong>; then the AI writes only the code that is needed, with no parasitic dependencies, no filler logs and no swallowed errors.</p>
         <div class="badges">
-          <span class="badge"><span data-l="es">Norma v2.5.0</span><span data-l="en" lang="en">Standard v2.5.0</span></span>
+          <span class="badge"><span data-l="es">Norma v2.6.0</span><span data-l="en" lang="en">Standard v2.6.0</span></span>
           <span class="badge"><span data-l="es">14 comandos /znve-*</span><span data-l="en" lang="en">14 /znve-* commands</span></span>
           <span class="badge"><span data-l="es">8 asistentes sincronizados</span><span data-l="en" lang="en">8 assistants in sync</span></span>
           <span class="badge"><span data-l="es">Servidor MCP · 7 herramientas</span><span data-l="en" lang="en">MCP server · 7 tools</span></span>
@@ -771,11 +771,16 @@ def test_golden_master():  # ✓ must pass 100% against the intact code
     <!-- ============================== CONTRATOS ============================== -->
     <section id="contratos">
       <p class="eyebrow"><span data-l="es">04 · Contrato primero</span><span data-l="en" lang="en">04 · Contract first</span></p>
-      <h2 data-l="es">La IA se detiene cuando el contrato está sólido</h2>
-      <h2 data-l="en" lang="en">The AI stops once the contract is solid</h2>
-      <p class="lead" data-l="es">Con <code>/znve-contract</code> la IA recomienda el stack de la plataforma, diseña los DTOs en <code>contracts/</code> y aplica una lista de chequeo de 4 puntos. Cuando se cumple, emite un criterio de parada y deja de proponer cambios: así se corta el bucle infinito de "mejoras".</p>
-      <p class="lead" data-l="en" lang="en">With <code>/znve-contract</code> the AI recommends the platform stack, designs the DTOs in <code>contracts/</code> and applies a 4-point checklist. Once it passes, it emits a stop criterion and stops proposing changes, which breaks the endless "improvement" loop.</p>
+      <h2 data-l="es">Contrato cuando hace falta; evidencia proporcional siempre</h2>
+      <h2 data-l="en" lang="en">Contracts when needed; proportional evidence always</h2>
+      <p class="lead" data-l="es">El flujo canónico usa <code>/znve-spec</code>: objetivo, alcance, criterios y checks aprobados por hash. En cambios de alto riesgo añade intención humana, resultado observable, invariantes y decisiones enlazadas a evidencia real. Un cambio local no recibe DTOs, tests ni documentación ceremonial.</p>
+      <p class="lead" data-l="en" lang="en">The canonical flow uses <code>/znve-spec</code>: objective, scope, criteria and hash-approved checks. High-risk changes add human intent, observable outcomes, invariants and decisions linked to real evidence. A local change does not receive ceremonial DTOs, tests or documentation.</p>
       <div class="grid">
+        <div class="card">
+          <h3 data-l="es">🧭 Rigor por riesgo</h3><h3 data-l="en" lang="en">🧭 Risk-based rigor</h3>
+          <p data-l="es"><b>P0:</b> ejecución focalizada. <b>P1/P2:</b> criterio y componente real cuando aplica. <b>P3:</b> intención, invariantes, decisión y evidencia <code>component_real</code> o <code>production_like</code>. El gate no acepta un invariante sin su check vigente.</p>
+          <p data-l="en" lang="en"><b>P0:</b> focused execution. <b>P1/P2:</b> criterion and real component when applicable. <b>P3:</b> intent, invariants, decision and <code>component_real</code> or <code>production_like</code> evidence. The gate does not accept an invariant without its current check.</p>
+        </div>
         <div class="card">
           <h3 data-l="es">✅ Lista de chequeo de solidez</h3><h3 data-l="en" lang="en">✅ Solidity checklist</h3>
           <p data-l="es"><b>1. Estructura invariable:</b> entradas, salidas, entidades y enums tipados.<br>
@@ -816,6 +821,8 @@ def test_golden_master():  # ✓ must pass 100% against the intact code
       <h2 data-l="en" lang="en">The 6 Operating Modes</h2>
       <p class="lead" data-l="es">Antes de cada tarea se declara el modo. Cada uno tiene su secuencia de comandos, pensada para una situación real del ciclo de vida del software.</p>
       <p class="lead" data-l="en" lang="en">The mode is declared before every task. Each one has its own command sequence, designed for a real situation in the software lifecycle.</p>
+      <p class="muted" data-l="es">Desde 2.5, los seis modos comparten un flujo transversal cuando el trabajo requiere una spec verificable: <code>/znve-spec</code> diseña comportamiento, interfaces, límites, efectos, supuestos y criterios; <code>/znve-verify</code> ejecuta checks autorizados y evalúa el gate; <code>/znve-checkpoint</code> guarda pendientes y evidencia; <code>/znve-resume</code> contrasta hashes antes de continuar.</p>
+      <p class="muted" data-l="en" lang="en">Since 2.5, all six modes share a cross-cutting flow when work needs a verifiable spec: <code>/znve-spec</code> designs behavior, interfaces, limits, effects, assumptions and criteria; <code>/znve-verify</code> runs authorized checks and evaluates the gate; <code>/znve-checkpoint</code> stores pending work and evidence; <code>/znve-resume</code> compares hashes before continuing.</p>
       <div class="grid modes">
         <div class="card"><h3>🟢 1 · Greenfield</h3><p data-l="es">Proyecto nuevo, día 0.</p><p data-l="en" lang="en">New project, day 0.</p><p><code>/znve-contract</code> → <code>/znve-execute</code></p></div>
         <div class="card"><h3>🔵 2 · In-Flight</h3><p data-l="es">Nuevas capacidades en un sistema activo.</p><p data-l="en" lang="en">New features in a live system.</p><p><code>/znve-contract --delta</code> → <code>/znve-execute</code></p></div>
@@ -1174,6 +1181,14 @@ git push                         # CI + GitHub Pages</code></pre><button class="
           <h3 data-l="es">v2.4.0: de la norma del código a la disciplina del agente</h3><h3 data-l="en" lang="en">v2.4.0: from code standard to agent discipline</h3>
           <p data-l="es">Nueve guardrails (Cerca de Contexto y Verificación Inviolable), Capa de Agente con un perfil por asistente y servidor MCP 2.0.0 con el mismo contrato de respuesta que la skill de Python. Donde corre el servidor, el código hace cumplir las garantías. Una prueba piloto A/B, archivada con sus límites, no mostró ahorro de tokens: siguen las pruebas con proyectos reales.</p>
           <p data-l="en" lang="en">Nine guardrails (Context Fence and Inviolable Verification), an agent layer with one profile per assistant and MCP server 2.0.0 sharing its response contract with the Python skill. Where the server runs, code enforces the guarantees. A pilot A/B test, archived with its limits, showed no token savings: tests on real projects come next.</p></li>
+        <li><time>2026-10</time>
+          <h3 data-l="es">v2.5.0: specs, evidencia y continuidad</h3><h3 data-l="en" lang="en">v2.5.0: specs, evidence and continuity</h3>
+          <p data-l="es">El flujo <em>spec-driven</em> amplía los contratos de datos con objetivo, archivos permitidos, criterios, checks y supuestos. El host aprueba el hash; <code>preflight</code>, <code>claim</code>, <code>apply</code>, <code>verify</code>, <code>gate</code>, <code>checkpoint</code> y <code>resume</code separan ejecución, evidencia vigente y aceptación.</p>
+          <p data-l="en" lang="en">The spec-driven flow extends data contracts with an objective, allowed files, criteria, checks and assumptions. The host approves the hash; <code>preflight</code>, <code>claim</code>, <code>apply</code>, <code>verify</code>, <code>gate</code>, <code>checkpoint</code> and <code>resume</code separate execution, current evidence and acceptance.</p></li>
+        <li><time>2026-10-28</time>
+          <h3 data-l="es">v2.6.0: pensamiento programador proporcional</h3><h3 data-l="en" lang="en">v2.6.0: proportional programmer thinking</h3>
+          <p data-l="es">La spec puede expresar intención humana, resultados observables, invariantes, decisiones, riesgo, estados, efectos y reversibilidad. Nada de eso es obligatorio para un cambio local; en riesgo alto, el gate exige relaciones verificables con checks reales y evidencia suficiente.</p>
+          <p data-l="en" lang="en">The spec can express human intent, observable outcomes, invariants, decisions, risk, states, effects and reversibility. None of this is required for a local change; at high risk, the gate requires verifiable links to real checks and sufficient evidence.</p></li>
       </ol>
     </section>
 
@@ -1217,7 +1232,7 @@ git push                         # CI + GitHub Pages</code></pre><button class="
     // ---------------------------------------------------------------------
     const I18N = {
       es: { title: 'Zero-Noise Vibe Engineering (ZNVE) | Arquitectura agéntica basada en especificaciones', copy: 'copiar', copied: 'copiado', manual: 'selecciona y copia' },
-      en: { title: 'Zero-Noise Vibe Engineering (ZNVE) | Spec-Driven Agentic Architecture', copy: 'copy', copied: 'copied', manual: 'select and copy' }
+      en: { title: 'Zero-Noise Vibe Engineering (ZNVE) | Programmer-Grounded Spec Engineering', copy: 'copy', copied: 'copied', manual: 'select and copy' }
     };
     const LANG_KEY = 'znve-lang';
     const TRANSLATE = 'https://translate.google.com/translate?sl=es&tl=en&u=';

@@ -1,8 +1,21 @@
-# Zero-Noise Vibe Engineering — ZNVE v2.5.0
+# Zero-Noise Vibe Engineering — ZNVE v2.6.0
 
-**Spec-Driven Agent Engineering.** Gobernanza para reducir deriva agéntica mediante especificaciones, alcance explícito y evidencia vigente. Compatible con los comandos de 2.4.2; sin prometer determinismo del modelo ni eliminar todo el drift.
+**Programmer-Grounded Spec Engineering.** Gobernanza para reducir deriva agéntica mediante especificaciones, alcance explícito y evidencia vigente proporcional al riesgo. Compatible con las specs de 2.5.0 y los comandos de 2.4.2; sin prometer determinismo del modelo ni eliminar todo el drift.
 
-## Qué añade 2.5
+## Qué añade 2.6
+
+La spec puede registrar el razonamiento de un programador y enlazarlo a evidencia. Todos los campos son opcionales: una spec 2.5.0 sigue siendo válida.
+
+- Intención humana, resultados observables (enlazados a criterios obligatorios), invariantes (enlazados a checks), transiciones de estado, efectos permitidos y reversibilidad.
+- Decisiones con alternativa elegida, alternativas descartadas, razón, condición de reapertura y lente técnica opcional (fundamentos, lenguaje, sistemas, datos, seguridad, producto, plataforma, escala, restricción).
+- `risk_budget` (impacto, incertidumbre, evidencia mínima) y `evidence_kind` por check: `local`, `component_real` o `production_like`.
+- Con impacto alto, la spec se rechaza si falta intención, resultado observable, invariante o decisión, o si la evidencia de un invariante es inferior a la mínima. Con incertidumbre alta exige un supuesto material.
+- `gate` no acepta mientras un invariante no tenga evidencia vigente y devuelve `unresolved_invariants`.
+- Proporcionalidad: los campos se añaden solo si reducen una ambigüedad o un riesgo material; un cambio local P0 no requiere DTO, tests ni texto ceremonial.
+
+`evidence_kind` es una declaración revisada por quien aprueba el hash de la spec: el motor comprueba la coherencia de lo declarado, no que el entorno sea realmente production-like. No detecta drift de intención que no esté enlazado a un criterio.
+
+### Base 2.5
 
 - `spec`, `verify`, `checkpoint` y `resume`, además de los diez comandos anteriores.
 - Estados separados de origen, respaldo, ejecución y vigencia.
@@ -83,6 +96,8 @@ Después, desde `integrations/mcp-server/`, ejecuta `npm test` y `npm run check:
 ## English overview
 
 ZNVE 2.5 adds verifiable specifications, host-approved execution, current evidence, acceptance gates and resumable task state. All supported hosts consume one shared MCP implementation. Existing tools remain compatible; the retired Antigravity Python engine fails explicitly. Grok remains documented without a dedicated distribution. Runtime isolation depends on the host. Passing checks do not prove specification completeness or universal agent reliability.
+
+ZNVE 2.6 lets a spec record a programmer's reasoning — human intent, observable outcomes, invariants, decisions with rejected alternatives and reopen conditions, state transitions, effects, reversibility and a risk budget — and links it to evidence. All new fields are optional, so 2.5 specs remain valid. High-impact specs must link every invariant to checks of sufficient declared evidence kind, and the gate stays closed while any invariant lacks current evidence. Evidence kinds are declarations reviewed by whoever approves the spec hash, not proof of the environment.
 
 ## Licencias
 

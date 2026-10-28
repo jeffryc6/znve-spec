@@ -93,6 +93,29 @@ export class Workflow {
     }
     const checks = new Set(ids(spec.checks));
     for (const criterion of spec.criteria) if (!checks.has(criterion.check_id)) error("BAD_ARGUMENT", `Check ausente para ${criterion.id}`);
+    const criteria = new Map<string, Obj>(spec.criteria.map((criterion: Obj): [string, Obj] => [criterion.id as string, criterion]));
+    const ensureReferences = (items: Obj[] | undefined, field: string, known: Set<string>) => {
+      for (const item of items ?? []) for (const id of item[field] ?? []) if (!known.has(id)) error("BAD_ARGUMENT", `${field} desconocido para ${item.id ?? item.from}`);
+    };
+    ensureReferences(spec.invariants, "check_ids", checks);
+    ensureReferences(spec.observable_outcomes, "criterion_ids", new Set(criteria.keys()));
+    ensureReferences(spec.state_transitions, "criterion_ids", new Set(criteria.keys()));
+    for (const outcome of spec.observable_outcomes ?? []) for (const id of outcome.criterion_ids as string[]) if (!criteria.get(id)?.required) error("BAD_ARGUMENT", `Resultado observable requiere criterio obligatorio: ${id}`);
+    for (const [name, items] of Object.entries({ invariants: spec.invariants ?? [], observable_outcomes: spec.observable_outcomes ?? [], decision_records: spec.decision_records ?? [] })) {
+      const values = ids(items as Obj[]);
+      if (new Set(values).size !== values.length) error("BAD_ARGUMENT", `IDs duplicados en ${name}`);
+    }
+    const risk = spec.risk_budget;
+    const evidenceRank: Record<string, number> = { local: 0, component_real: 1, production_like: 2 };
+    if (risk?.impact === "high") {
+      if (!spec.human_intent || !(spec.observable_outcomes?.length) || !(spec.invariants?.length) || !(spec.decision_records?.length)) error("BAD_ARGUMENT", "Riesgo alto requiere intención, resultado observable, invariante y decisión");
+      if (evidenceRank[risk.minimum_evidence] < evidenceRank.component_real) error("BAD_ARGUMENT", "Riesgo alto requiere evidencia component_real o production_like");
+      for (const invariant of spec.invariants) for (const checkId of invariant.check_ids) {
+        const kind = spec.checks.find((check: Obj) => check.id === checkId).evidence_kind;
+        if (!kind || evidenceRank[kind] < evidenceRank[risk.minimum_evidence]) error("BAD_ARGUMENT", `Invariante ${invariant.id} requiere evidencia suficiente`);
+      }
+    }
+    if (risk?.uncertainty === "high" && !spec.assumptions.some((assumption: Obj) => assumption.material)) error("BAD_ARGUMENT", "Incertidumbre alta requiere un supuesto material");
     const seen = new Set<string>();
     for (const file of [...spec.required_files, ...spec.allowed_files]) {
       if (path.isAbsolute(file) || file.includes("\\") || file.split("/").some((x: string) => !x || x === "." || x === ".." || x.includes(":"))) error("BAD_ARGUMENT", "Usa rutas relativas canónicas con /");
@@ -225,17 +248,18 @@ export class Workflow {
       if (operation === "gate") {
         const records: Obj[] = [];
         for (const id of payload.evidence_ids) records.push(await this.load("evidence", id));
+        const validChecks = new Set<string>();
+        for (const record of records) {
+          validate(record, await this.schema("evidence"));
+          if (record.state === "passed" && record.exit_code === 0 && !record.timed_out && !record.output_limited && record.validity === "current" && !(await this.stale(record, payload.spec_path))) validChecks.add(record.check_id);
+        }
         const results = [];
         for (const c of spec.criteria) {
-          let passed = false;
-          for (const r of records) {
-            validate(r, await this.schema("evidence"));
-            if (r.check_id === c.check_id && r.state === "passed" && r.exit_code === 0 && !r.timed_out && !r.output_limited && r.validity === "current" && !(await this.stale(r, payload.spec_path))) passed = true;
-          }
-          results.push({ criterion: c.id, required: c.required, state: passed ? "passed" : "not_verified" });
+          results.push({ criterion: c.id, required: c.required, state: validChecks.has(c.check_id) ? "passed" : "not_verified" });
         }
         const unresolved = spec.assumptions.filter((a: Obj) => a.material && (a.origin !== "observed" || a.evidence !== "support"));
-        return { status: "SUCCESS", accepted: this.approved(fingerprint) && unresolved.length === 0 && results.filter(c => c.required).every(c => c.state === "passed"), criteria: results, unresolved_assumptions: unresolved.map((a: Obj) => a.id), host_approved: this.approved(fingerprint), assurance: "Cumplimiento de checks declarados; no prueba completitud de spec ni ausencia de defectos. Estado local no resistente a manipulación por el dueño del host." };
+        const unresolvedInvariants = (spec.invariants ?? []).flatMap((invariant: Obj) => invariant.check_ids).filter((checkId: string) => !validChecks.has(checkId));
+        return { status: "SUCCESS", accepted: this.approved(fingerprint) && unresolved.length === 0 && unresolvedInvariants.length === 0 && results.filter(c => c.required).every(c => c.state === "passed"), criteria: results, unresolved_assumptions: unresolved.map((a: Obj) => a.id), unresolved_invariants: unresolvedInvariants, host_approved: this.approved(fingerprint), assurance: "Cumplimiento de checks declarados; no prueba completitud de spec ni ausencia de defectos. Estado local no resistente a manipulación por el dueño del host." };
       }
       if (operation === "checkpoint") {
         const record = { id: randomUUID(), spec_id: spec.id, spec_hash: fingerprint, files: await this.snapshot(spec), pending: payload.pending, evidence_ids: payload.evidence_ids, created_at: new Date().toISOString() };

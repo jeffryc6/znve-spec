@@ -119,6 +119,28 @@ test('unresolved material assumption blocks acceptance even with green checks',(
   return fixture(async ({call})=>{const r=await call('verify',{check_id:'unit'});const gate=await call('gate',{evidence_ids:[r.evidence.id]});assert.equal(gate.accepted,false);assert.deepEqual(gate.unresolved_assumptions,['a']);},spec);
 });
 
+test('high-risk programmer spec links intent, invariants and real-component evidence',()=>{
+  const spec=specification();
+  spec.checks[0].evidence_kind='component_real';
+  spec.risk_budget={impact:'high',uncertainty:'medium',minimum_evidence:'component_real'};
+  spec.human_intent='Confirm one payment without duplicate charge';
+  spec.observable_outcomes=[{id:'outcome',statement:'One key produces one charge',criterion_ids:['regression']}];
+  spec.invariants=[{id:'one-charge',statement:'An idempotency key is charged once',check_ids:['unit']}];
+  spec.decision_records=[{id:'store',lens:'data',chosen:'Use a unique constraint',alternatives_rejected:['In-memory deduplication'],rationale:'Survives restarts',reopen_when:'Multi-region payments'}];
+  return fixture(async ({call})=>{
+    assert.equal((await call('gate',{evidence_ids:[]})).accepted,false);
+    const evidence=await call('verify',{check_id:'unit'});
+    const gate=await call('gate',{evidence_ids:[evidence.evidence.id]});
+    assert.equal(gate.accepted,true); assert.deepEqual(gate.unresolved_invariants,[]);
+  },spec);
+});
+
+test('high-risk spec rejects ceremonial claims without linked evidence',()=>{
+  const spec=specification();
+  spec.risk_budget={impact:'high',uncertainty:'low',minimum_evidence:'component_real'};
+  return fixture(async ({call})=>await rejects(()=>call('spec_validate'),'BAD_ARGUMENT'),spec);
+});
+
 test('claims serialize across server instances and reject overlap',()=>fixture(async ({call,io})=>{
   const other=new Workflow(io);
   const results=await Promise.allSettled([call('claim',{owner:'a',files:['src/value.js'],ttl_seconds:60}),other.dispatch('claim',{spec_path:'spec.json',owner:'b',files:['src/value.js'],ttl_seconds:60})]);

@@ -2,7 +2,7 @@
   "spec_format": 1,
   "name": "znve",
   "title": "Zero-Noise Vibe Engineering",
-  "version": "2.5.0",
+  "version": "2.6.0",
   "author": "jeffryc6",
   "license": "CC-BY-4.0 AND MIT (licencia dual; ver LICENSE)",
   "source": "https://github.com/jeffryc6/znve-spec",
@@ -1703,12 +1703,14 @@
       "folder": "znve"
     }
   ],
-  "subtitle": "Spec-Driven Agent Engineering",
+  "subtitle": "Programmer-Grounded Spec Engineering",
   "workflow": {
-    "principles_es": "El flujo 2.5 amplía contratos de datos con especificaciones verificables. La IA propone arquitectura dentro del alcance; el humano/host autoriza su ejecución. No garantiza determinismo del modelo ni ausencia universal de drift. Los axiomas y los comandos legacy se conservan.",
+    "principles_es": "El flujo 2.6 amplía contratos de datos con especificaciones verificables y pensamiento programador proporcional al riesgo. La IA propone arquitectura dentro del alcance; el humano/host autoriza su ejecución. No garantiza determinismo del modelo ni ausencia universal de drift. Los axiomas y los comandos legacy se conservan.",
     "rules_es": [
       "Conserva origen (observed/inferred/external), respaldo (support/refute/both/none), ejecución y vigencia como dimensiones separadas. Desconocido no equivale a falso; no encontrar fallos no equivale a demostrar corrección.",
       "Usa specs pequeñas con objetivo, revisión, allowed_files, required_files, criterios y checks. Un DTO es parte de la spec, no prueba de diseño completo.",
+      "Añade intención humana, resultado observable, invariantes, decisiones, estados, efectos o reversibilidad solo cuando reducen una ambigüedad o riesgo material. No crees DTOs, tests ni texto ceremonial para cambios P0 locales.",
+      "Si risk_budget declara impacto alto, exige intención, resultado observable, invariante, decisión y evidencia component_real o production_like enlazada a checks. Un mock prueba lógica aislada; nunca certifica integración.",
       "Prioriza coste/riesgo total de dependencias, presupuestos de observabilidad y mediciones reales; los filtros legacy son heurísticas, no certificadores de seguridad ni rendimiento.",
       "Una spec aprobada y un claim permiten editar su allowlist con expected_hash. Las escrituras son atómicas por archivo, no una transacción de varios archivos. Claims solo coordinan agentes que usan este motor. El runner omite también argv crudo de la evidencia; usa su digest y el hash de spec para trazabilidad.",
       "Solo gate calcula accepted a partir de evidencia local vigente y supuestos materiales resueltos. Un checkpoint o texto generado nunca prueba éxito. Los checks y la aprobación son tan confiables como el host que los controla.",
@@ -1848,6 +1850,14 @@
                   "type": "integer",
                   "minimum": 100,
                   "maximum": 60000
+                },
+                "evidence_kind": {
+                  "type": "string",
+                  "enum": [
+                    "local",
+                    "component_real",
+                    "production_like"
+                  ]
                 }
               },
               "required": [
@@ -1861,6 +1871,104 @@
             "minItems": 1,
             "maxItems": 128,
             "uniqueItems": true
+          },
+          "human_intent": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "observable_outcomes": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"},
+                "statement": {"type": "string", "minLength": 1, "maxLength": 4096},
+                "criterion_ids": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"}, "minItems": 1, "maxItems": 128, "uniqueItems": true}
+              },
+              "required": ["id", "statement", "criterion_ids"],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "invariants": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"},
+                "statement": {"type": "string", "minLength": 1, "maxLength": 4096},
+                "check_ids": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"}, "minItems": 1, "maxItems": 128, "uniqueItems": true}
+              },
+              "required": ["id", "statement", "check_ids"],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "decision_records": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {"type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"},
+                "lens": {"type": "string", "enum": ["fundamentals", "language", "systems", "data", "security", "product", "platform", "scale", "constraint"]},
+                "chosen": {"type": "string", "minLength": 1, "maxLength": 4096},
+                "alternatives_rejected": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 4096}, "minItems": 1, "maxItems": 32, "uniqueItems": true},
+                "rationale": {"type": "string", "minLength": 1, "maxLength": 4096},
+                "reopen_when": {"type": "string", "minLength": 1, "maxLength": 4096}
+              },
+              "required": ["id", "chosen", "alternatives_rejected", "rationale", "reopen_when"],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "risk_budget": {
+            "type": "object",
+            "properties": {
+              "impact": {"type": "string", "enum": ["low", "medium", "high"]},
+              "uncertainty": {"type": "string", "enum": ["low", "medium", "high"]},
+              "minimum_evidence": {"type": "string", "enum": ["local", "component_real", "production_like"]}
+            },
+            "required": ["impact", "uncertainty", "minimum_evidence"],
+            "additionalProperties": false
+          },
+          "state_transitions": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "from": {"type": "string", "minLength": 1, "maxLength": 256},
+                "to": {"type": "string", "minLength": 1, "maxLength": 256},
+                "criterion_ids": {"type": "array", "items": {"type": "string", "minLength": 1, "maxLength": 80, "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"}, "minItems": 1, "maxItems": 128, "uniqueItems": true}
+              },
+              "required": ["from", "to", "criterion_ids"],
+              "additionalProperties": false
+            },
+            "minItems": 1,
+            "maxItems": 128,
+            "uniqueItems": true
+          },
+          "allowed_effects": {
+            "type": "array",
+            "items": {"type": "string", "minLength": 1, "maxLength": 256},
+            "minItems": 1,
+            "maxItems": 64,
+            "uniqueItems": true
+          },
+          "reversibility": {
+            "type": "object",
+            "properties": {
+              "strategy": {"type": "string", "minLength": 1, "maxLength": 4096},
+              "reopen_when": {"type": "string", "minLength": 1, "maxLength": 4096}
+            },
+            "required": ["strategy", "reopen_when"],
+            "additionalProperties": false
           },
           "assumptions": {
             "type": "array",

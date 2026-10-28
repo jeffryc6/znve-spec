@@ -1,11 +1,13 @@
 # Flujo spec-driven 2.5
 
-El flujo 2.5 amplía contratos de datos con especificaciones verificables. La IA propone arquitectura dentro del alcance; el humano/host autoriza su ejecución. No garantiza determinismo del modelo ni ausencia universal de drift. Los axiomas y los comandos legacy se conservan.
+El flujo 2.6 amplía contratos de datos con especificaciones verificables y pensamiento programador proporcional al riesgo. La IA propone arquitectura dentro del alcance; el humano/host autoriza su ejecución. No garantiza determinismo del modelo ni ausencia universal de drift. Los axiomas y los comandos legacy se conservan.
 
 Lee [specification.schema.json](specification.schema.json) para diseñar una spec. No inventes aprobación ni evidencia sin el MCP. Herramienta común: znve_workflow(operation, payload). El operador autoriza el hash de spec en ZNVE_APPROVED_SPECS y runners absolutos en ZNVE_RUNNERS. El runner no es sandbox; usa solo checks revisados. Sin motor, declara modo de instrucciones.
 
 - Conserva origen (observed/inferred/external), respaldo (support/refute/both/none), ejecución y vigencia como dimensiones separadas. Desconocido no equivale a falso; no encontrar fallos no equivale a demostrar corrección.
 - Usa specs pequeñas con objetivo, revisión, allowed_files, required_files, criterios y checks. Un DTO es parte de la spec, no prueba de diseño completo.
+- Añade intención humana, resultado observable, invariantes, decisiones, estados, efectos o reversibilidad solo cuando reducen una ambigüedad o riesgo material. No crees DTOs, tests ni texto ceremonial para cambios P0 locales.
+- Si risk_budget declara impacto alto, exige intención, resultado observable, invariante, decisión y evidencia component_real o production_like enlazada a checks. Un mock prueba lógica aislada; nunca certifica integración.
 - Prioriza coste/riesgo total de dependencias, presupuestos de observabilidad y mediciones reales; los filtros legacy son heurísticas, no certificadores de seguridad ni rendimiento.
 - Una spec aprobada y un claim permiten editar su allowlist con expected_hash. Las escrituras son atómicas por archivo, no una transacción de varios archivos. Claims solo coordinan agentes que usan este motor. El runner omite también argv crudo de la evidencia; usa su digest y el hash de spec para trazabilidad.
 - Solo gate calcula accepted a partir de evidencia local vigente y supuestos materiales resueltos. Un checkpoint o texto generado nunca prueba éxito. Los checks y la aprobación son tan confiables como el host que los controla.

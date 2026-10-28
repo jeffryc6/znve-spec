@@ -1,8 +1,8 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "znve",
-  "version": "2.5.0",
-  "description": "Zero-Noise Vibe Engineering (ZNVE v2.5.0): contratos inmutables, cero dependencias parásitas y mínima huella de ejecución.",
+  "version": "2.6.0",
+  "description": "Zero-Noise Vibe Engineering (ZNVE v2.6.0): contratos inmutables, cero dependencias parásitas y mínima huella de ejecución.",
   "author": {
     "name": "jeffryc6",
     "url": "https://github.com/jeffryc6"

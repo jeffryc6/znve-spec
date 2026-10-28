@@ -1,4 +1,4 @@
-# ZNVE v2.5.0 en Gemini / Antigravity
+# ZNVE v2.6.0 en Gemini / Antigravity
 
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
