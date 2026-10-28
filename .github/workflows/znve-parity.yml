@@ -28,6 +28,9 @@ jobs:
       - name: Run ZNVE Drift Verification
         run: python znve-auto/test_sync.py
 
+      - name: Verify workflow schemas and Python retirement
+        run: python znve-auto/test_workflow_sync.py
+
   mcp-server:
     runs-on: ubuntu-latest
     defaults:

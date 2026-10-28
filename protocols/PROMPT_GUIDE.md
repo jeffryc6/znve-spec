@@ -1,6 +1,8 @@
+> Compatibilidad: este documento conserva el workflow legacy. Para nuevas tareas 2.5 usa [SPEC_DRIVEN.md](SPEC_DRIVEN.md), [VERIFICATION.md](VERIFICATION.md) y [MEMORY_AND_HANDOFF.md](MEMORY_AND_HANDOFF.md). Los resultados anteriores no demuestran conducta de modelos actuales.
+
 # GUÍA MAESTRA DE PROMPTS ZNVE (ZERO-NOISE VIBE ENGINEERING)
 **Catálogo de Prompts Genéricos para Agentes de IA (Claude, Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity, Grok)**
-*Versión: 2.4.2 | Estándar: Spec-Driven Agentic Architecture*
+*Versión: 2.5.0 | Estándar: Spec-Driven Agentic Architecture*
 
 ---
 
@@ -39,7 +41,7 @@ Los formatos de salida exactos de cada comando están en [COMMANDS.md](COMMANDS.
 /znve-help
 ```
 
-La respuesta esperada es el catálogo de 10 comandos, la regla de 4 bloques y un ejemplo de uso, sin texto adicional.
+La respuesta esperada es el catálogo de 14 comandos, la regla de 4 bloques y un ejemplo de uso, sin texto adicional.
 
 ---
 

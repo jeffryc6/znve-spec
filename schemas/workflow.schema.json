@@ -1,0 +1,256 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "spec_validate": {
+      "type": "object",
+      "properties": {
+        "spec_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "spec_path"
+      ],
+      "additionalProperties": false
+    },
+    "preflight": {
+      "type": "object",
+      "properties": {
+        "spec_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        }
+      },
+      "required": [
+        "spec_path"
+      ],
+      "additionalProperties": false
+    },
+    "verify": {
+      "type": "object",
+      "properties": {
+        "spec_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "check_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"
+        }
+      },
+      "required": [
+        "spec_path",
+        "check_id"
+      ],
+      "additionalProperties": false
+    },
+    "gate": {
+      "type": "object",
+      "properties": {
+        "spec_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"
+          },
+          "minItems": 0,
+          "maxItems": 128,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "spec_path",
+        "evidence_ids"
+      ],
+      "additionalProperties": false
+    },
+    "checkpoint": {
+      "type": "object",
+      "properties": {
+        "spec_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "pending": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "minItems": 0,
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"
+          },
+          "minItems": 0,
+          "maxItems": 128,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "spec_path",
+        "pending",
+        "evidence_ids"
+      ],
+      "additionalProperties": false
+    },
+    "resume": {
+      "type": "object",
+      "properties": {
+        "spec_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "checkpoint_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"
+        }
+      },
+      "required": [
+        "spec_path",
+        "checkpoint_id"
+      ],
+      "additionalProperties": false
+    },
+    "claim": {
+      "type": "object",
+      "properties": {
+        "spec_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "owner": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"
+        },
+        "files": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "minItems": 1,
+          "maxItems": 128,
+          "uniqueItems": true
+        },
+        "ttl_seconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        }
+      },
+      "required": [
+        "spec_path",
+        "owner",
+        "files",
+        "ttl_seconds"
+      ],
+      "additionalProperties": false
+    },
+    "apply": {
+      "type": "object",
+      "properties": {
+        "spec_path": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "claim_id": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"
+        },
+        "file": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 4096
+        },
+        "expected_hash": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 64,
+          "pattern": "^(missing|[a-f0-9]{64})$"
+        },
+        "content": {
+          "type": "string",
+          "maxLength": 1048576
+        }
+      },
+      "required": [
+        "spec_path",
+        "claim_id",
+        "file",
+        "expected_hash",
+        "content"
+      ],
+      "additionalProperties": false
+    },
+    "stall_detect": {
+      "type": "object",
+      "properties": {
+        "window": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 20
+        },
+        "events": {
+          "type": "array",
+          "maxItems": 100,
+          "items": {
+            "type": "object",
+            "properties": {
+              "action": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 4096
+              },
+              "new_evidence": {
+                "type": "boolean"
+              }
+            },
+            "required": [
+              "action",
+              "new_evidence"
+            ],
+            "additionalProperties": false
+          }
+        }
+      },
+      "required": [
+        "window",
+        "events"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

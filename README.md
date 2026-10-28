@@ -1,97 +1,42 @@
-# Zero-Noise Vibe Engineering (ZNVE) v2.4.2
-> **Spec-Driven Agentic Architecture & Zero-Noise AI Software Engineering**
-> *Arquitectura Agéntica Basada en Especificaciones e Ingeniería de Software IA Cero Ruido*
+# Zero-Noise Vibe Engineering — ZNVE v2.5.0
 
-[![License: CC BY 4.0](https://img.shields.io/badge/License-CC%20BY%204.0-blue.svg)](LICENSE)
-[![Code License: MIT](https://img.shields.io/badge/Code%20License-MIT-green.svg)](LICENSE)
-[![Standard: ZNVE v2.4.2](https://img.shields.io/badge/Standard-ZNVE%20v2.4.2-purple.svg)](SPECIFICATION.md)
-[![Glossary](https://img.shields.io/badge/Glossary-ES%20%2F%20EN-lightgrey.svg)](GLOSSARY.md)
-[![MCP Server](https://img.shields.io/badge/MCP%20Server-6%20tools-orange.svg)](integrations/mcp-server/)
-[![Parity Check](https://github.com/jeffryc6/znve-spec/actions/workflows/znve-parity.yml/badge.svg)](.github/workflows/znve-parity.yml)
+**Spec-Driven Agent Engineering.** Gobernanza para reducir deriva agéntica mediante especificaciones, alcance explícito y evidencia vigente. Compatible con los comandos de 2.4.2; sin prometer determinismo del modelo ni eliminar todo el drift.
 
----
+## Qué añade 2.5
 
-## 🌐 Language / Idioma
-- 🇬🇧 [English Overview](#-english-overview)
-- 🇪🇸 [Resumen en Español](#-resumen-en-español)
+- `spec`, `verify`, `checkpoint` y `resume`, además de los diez comandos anteriores.
+- Estados separados de origen, respaldo, ejecución y vigencia.
+- Specs aprobadas por hash del host, checks reales y gate calculado por código.
+- Claims entre agentes cooperativos y escritura optimista dentro de una allowlist.
+- Un único MCP TypeScript con siete herramientas; Python de Antigravity se retira explícitamente.
+- Copilot conserva `.github/copilot-instructions.md`. Grok sigue documentado, sin carpeta dedicada.
 
----
+No se incorporan derivadas, integrales, base vectorial ni un servicio adicional de memoria. No hay cifras de mejora conductual hasta repetir evaluaciones adecuadas.
 
-## 🇬🇧 English Overview
+## Inicio
 
-### What is ZNVE?
-**Zero-Noise Vibe Engineering (ZNVE)** is an open, deterministic technical standard and agentic governance framework designed to eliminate **AI agentic drift** and **AI death loops** in AI-assisted software development.
+Lee [la especificación](SPECIFICATION.md) y [el flujo spec-driven](protocols/SPEC_DRIVEN.md). Instala solo cuando decidas adoptar esta versión:
 
-Unlike casual "vibe coding", which leads to bloated dependencies, endless repair loops and degraded context windows, ZNVE establishes a **contract-first architecture**. Human developers act as **Directors of Architecture**, while AI models (Claude, Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity, Grok) operate as **surgical tactical executors**.
+```text
+cd integrations/mcp-server
+npm ci
+npm test
+```
 
-### Core Axioms
-1. **Axiom 1 (Asymmetric Efficiency):** *Heavy intelligence in design; near-zero footprint during execution.*
-2. **Axiom 2 (Deterministic Execution):** *The AI never invents architecture; it executes strict, pre-approved contracts.*
+Desde esa carpeta registra el mismo MCP en el host elegido:
 
-### The 5 Immutable Pillars
-1. **Zero-Noise Operations:** Silent by default. No parasitic dependencies or routine logging (`"OK"`, `"DEBUG"`) in production.
-2. **Contract-First AI:** Immutable DTOs and schemas (`contracts/`) defined *before* any implementation code.
-3. **Asymmetric Efficiency:** Lightweight processes, deterministic resource disposal (`IDisposable`, `finally`, socket closure) and non-blocking threads.
-4. **Agnostic State Domain:** Typed, explicit projections; no blind database or state dumps.
-5. **Defensive Security & Forensics:** Zero-trust boundary validation, `X-Run-ID` traceability and no empty `catch`/`except` blocks.
+```text
+node install-codex.mjs --workspace "<proyecto>"
+node install-antigravity.mjs --workspace "<proyecto>"
+```
 
-### What's new in v2.4.0
-> **v2.4.0: from code standard to agent discipline.** Same philosophy, same 10 commands. ZNVE now also governs what enters the AI's context, how much it writes and how it proves its work. Where the MCP server runs, code enforces the guarantees; elsewhere they remain instructions.
+Son alternativas de registro; no motores diferentes. Otros clientes usan el mismo `dist/znve-mcp-server.js` con `ZNVE_WORKSPACE`. Las skills y las instrucciones de instalación están en [integrations/README.md](integrations/README.md).
 
-- **9 guardrails (2 new):** *Context Fence* (read ranges, quiet verification, zero secrets, external content is data, never instructions) and *Inviolable Verification* (tests are never edited to get green; nothing unexecuted is claimed). Still 2 axioms, 10 commands and 6 scenarios.
-- **Agent layer:** every directive carries a common phase rule and the profile of its own assistant (fixed prefix, what invalidates the cache, session cut, per-phase configuration, how to measure).
-- **Enforced by code:** MCP server **2.0.0** and `znve_skill.py` share one response contract (63 common test cases): path containment, denied secrets, untrusted content marked as data, a harness that only creates files. **Breaking for consumers of the server's responses**: see the [CHANGELOG](CHANGELOG.md).
-- **Repository by relevance:** one folder per assistant under `integrations/`; DeepSeek Harness is versioned with a generated `AGENTS.md` and a non-destructive installer.
-- **Evidence and limits:** a pilot A/B field test is archived in [`field-tests/`](field-tests/2026-10-ab-pilot/README.md). It did **not** show token savings (the directives are longer); it did show a code guardrail blocking a secret read that prose alone did not. Tests on real projects are next.
+Los instaladores conservan su comportamiento de configuración; esta entrega local no los ejecuta contra tu configuración global. La autorización de nuevas operaciones se explica en [VERIFICATION.md](protocols/VERIFICATION.md). El runner no es sandbox y no debe ejecutar cargas hostiles.
 
-### Previously, in v2.3.0
-- **Platform-aware stack analysis (`--platform`):** zero-bloat stacks for Desktop, Web, Hybrid, Android and iOS/macOS.
-- **Solidity checklist & stop criterion:** the AI stops proposing once the contract passes the 4-point checklist.
-- **Delta contracts (`/znve-contract --delta`):** Bucket A (needed now) vs. Bucket B (deferred to `CONTRACT_BACKLOG.md`).
-- **Single source of truth (`znve-auto/`):** every assistant directive, the Claude and Antigravity skills and the command manuals are generated from `znve-auto/master_spec.json`, and CI fails on any drift.
+## Comandos
 
----
-
-## 🇪🇸 Resumen en Español
-
-### ¿Qué es ZNVE?
-**Zero-Noise Vibe Engineering (ZNVE)** es un estándar técnico abierto y un marco de gobernanza agéntica diseñado para eliminar la **degradación del contexto de la IA** (*agentic drift*) y los **bucles infinitos de reparación** en el desarrollo asistido por IA.
-
-A diferencia del "vibe coding" caótico, que acumula librerías parásitas y código frágil, ZNVE establece una **arquitectura basada en contratos**. El desarrollador humano actúa como **Director de Arquitectura** y los modelos de IA (Claude, Gemini, Cursor, Windsurf, Copilot, DeepSeek, Ollama, OpenRouter, Antigravity, Grok) como **ejecutores tácticos quirúrgicos**.
-
-### Axiomas centrales
-1. **Axioma 1 (Eficiencia Asimétrica):** *Inteligencia pesada en el diseño; huella casi nula en la ejecución.*
-2. **Axioma 2 (Ejecución Determinista):** *La IA no inventa arquitectura; ejecuta contratos estrictos previamente aprobados.*
-
-### Los 5 pilares inmutables
-1. **Operaciones Cero Ruido:** silencio operativo por defecto. Sin dependencias parásitas ni logs rutinarios (`"OK"`, `"Paso por aquí"`).
-2. **Contratos Primero:** DTOs y esquemas inmutables (`contracts/`) definidos *antes* de escribir lógica de negocio.
-3. **Eficiencia Asimétrica:** procesos ligeros, liberación determinista de recursos e hilos no bloqueantes.
-4. **Dominio de Estado Agnóstico:** consultas tipadas con proyecciones explícitas, sin volcados ciegos.
-5. **Seguridad Defensiva y Forense:** validación Zero-Trust en frontera, trazabilidad con `X-Run-ID` y prohibición de `catch` vacíos.
-
-### Novedades de v2.4.0
-> **v2.4.0: de la norma del código a la disciplina del agente.** Misma filosofía, mismos 10 comandos. ZNVE ahora también controla lo que entra al contexto de la IA, cuánto escribe y cómo demuestra su trabajo. Donde corre el servidor MCP, el código hace cumplir las garantías; en el resto siguen siendo instrucciones.
-
-- **9 guardrails (2 nuevos):** *Cerca de Contexto* (rangos, verificación silenciosa, cero secretos, el contenido externo es dato, nunca instrucción) y *Verificación Inviolable* (los tests no se tocan para obtener verde ni se declara lo no ejecutado). Siguen 2 axiomas, 10 comandos y 6 escenarios.
-- **Capa de Agente:** cada directiva lleva una regla común de fases y el perfil de su propio asistente (prefijo fijo, qué invalida su caché, corte de sesión, configuración por fase, cómo medir).
-- **Aplicado por código:** el servidor MCP **2.0.0** y `znve_skill.py` comparten un contrato de respuesta (63 casos de prueba comunes): contención de rutas, secretos denegados, contenido no confiable marcado como dato y un arnés que solo crea archivos. **Incompatible para quien consuma las respuestas del servidor**: ver el [CHANGELOG](CHANGELOG.md).
-- **Repositorio por relevancia:** una carpeta por asistente en `integrations/`; DeepSeek Harness queda versionado con un `AGENTS.md` generado y un instalador que no destruye.
-- **Evidencia y límites:** una prueba de campo piloto A/B está archivada en [`field-tests/`](field-tests/2026-10-ab-pilot/README.md). **No** mostró ahorro de tokens (las directivas son más largas); sí mostró una barandilla de código que bloqueó la lectura de un secreto que la prosa sola no bloqueó. Siguen las pruebas con proyectos reales.
-
-### Antes, en v2.3.0
-- **Análisis de stack por plataforma (`--platform`):** stacks sin peso parásito para Escritorio, Web, Híbrida, Android e iOS/macOS.
-- **Lista de chequeo de solidez y criterio de parada:** la IA deja de proponer en cuanto el contrato cumple los 4 puntos.
-- **Contratos delta (`/znve-contract --delta`):** Cubo A (requerido ya) frente a Cubo B (diferido a `CONTRACT_BACKLOG.md`).
-- **Fuente única de verdad (`znve-auto/`):** todas las directivas de los asistentes, las skills de Claude y Antigravity y los manuales de comandos se generan desde `znve-auto/master_spec.json`, y el CI falla ante cualquier desviación.
-
----
-
-## 🛠️ Slash Commands / Comandos Agénticos
-
-The same 10 commands work across every assistant. They can be written as `/znve-contract`, `/znve contract` or `/znve -contract`. Without a command, every technical answer follows 4 blocks: Blueprint & Contract → Rationale → Atomic Task → Verification.
-
-Los mismos 10 comandos funcionan en todos los asistentes. Se escriben como `/znve-contract`, `/znve contract` o `/znve -contract`. Sin comando, toda respuesta técnica sigue 4 bloques: Blueprint y Contrato → Racional → Tarea Atómica → Verificación.
+En hosts que reservan `/`, usa `znve spec`, `$znve spec` o la forma que admita su selector de skills. Son protocolos del agente, no promesas de comandos nativos de todas las aplicaciones.
 
 <!-- >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano) -->
 | Command / Comando | Mode / Modo | Purpose | Propósito |
@@ -106,116 +51,39 @@ Los mismos 10 comandos funcionan en todos los asistentes. Se escriben como `/znv
 | `/znve-harness --target=<archivo_legacy>` | 5 | Black-box Golden Master suite on intact code. | Suite Golden Master de caja negra sobre código intacto. |
 | `/znve-legacy-rescue` | 5 | End-to-end 5-phase legacy orchestration. | Orquestación integral en 5 fases para código legacy. |
 | `/znve-audit --target=<módulo>` | 6 | Hardening of threads, memory, descriptors and security. | Hardening de hilos, memoria, descriptores y seguridad. |
+| `/znve-spec --spec=<ruta>` | 1, 2, 3, 4, 5, 6 | Design a verifiable specification. | Diseña comportamiento, interfaces, límites, efectos, supuestos y criterios de aceptación. |
+| `/znve-verify --spec=<ruta>` | 1, 2, 3, 4, 5, 6 | Run authorized checks and evaluate the gate. | Ejecuta checks autorizados y evalúa criterios con gate. |
+| `/znve-checkpoint --spec=<ruta>` | 1, 2, 3, 4, 5, 6 | Persist task state and evidence references. | Persiste pendientes, hashes y referencias a evidencia. |
+| `/znve-resume --spec=<ruta>` | 1, 2, 3, 4, 5, 6 | Resume against current spec and file hashes. | Contrasta checkpoint, spec y archivos actuales. |
 <!-- <<< znve:generated -->
 
-Full manual with output formats, MCP tools and per-assistant setup / Manual completo con formatos de salida, herramientas MCP y configuración por asistente: [protocols/COMMANDS.md](protocols/COMMANDS.md).
+## Documentación
 
----
+- [Spec-driven](protocols/SPEC_DRIVEN.md): estructura, aprobación y compatibilidad.
+- [Verificación](protocols/VERIFICATION.md): runner, gate, errores y límites.
+- [Memoria y handoff](protocols/MEMORY_AND_HANDOFF.md): checkpoints, vigencia y concurrencia.
+- [Manual generado](protocols/COMMANDS.md): comandos, herramientas e integraciones.
+- [Workflows](protocols/workflows/README.md): hotfix, upgrade, legacy y hardening.
+- [Notas 2.5.0](releases/2.5.0/README.md): migración y alcance de entrega.
 
-## 🚀 Quick Start / Inicio Rápido
+`field-tests/`, `rfcs/` y `releases/2.4.2/` conservan historia. Sus resultados, transcripciones y versiones no se actualizan para aparentar una nueva evaluación.
 
-| Assistant / Asistente | Setup / Instalación |
-| :--- | :--- |
-| **Claude (claude.ai)** | Upload / Sube [`znve.zip`](integrations/claude/skills/znve.zip) in *Settings → Capabilities → Skills* |
-| **Claude Code** | Copy / Copia [`integrations/claude/skills/znve/`](integrations/claude/skills/znve/) to `~/.claude/skills/` |
-| **Claude Projects** | Paste / Pega [`project-instructions.md`](integrations/claude/project-instructions.md) in *Project Instructions* |
-| **Gemini (app & CLI)** | Upload / Sube [`gemini/skills/znve/`](integrations/gemini/skills/znve/) in *Settings → Skills* · CLI: `gemini skills install` ([`INSTALL_GEMINI.md`](integrations/gemini/INSTALL_GEMINI.md)) |
-| **Grok (desktop)** | Copy / Copia [`grok/skills/znve/`](integrations/grok/skills/znve/) to / a `~/.grok/skills/znve/` and enable it / y actívala |
-| **GitHub Copilot** | [`.github/copilot-instructions.md`](.github/copilot-instructions.md) (already in place / ya incluido) |
-| **Cursor / Windsurf** | Copy / Copia [`cursorrules.md`](integrations/cursor/cursorrules.md) as / como `.cursorrules` |
-| **DeepSeek** | [`directive.md`](integrations/deepseek/directive.md) as the `system` message / como mensaje `system` |
-| **Ollama** | `ollama create znve-agent -f ./integrations/ollama/Modelfile` |
-| **OpenRouter** | [`system-prompt.md`](integrations/openrouter/system-prompt.md) + [`response-schema.json`](integrations/openrouter/response-schema.json) |
-| **Antigravity** | [`INSTALL_ANTIGRAVITY.md`](integrations/antigravity/INSTALL_ANTIGRAVITY.md) (skill) · [`ANTIGRAVITY_INSTALL.md`](integrations/mcp-server/ANTIGRAVITY_INSTALL.md) (MCP) |
+## Fuente única y validación
 
-### English
-1. **Install ZNVE** in your assistant using the table above.
-2. **Design the contract:** send `/znve-contract --platform=<desktop|web|mobile|hybrid>` with your requirement.
-3. **Approve and execute:** check the 4-point solidity checklist, freeze the contract and run `/znve-execute --target=<file>`.
-
-See [protocols/GREENFIELD_STARTER.md](protocols/GREENFIELD_STARTER.md) for a Day 0 walkthrough and [protocols/PROMPT_GUIDE.md](protocols/PROMPT_GUIDE.md) for ready-to-use prompts.
-
-### Español
-1. **Instala ZNVE** en tu asistente con la tabla anterior.
-2. **Diseña el contrato:** envía `/znve-contract --platform=<desktop|web|mobile|hybrid>` con tu requerimiento.
-3. **Aprueba y ejecuta:** verifica la lista de chequeo de 4 puntos, congela el contrato y ejecuta `/znve-execute --target=<archivo>`.
-
-Consulta [protocols/GREENFIELD_STARTER.md](protocols/GREENFIELD_STARTER.md) para un recorrido de día 0 y [protocols/PROMPT_GUIDE.md](protocols/PROMPT_GUIDE.md) para prompts listos para usar.
-
----
-
-## 📂 Repository Layout / Estructura del Repositorio
+`znve-auto/master_spec.json` genera directivas, schemas y paquetes reproducibles. No edites artefactos generados a mano.
 
 ```text
-znve-spec/
-├── .github/
-│   ├── copilot-instructions.md        <-- GitHub Copilot directive (generated)
-│   └── workflows/znve-parity.yml      <-- CI: spec parity & drift check
-├── field-tests/
-│   └── 2026-10-ab-pilot/              <-- Pilot A/B field test (v2.3.0 vs v2.4.0 directives)
-├── protocols/
-│   ├── ZNVE_PROTOCOL.md               <-- Universal master protocol (6 modes)
-│   ├── ZNVE_MODERN_APPS_PROTOCOL.md   <-- Modern apps: triage, hotfix & upgrades
-│   ├── ZNVE_LEGACY_PROTOCOL.md        <-- 5-phase legacy rescue protocol
-│   ├── GREENFIELD_STARTER.md          <-- Day 0 quickstart
-│   ├── PROMPT_GUIDE.md                <-- Prompt templates per command
-│   └── COMMANDS.md                    <-- Full command & MCP manual (generated)
-├── integrations/                      <-- One folder per assistant (index: integrations/README.md)
-│   ├── claude/                        <-- Skill + znve.zip, Claude Projects / CLAUDE.md (generated)
-│   ├── gemini/                        <-- Gemini app & Gemini CLI skill (generated)
-│   ├── grok/                          <-- Grok desktop skill, flat frontmatter (generated)
-│   ├── antigravity/                   <-- Antigravity skill, SDK module & installers
-│   ├── cursor/cursorrules.md          <-- Cursor / Windsurf rules (generated)
-│   ├── deepseek/                      <-- directive.md (generated) & harness/ (DeepSeek Harness)
-│   ├── ollama/Modelfile               <-- Ollama local agent (generated)
-│   ├── openrouter/                    <-- System prompt (generated), JSON schema & client
-│   └── mcp-server/                    <-- stdio MCP server (6 tools) & Antigravity installer
-├── releases/                          <-- Release notes and verification evidence per version
-├── rfcs/                              <-- Request for Comments
-├── znve-auto/                         <-- Single source of truth: spec, builder & parity tests
-├── CHANGELOG.md                       <-- Version history & migration notes
-├── CONTRIBUTING.md                    <-- Contribution guidelines
-├── GLOSSARY.md                        <-- Technical glossary (ES/EN)
-├── LICENSE                            <-- Dual license (CC BY 4.0 + MIT)
-├── README.md                          <-- This file
-├── SPECIFICATION.md                   <-- Formal technical specification v2.4.2
-└── index.html                         <-- GitHub Pages landing page
-```
-
----
-
-## 🔁 Maintaining ZNVE / Mantenimiento
-
-Commands, guardrails and the version live in [`znve-auto/master_spec.json`](znve-auto/master_spec.json). Files marked *generated* must not be edited by hand.
-
-Los comandos, los guardrails y la versión viven en [`znve-auto/master_spec.json`](znve-auto/master_spec.json). Los archivos marcados como *generated* no se editan a mano.
-
-```bash
-python znve-auto/builder.py
-```
-
-```bash
+python znve-auto/builder.py --verify
 python znve-auto/test_sync.py
+python znve-auto/test_workflow_sync.py
 ```
 
-```bash
-cd integrations/mcp-server && npm ci && npm test
-```
+Después, desde `integrations/mcp-server/`, ejecuta `npm test` y `npm run check:openrouter`. El CI ejecuta las mismas comprobaciones. Detalles en [znve-auto/README.md](znve-auto/README.md).
 
-The first command regenerates every artifact; the second certifies parity; the third builds the MCP server and runs its regression suite. All of them run in CI on every push and pull request. Details in [znve-auto/README.md](znve-auto/README.md).
+## English overview
 
-El primero regenera todos los artefactos; el segundo certifica la paridad; el tercero compila el servidor MCP y ejecuta su suite de regresión. Todos se ejecutan en el CI en cada push y pull request. Detalles en [znve-auto/README.md](znve-auto/README.md).
+ZNVE 2.5 adds verifiable specifications, host-approved execution, current evidence, acceptance gates and resumable task state. All supported hosts consume one shared MCP implementation. Existing tools remain compatible; the retired Antigravity Python engine fails explicitly. Grok remains documented without a dedicated distribution. Runtime isolation depends on the host. Passing checks do not prove specification completeness or universal agent reliability.
 
----
+## Licencias
 
-## 📜 Dual License / Licenciamiento Dual
-
-- **Specification & documentation / Especificación y documentación** (`SPECIFICATION.md`, `README.md`, `GLOSSARY.md`, `CONTRIBUTING.md`, `rfcs/`, `releases/`, `case-studies/`, `field-tests/`): [CC BY 4.0](LICENSE).
-- **Protocols & integrations / Protocolos e integraciones** (`protocols/`, `integrations/`: protocols, command manual, agent directives, skills, MCP server / protocolos, manual de comandos, directivas, skills, servidor MCP): [CC BY 4.0 **and** MIT](LICENSE). Both licenses apply together; use whichever fits / Ambas licencias a la vez; elige la que te convenga.
-- **Repository tooling / Herramientas del repositorio** (`znve-auto/`, `.github/`, `index.html`): [MIT](LICENSE).
-
----
-
-<p align="center">
-  <b>Zero-Noise Vibe Engineering (ZNVE)</b> — <i>Surgical Rigor in AI-Assisted Architecture</i>
-</p>
+Consulta [LICENSE](LICENSE): documentación bajo CC BY 4.0; protocolos e integraciones con CC BY 4.0 y MIT; herramientas de generación y schemas bajo MIT. No se modifica el licenciamiento de datos externos archivados.

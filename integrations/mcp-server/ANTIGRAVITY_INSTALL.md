@@ -1,8 +1,10 @@
 # ZNVE MCP Server: instalación en Google Antigravity
 
-Servidor MCP por **stdio** (`@modelcontextprotocol/sdk`) que expone 6 herramientas:
+Servidor MCP por **stdio** (`@modelcontextprotocol/sdk`) que expone 7 herramientas:
 `znve_help`, `znve_forensic_scan`, `znve_validate_contract`, `znve_scaffold_harness`,
-`znve_surgical_write` y `znve_audit_resources`.
+`znve_surgical_write`, `znve_audit_resources` y `znve_workflow`.
+
+Es el mismo motor que utilizan Codex y otros clientes MCP. No es una implementación exclusiva de Antigravity. Para aprobar specs/runners y conocer sus límites, consulta [VERIFICATION.md](../../protocols/VERIFICATION.md). El ejemplo del SDK permanece **NO INTEGRADO** hasta ejecutar un smoke contra ese SDK real.
 
 Referencias: [Model Context Protocol](https://modelcontextprotocol.io) ·
 [Antigravity SDK: MCP](https://antigravity.google/docs/sdk/mcp/#model-context-protocol-mcp-integration) ·
@@ -36,7 +38,7 @@ Qué hace, en orden (aborta en el primer fallo):
 
 1. `npm ci` (o `npm install` si no hay lockfile).
 2. `npm run build`, que genera `dist/znve-mcp-server.js`.
-3. **Smoke test MCP real**: arranca el servidor desde un cwd ajeno y envía `initialize` → `notifications/initialized` → `tools/list`. Exige exactamente las 6 herramientas que declara `znve-auto/master_spec.json` y que stdout no tenga ruido fuera de JSON-RPC.
+3. **Smoke test MCP real**: arranca el servidor desde un cwd ajeno y envía `initialize` → `notifications/initialized` → `tools/list`. Exige exactamente las 7 herramientas que declara `znve-auto/master_spec.json` y que stdout no tenga ruido fuera de JSON-RPC.
 4. Localiza el `mcp_config.json` de Antigravity, en este orden:
    - Si `znve-engine` ya está registrado en alguno, **lo actualiza ahí** (en todos los que lo tengan), para no dejar una entrada antigua apuntando a una ruta que ya no existe.
    - Si no, usa el primero que exista entre `~/.gemini/config/mcp_config.json` (la ruta global documentada), `~/.gemini/antigravity-ide/mcp_config.json` y `~/.gemini/antigravity/mcp_config.json`.
@@ -46,7 +48,7 @@ Qué hace, en orden (aborta en el primer fallo):
 5. Guarda un backup (`mcp_config.json.bak-<timestamp>`) y **fusiona** la entrada `znve-engine`. Los demás servidores quedan intactos.
 
 Después, en Antigravity: **panel Agent → menú `…` → MCP Servers → Manage MCP Servers → Refresh**.
-`znve-engine` debe aparecer con 6 herramientas.
+`znve-engine` debe aparecer con 7 herramientas.
 
 ### Opciones
 

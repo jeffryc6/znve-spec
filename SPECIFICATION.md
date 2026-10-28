@@ -1,148 +1,39 @@
-# SPECIFICATION.md: Zero-Noise Vibe Engineering (ZNVE)
-**Norma Técnica Universal y Gobernanza Agéntica v2.4.2**
-*Status: Standard | Classification: Spec-Driven Agentic Software Architecture*
+# ZNVE v2.5.0 — Spec-Driven Agent Engineering
 
----
+Norma de gobernanza para reducir drift, acotar acciones y mantener trazabilidad. La IA propone; humano/host autoriza el alcance; herramientas comprueban las propiedades que pueden observar. Ninguna directiva garantiza determinismo del modelo ni ausencia de defectos.
 
-## 1. PREÁMBULO Y FUNDAMENTOS FILOSÓFICOS
+## 1. Compatibilidad y axiomas
 
-Zero-Noise Vibe Engineering (ZNVE) es una norma técnica y metaprotocolo de arquitectura de software diseñado para transformar la programación asistida por Inteligencia Artificial (LLMs, agentes autónomos y asistentes de IDE) en una disciplina quirúrgica, determinista y de alta precisión.
+Se conservan los axiomas legacy:
 
-ZNVE resuelve estructuralmente el "bucle de degradación agéntica" (*AI agentic drift*) y la acumulación de deuda técnica derivados de la generación no restringida de código.
+1. Inteligencia pesada en el diseño; huella casi nula en la ejecución.
+2. La IA no inventa arquitectura; ejecuta contratos deterministas.
 
-### 1.1 Axiomas Inmutables
-1. **Axioma 1 (Diseño Pesado, Ejecución Silenciosa):** *Inteligencia concentrada en la fase de diseño y contrato; huella física y computacional mínima en la ejecución.*
-2. **Axioma 2 (Ejecución de Contratos Deterministas):** *La IA no inventa arquitectura ni improvisa tipos; ejecuta contratos estrictos y preaprobados.*
+Su lectura operativa en 2.5 permite propuestas de arquitectura antes de su autorización. “Determinista” describe los límites y comprobaciones ejecutables, no la generación del modelo ni toda semántica de un programa. Las reglas legacy se mantienen para compatibilidad; el flujo nuevo tiene especificación y estados explícitos.
 
-El Axioma 1 aplica también a la ejecución del propio agente: lo que lee (contexto) y lo que escribe (salida) es huella de ejecución, y se mantiene al mínimo (guardrail 8). El Axioma 2 incluye la verificación: el agente no altera las pruebas para obtener verde ni declara lo que no ejecutó, y no sustituye por un simulador un motor o dependencia real que el contrato nombra: sin smoke test ejecutado contra el real, el resultado es NO INTEGRADO (guardrail 9).
+## 2. Pilares y guardrails
 
-### 1.2 Roles
-* **Director de Arquitectura (humano):** delimita el perímetro, aprueba contratos y certifica la paridad.
-* **Ejecutor Táctico (IA):** produce sintaxis determinista que satisface el contrato, sin cambios estructurales no autorizados.
+Se conservan cinco pilares: mínimo ruido útil, especificación previa, eficiencia de recursos, estado explícito y seguridad/verificación. Las directivas los traducen en 9 guardrails legacy: higiene de dependencias, ruido de runtime, contrato primero, hilo principal, persistencia, errores, concisión, contexto y Verificación Inviolable.
 
----
+En el flujo 2.5:
 
-## 2. LOS 5 PILARES DE ZNVE
+- Dependencias se justifican por coste/riesgo total; nativo no es sinónimo de seguro.
+- Observabilidad tiene presupuesto; no se ocultan métricas ni auditoría necesaria.
+- Lecturas se seleccionan por relevancia y se repiten si la fuente cambia.
+- Un conjunto de archivos autorizado sustituye al target único solo con `--spec`.
+- Los cambios a pruebas existentes nunca se justifican por obtener verde; requieren revisar intención y spec.
+- Sesiones y modelos se eligen por riesgo/capacidad; no se exige cortar contexto al acabar cada fase nueva.
+- Filtros léxicos son sensores parciales. `CLEAN`/`APPROVED` legacy no acreditan aceptación completa.
 
-```
-┌──────────────────────────────────────────────────────────────────────────┐
-│                          LOS 5 PILARES DE ZNVE                           │
-├───────────────┬───────────────┬───────────────┬───────────────┬──────────┤
-│ 1. CERO RUIDO │ 2. CONTRATOS  │ 3. EFICIENCIA │ 4. ESTADO     │ 5. SEG.  │
-│    (ANTI-     │    PRIMERO    │   ASIMÉTRICA  │    AGNÓSTICO  │ DEFENSIVA│
-│    BLOAT)     │ (CONTRACT-1st)│ (LOW-FOOTPRINT│ (PROYECCIONES)│ & FORENS.│
-└───────────────┴───────────────┴───────────────┴───────────────┴──────────┘
-```
+## 3. Spec y estados
 
-### Pilar 1: Cero Ruido (Zero-Noise Operations & Anti-Bloat Fence)
-* Prohibición absoluta de librerías de terceros no esenciales o parásitas.
-* Prohibida la emisión de logs rutinarios de confirmación en entornos de producción. La telemetría opera por excepción.
+`schemas/specification.schema.json` define identidad/revisión, objetivo, allowed_files, required_files, criterios, checks y supuestos. El archivo no se incluye en su propia allowlist. Rutas canónicas relativas y listas sin alias; la spec no puede autoautorizar cambios.
 
-### Pilar 2: Contratos Primero (Contract-First AI)
-* Antes de escribir una sola línea de lógica de negocio, se debe definir el contrato inmutable en la carpeta `contracts/` (DTOs, Zod, Pydantic v2 o JSON Schema).
-* Poda de Contexto (*Context Boundary Pruning*): los agentes de IA reciben únicamente el contrato activo y el archivo objetivo (`TARGET_FILE`).
+Origen (`observed/inferred/external`), respaldo (`support/refute/both/none`), resultado de ejecución y vigencia son dimensiones distintas. Estado desconocido no significa falso, ni prueba omitida significa pasada. Los reportes de modelos pueden indicar not_run/running/passed/failed/blocked/skipped; evidencia real del runner solo se emite tras terminar la ejecución.
 
-### Pilar 3: Eficiencia Asimétrica y Respeto a Recursos
-* Consumo mínimo de CPU y RAM. Liberación determinista de recursos (`close`, `dispose`, `finally`, `unbinding`).
-* Garantía de hilos no bloqueantes (I/O asíncrono obligatorio).
+La aprobación es un hash SHA-256 revisado y configurado por el host, no un booleano que el agente se asigna. Cambiar bytes de spec revoca esa coincidencia. Los checks son tan correctos como su diseño y las entradas declaradas.
 
-### Pilar 4: Dominio de Estado Agnóstico
-* Consultas y mutaciones de estado estrictamente proyectadas.
-* Prohibidas las consultas ciegas o escaneos masivos en memoria.
-
-### Pilar 5: Seguridad Defensiva y Diagnóstico Forense
-* Validación y sanitización estricta en fronteras de entrada.
-* Prohibidos los bloques `try/catch` vacíos o el silenciamiento de excepciones. Trazabilidad con `X-Run-ID`.
-
-### 2.6 Guardrails operativos
-Las directivas de los asistentes traducen los 5 pilares en 9 guardrails que el agente aplica en cada respuesta:
-
-| # | Guardrail | Pilar |
-|---|---|---|
-| 1 | Higiene radical de dependencias (Anti-Bloat Fence) | 1 |
-| 2 | Cero ruido en runtime | 1 |
-| 3 | Contrato primero | 2 |
-| 4 | Respeto al hilo principal | 3 |
-| 5 | Persistencia eficiente y agnóstica | 4 |
-| 6 | Cero supresión silenciosa | 5 |
-| 7 | Cero relleno conversacional | 1 |
-| 8 | Cerca de Contexto (Context Fence) | 1 |
-| 9 | Verificación Inviolable | 2 |
-
-### 2.7 Capa de Agente
-
-La Capa Camaleónica adapta ZNVE a la plataforma del proyecto; la **Capa de Agente** lo adapta a la IA que se usa. Cada directiva generada lleva dos partes:
-
-* **Regla común de fases:** cada fase es una sesión; las de diseño (`contract`, `forensic`, `triage`, `audit`) usan el modelo o nivel de razonamiento más alto disponible y las de ejecución (`execute`, `hotfix`, `harness`), el más rápido que cumpla el contrato; la configuración se elige al abrir la sesión y no cambia dentro de ella.
-* **Perfil del asistente:** solo el suyo (prefijo fijo, qué invalida su caché, corte de sesión, configuración por fase y campos de medición). Describen comportamiento y no llevan cifras, porque caducan; están en `agent_profiles` de `znve-auto/master_spec.json` y la SECCIÓN 5 de `protocols/COMMANDS.md` los reúne.
-
-Los guardrails 8 y 9 son instrucciones en todos los asistentes; **el servidor MCP y `znve_skill.py` además las aplican por código** (lista de secretos denegada, contenido marcado como dato no confiable, arnés que solo crea). Donde no hay servidor, siguen siendo instrucciones y no una garantía.
-
----
-
-## 3. FLUJO DE CONTRATOS Y CONTROL ANTI-BUCLE
-
-### 3.1 Análisis Tecnológico por Plataforma (`--platform`)
-Al activar `/znve-contract`, la IA evalúa el tipo de aplicación y sugiere el stack con cero peso parásito:
-
-* **Escritorio (Windows / macOS / Linux), `desktop`:** Rust + Tauri v2 o WinUI 3 nativo | Persistencia: SQLite (WAL mode) / DuckDB.
-* **macOS Nativo, `desktop`:** Swift 6 + SwiftUI | Persistencia: SwiftData.
-* **Web-App, `web`:** Vite + TypeScript / Next.js App Router | Persistencia: IndexedDB nativo (Dexie.js solo como excepción justificada).
-* **Híbrida (Mobile / Desktop), `hybrid`:** Tauri Mobile / Flutter / React Native Bare | Persistencia: almacenamiento nativo de la plataforma (MMKV o WatermelonDB solo como excepción justificada).
-* **Android Nativo, `mobile`:** Kotlin + Jetpack Compose + Corrutinas | Persistencia: Room DB.
-* **iOS / iPadOS Nativo, `mobile`:** Swift 6 + SwiftUI | Persistencia: SwiftData.
-
-**Excepciones al Anti-Bloat Fence:** una librería de terceros solo entra si el SDK nativo no ofrece la capacidad, y el contrato lo justifica en la Anti-Bloat Fence: qué resuelve, su peso y la alternativa nativa descartada.
-
-### 3.2 Lista de Chequeo de Solidez y Criterio de Parada
-Para evitar sugerencias infinitas de la IA, el contrato debe cumplir 4 puntos antes de programar:
-
-1. `[x]` **Estructura Invariable:** Entradas, salidas, entidades y Enums tipados.
-2. `[x]` **Defensas de Frontera:** Excepciones y errores explicitados (sin `any` ni `catch` genéricos).
-3. `[x]` **Cero Dependencias Parásitas:** Uso exclusivo del SDK nativo, el runtime aprobado o una excepción justificada en la Anti-Bloat Fence.
-4. `[x]` **Filtro de Diferimiento:** Ideas secundarias movidas a `contracts/CONTRACT_BACKLOG.md`.
-
-> **🛑 CRITERIO DE PARADA OBLIGATORIO (STOP CRITERION):**
-> Al cumplirse los 4 puntos, la IA emite: *“Contrato v1 sólido y cerrado. Listo para /znve-execute.”* y DETIENE la generación.
-
-### 3.3 Análisis Delta (`/znve-contract --delta`)
-Para proyectos en desarrollo o actualización de versiones:
-1. Audita discrepancias entre `contracts/` y `src/`.
-2. Clasifica en **Cubo A (Requerido Ya / Etapa Activa)** y **Cubo B (Diferido a `CONTRACT_BACKLOG.md`)**.
-3. Sincroniza y re-congela el contrato antes de modificar código.
-
----
-
-## 4. LOS 6 MODOS OPERATIVOS UNIVERSALES
-
-| Modo | Nombre | Flujo de comandos |
-|---|---|---|
-| 🟢 1 | **Greenfield** (proyectos nuevos, día 0) | `/znve-contract` → `/znve-execute` |
-| 🔵 2 | **In-Flight** (proyectos activos y nuevas capacidades) | `/znve-contract --delta` → `/znve-execute` |
-| 🟠 3 | **Hotfix & Recovery** (triaje de crisis en producción) | `/znve-triage` → `/znve-hotfix` |
-| 🟣 4 | **Modern Maintenance** (migración de SDKs y breaking changes) | `/znve-upgrade` |
-| 🟡 5 | **Legacy Rescue** (refactorización en 5 fases de monolitos críticos) | `/znve-forensic` → `/znve-harness` → `/znve-legacy-rescue` |
-| 🔴 6 | **Audit & Hardening** (higiene técnica, memoria y seguridad) | `/znve-audit` |
-
-Las 5 fases de Legacy Rescue son: ingesta pasiva, reporte forense, arnés Golden Master, Shadow Run (`Salida(Nuevo) == Salida(Legacy)`) y Strangler Fig. No se avanza de fase sin que la anterior esté verificada.
-
----
-
-## 5. CAPA CAMALEÓNICA (PLATFORM-SPECIFIC ADAPTERS)
-
-Restricciones adicionales por stack. Se suman a los guardrails globales; no los reemplazan.
-
-* **Android:** `WorkManager`, `LifecycleOwner` y `StateFlow`; sin `WakeLock` innecesarios, sin retener contextos de Activity ni bloquear el hilo de UI.
-* **iOS / macOS (Swift):** SwiftUI sobre `@MainActor` solo para vistas, trabajo pesado en `Actors` de fondo y `BGTaskScheduler`; sin capturas fuertes de `self` (`[weak self]`).
-* **Windows Desktop (C# / WinUI / WPF / C++):** `IDisposable` estricto, `async/await` puro sin `.Result`/`.Wait()`, mutex de instancia única y ciclos de render aislados.
-* **Híbridos (Tauri / Flutter / React Native):** IPC liviano con payloads mínimos y aislamiento de procesos nativos.
-* **Web / Backend:** APIs nativas, contratos OpenAPI / JSON Schema, proyecciones, timeouts estrictos, middleware de sanitización y apagado elegante.
-
----
-
-## 6. GOBERNANZA AGÉNTICA Y COMANDOS `/znve-*`
-
-Cada comando impone un rol cerrado y un formato de salida con encabezados fijos (ver [protocols/COMMANDS.md](protocols/COMMANDS.md)). Las formas `/znve-contract`, `/znve contract` y `/znve -contract` son equivalentes; `/znve` solo equivale a `/znve-help`.
+## 4. Operaciones
 
 <!-- >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano) -->
 * `/znve-help` (todos): Manual operativo e índice de comandos. Solo lectura.
@@ -155,63 +46,42 @@ Cada comando impone un rol cerrado y un formato de salida con encabezados fijos 
 * `/znve-harness --target=<archivo_legacy>` (modo 5): Suite Golden Master de caja negra sobre código intacto.
 * `/znve-legacy-rescue` (modo 5): Orquestación integral en 5 fases para código legacy.
 * `/znve-audit --target=<módulo>` (modo 6): Hardening de hilos, memoria, descriptores y seguridad. Solo lectura.
+* `/znve-spec --spec=<ruta>` (modo 1, 2, 3, 4, 5, 6): Diseña comportamiento, interfaces, límites, efectos, supuestos y criterios de aceptación. Solo lectura.
+* `/znve-verify --spec=<ruta>` (modo 1, 2, 3, 4, 5, 6): Ejecuta checks autorizados y evalúa criterios con gate.
+* `/znve-checkpoint --spec=<ruta>` (modo 1, 2, 3, 4, 5, 6): Persiste pendientes, hashes y referencias a evidencia.
+* `/znve-resume --spec=<ruta>` (modo 1, 2, 3, 4, 5, 6): Contrasta checkpoint, spec y archivos actuales. Solo lectura.
 <!-- <<< znve:generated -->
 
----
+Los diez comandos anteriores conservan su propósito. Los nuevos spec/verify/checkpoint/resume usan `znve_workflow`. `execute --spec` usa claim y apply. Los seis escenarios se conservan; un cambio funcional importante de un comando existente exige versión mayor.
 
-## 7. FORMATO DE RESPUESTA POR DEFECTO
+## 5. Motor común
 
-Toda consulta técnica sin comando se responde en 4 bloques cerrados:
+Solo `integrations/mcp-server/` implementa reglas ejecutables. Transporte stdio, siete herramientas: las seis legacy y `znve_workflow`. Esta última agrupa spec_validate, preflight, verify, gate, checkpoint, resume, claim, apply y stall_detect.
 
-1. **BLOQUE 1: SYSTEM BLUEPRINT & CONTRATO:** límites, plataforma, Anti-Bloat Fence y contrato estricto (DTO/interfaz).
-2. **BLOQUE 2: RACIONAL DE INGENIERÍA:** 2-3 viñetas que justifican la mínima huella y la ausencia de dependencias parásitas.
-3. **BLOQUE 3: TAREAS ATÓMICAS DE IMPLEMENTACIÓN:** `TARGET_FILE` único, acción quirúrgica y restricciones aplicadas.
-4. **BLOQUE 4: VERIFICACIÓN ATÓMICA:** comando de terminal determinista o prueba reproducible.
+Schemes y descripciones proceden de master_spec.json. Zod valida la envoltura MCP y el módulo workflow valida un subconjunto explícito de JSON Schema (objetos, propiedades, requeridos, tipos, arrays, enum, tamaños, patrones y cotas enteras). No se anuncia compatibilidad con todo JSON Schema.
 
-Las preguntas conceptuales se responden de forma directa, sin forzar los 4 bloques.
+Los procesos verificadores requieren runners absolutos autorizados y spec aprobada. No usan shell, no heredan claves API y no devuelven output/argv crudos. El host aporta sandbox/permisos; no se promete confinamiento de procesos ni protección frente al dueño del workspace.
 
----
+## 6. Evidencia y aceptación
 
-## 8. HERRAMIENTAS MCP (`znve_*`)
+Evidencia: spec/hash, check, snapshot antes de ejecutar, estado, exit code, límites, digests y fecha. Gate acepta únicamente criterios obligatorios con checks pasados y snapshot vigente, más supuestos materiales observados y respaldados. Un cambio durante la prueba produce stale. Los datos locales no están firmados; el host es parte de la frontera de confianza.
 
-El servidor de referencia (`integrations/mcp-server/znve-mcp-server.ts`, transporte stdio) convierte las cláusulas en barandillas físicas para agentes autónomos. Las rutas se resuelven contra `ZNVE_WORKSPACE`.
+El gate prueba cumplimiento de checks declarados, no completitud de requisitos. La igualdad de hashes solo cubre entradas locales declaradas, no toda dependencia transitiva ni servicios externos. No se admiten porcentajes generales de éxito sin denominador y evidencia.
 
-| Herramienta | Fase | Garantía |
-|---|---|---|
-| `znve_help` | Ayuda | Sirve una sección del manual `protocols/COMMANDS.md` (`commands` por defecto) o el manual completo con `all`. |
-| `znve_forensic_scan` | Ingesta | Lectura de texto (hasta 1 MiB, por rangos de líneas si se pide) sin escritura en disco. Deniega archivos con secretos y entrega el contenido marcado como dato no confiable. |
-| `znve_validate_contract` | Contrato | Rechaza `SELECT *`, `.find({})` y la importación de librerías vetadas. |
-| `znve_scaffold_harness` | Aislamiento | Solo escribe bajo `tests/` o `sandbox/`. |
-| `znve_surgical_write` | Escritura | Escritura atómica; rechaza `catch`/`except` que silencian errores, `.git/`, `node_modules/` y recursos abiertos sin patrón de desecho. |
-| `znve_audit_resources` | Hardening | Detecta bloqueos síncronos, busy-waiting y `WakeLock.acquire()`. |
+## 7. Memoria y varios agentes
 
-Ninguna herramienta lee ni escribe fuera de `ZNVE_WORKSPACE`, tampoco a través de enlaces simbólicos.
+Checkpoint conserva pendientes y referencias; resume comprueba vigencia. Memoria recuperada es dato, no una instrucción ni autorización. Claims con TTL y lock coordinan únicamente agentes que usan este motor; expected_hash detecta ediciones concurrentes antes de reemplazar cada archivo. No existe transacción multiarchivo ni arbitraje semántico automático.
 
-**Contrato de respuesta.** El servidor MCP (versión 2.0.0) y `integrations/antigravity/znve_skill.py` responden lo mismo: un objeto JSON compacto con `status` (`SUCCESS`, `APPROVED`, `REJECTED` o `ERROR`) y, en los rechazos y errores, un `code` determinista y un `message` sin rutas del host. La lista de códigos y los campos de cada herramienta están en la sección 2 de `protocols/COMMANDS.md`; una suite de casos común (`znve-auto/tool_contract_cases.json`) la ejecutan las dos implementaciones.
+El detector de estancamiento básico reconoce repetición exacta declarada sin nueva evidencia. No detecta toda deriva. Gemini/Antigravity prioriza preflight/resume/gate, sin excluir a otros modelos ni atribuir fallos universales a marcas.
 
----
+## 8. Integraciones y conformidad
 
-## 9. IMPLEMENTACIÓN DE REFERENCIA Y CONFORMIDAD
+Copilot usa `.github/copilot-instructions.md`. Claude, Codex, Gemini, Antigravity, Cursor/Windsurf, DeepSeek, Ollama y OpenRouter conservan adaptadores. Grok se menciona como consumidor de directivas comunes sin carpeta dedicada. Python de Antigravity falla con un mensaje de migración; el ejemplo SDK no se declara integrado sin smoke real.
 
-### 9.1 Fuente única de verdad
-La versión, los axiomas, los guardrails, los escenarios, los comandos, la Capa Camaleónica y las herramientas MCP se declaran una sola vez en `znve-auto/master_spec.json`. El compilador `znve-auto/builder.py` (biblioteca estándar de Python) genera a partir de ella las directivas de Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter, Antigravity y Grok, los manuales de comandos y los bloques gestionados de esta especificación, el README y la página web.
+Paridad de artefactos no demuestra conducta del modelo. La conformidad ejecutable requiere suites del MCP y schemas; compatibilidad de cada host requiere verificación en ese host. Evidencia archivada conserva versiones y limitaciones originales.
 
-### 9.2 Conformidad
-Una directiva o herramienta es conforme con ZNVE v2.4.2 si:
-1. Expone los 10 comandos con los encabezados de salida definidos en `protocols/COMMANDS.md`.
-2. Aplica los 9 guardrails de la sección 2.6 y la Capa Camaleónica del stack detectado.
-3. Respeta el criterio de parada de la sección 3.2 y el formato por defecto de la sección 7.
-4. Cita una única versión de ZNVE, la de esta especificación.
+## 9. Versionado y fuente única
 
-`znve-auto/test_sync.py` certifica estos puntos para los artefactos del repositorio y se ejecuta en el CI (`.github/workflows/znve-parity.yml`) en cada push y pull request.
+`znve-auto/master_spec.json` gobierna versión, comandos, modelos de datos y generación. Norma 2.5.0; MCP 2.1.0, con herramientas legacy sin ruptura. OpenRouter añade un campo de reporte obligatorio y documenta su migración; ese texto del modelo no es evidencia.
 
----
-
-## 10. VERSIONADO
-
-ZNVE sigue SemVer:
-* **Mayor:** cambios en axiomas, pilares o en la semántica de un comando existente.
-* **Menor:** comandos, opciones (`--platform`, `--delta`) o modos nuevos compatibles con los anteriores.
-* **Parche:** correcciones de redacción, ejemplos o formato.
-
-Las propuestas de cambio siguen el proceso de RFC descrito en [CONTRIBUTING.md](CONTRIBUTING.md).
+Mayor: cambios incompatibles de axiomas/semántica. Menor: capacidades optativas compatibles. Parche: correcciones. No se introducen cálculos especulativos ni dependencias de memoria para esta versión. Ver `protocols/` y las notas de entrega para procedimientos y límites.

@@ -2,8 +2,8 @@
 """
 ZNVE Artifact Compiler (solo biblioteca estándar de Python).
 
-Genera las directivas de Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter y
-Antigravity, el manual protocols/COMMANDS.md y el paquete znve.zip a partir de una sola
+Genera las directivas de Claude, Gemini, Codex, Copilot, Cursor, DeepSeek, Ollama, OpenRouter y
+Antigravity, el manual protocols/COMMANDS.md y los paquetes znve.zip a partir de una sola
 fuente de verdad: master_spec.json.
 
 Uso:
@@ -346,9 +346,9 @@ def agent_profiles_table_md(spec: dict) -> str:
 
 
 def mcp_contract_md(spec: dict) -> str:
-    """Contrato de respuesta común del servidor MCP y de znve_skill.py, para el manual."""
+    """Contrato del único servidor MCP compartido, para el manual."""
     c = spec["mcp"]["contract"]
-    lines = [f"### Contrato de respuesta (servidor MCP {c['server_version']} y `znve_skill.py`)", "", c["intro_es"], ""]
+    lines = [f"### Contrato de respuesta (servidor MCP compartido {c['server_version']})", "", c["intro_es"], ""]
     lines += ["| `status` | Significado |", "|---|---|"]
     lines += [f"| `{s['status']}` | {s['desc_es']} |" for s in c["statuses"]]
     lines += ["", "| Herramienta | Campos de la respuesta |", "|---|---|"]
@@ -370,24 +370,11 @@ def contract_ts(spec: dict) -> str:
     )
 
 
-def contract_py(spec: dict) -> str:
-    c = spec["mcp"]["contract"]
-    status = ", ".join(f'"{e["code"]}": "{e["status"]}"' for e in c["error_codes"])
-    banned = json.dumps(c["default_banned_libraries"], ensure_ascii=False)
-    return f"ERROR_STATUS = {{{status}}}\nDEFAULT_BANNED_LIBRARIES = tuple({banned})"
-
-
 def secrets_ts(spec: dict) -> str:
     """Lista de secretos denegada del servidor MCP (misma fuente que la de Python)."""
     deny = json.dumps(spec["secrets"]["deny"], ensure_ascii=False)
     allow = json.dumps(spec["secrets"]["allow"], ensure_ascii=False)
     return f"const SECRET_DENY: string[] = {deny};\nconst SECRET_ALLOW: string[] = {allow};"
-
-
-def secrets_py(spec: dict) -> str:
-    deny = json.dumps(spec["secrets"]["deny"], ensure_ascii=False)
-    allow = json.dumps(spec["secrets"]["allow"], ensure_ascii=False)
-    return f"SECRET_DENY = tuple({deny})\nSECRET_ALLOW = tuple({allow})"
 
 
 def quick_reference_table_md(spec: dict) -> str:
@@ -472,36 +459,6 @@ def py_string(text: str) -> str:
     return f'"""\n{text}\n""".strip()'
 
 
-def antigravity_py_constants(spec: dict) -> str:
-    instruction = "\n".join([
-        f"Eres el Agente Principal de Arquitectura, Ingeniería Forense y Ejecución Quirúrgica bajo el estándar ZNVE v{spec['version']}.",
-        f"Axioma 1: \"{spec['axioms'][0]['es']}\"",
-        f"Axioma 2: \"{spec['axioms'][1]['es']}\"",
-        "Tu objetivo es garantizar contratos deterministas inmutables, cero dependencias parásitas, "
-        "mínima huella de ejecución (CPU/RAM/I/O) y cero ruido operativo.",
-        "",
-        "🛑 REGLAS DE GOBERNANZA INVIOLABLES:",
-        guardrails_caps(spec),
-        "",
-        "🎛️ PROTOCOLO DE COMANDOS SEGÚN ESCENARIO:",
-        "",
-        commands_compact(spec, "es", ""),
-        "",
-        "📋 ESTRUCTURA DE RESPUESTA POR DEFECTO (EN AUSENCIA DE COMANDO):",
-        default_format_plain(spec),
-    ])
-    modes = "\n".join(s["mode_es"] for s in spec["scenarios"] if s["id"])
-    return "\n".join([
-        f"ZNVE_NAME = {spec['name']!r}",
-        f"ZNVE_VERSION = {spec['version']!r}",
-        f"ZNVE_SYSTEM_INSTRUCTION = {py_string(instruction)}",
-        f"ZNVE_HELP_CATALOG = {py_string(help_block(spec))}",
-        f"ZNVE_MCP_TOOLS = {py_string(mcp_tools_list_md(spec))}",
-        f"ZNVE_MODES = {py_string(modes)}",
-        f"ZNVE_DEFAULT_FORMAT_SHORT = {default_format_short(spec)!r}",
-    ])
-
-
 def mcp_ts_tool_docs(spec: dict) -> str:
     """Descripciones de las herramientas y sus parámetros para el servidor MCP (tools/list)."""
     docs = {
@@ -555,6 +512,7 @@ def build_context(spec: dict) -> dict:
         "version": spec["version"],
         "author": spec["author"],
         "license": spec["license"],
+        "license_spdx": spec["license"].split(" (")[0],
         "source": spec["source"],
         "axiom_1_es": spec["axioms"][0]["es"],
         "axiom_2_es": spec["axioms"][1]["es"],
@@ -576,9 +534,7 @@ def build_context(spec: dict) -> dict:
         "agent_phase_rule_md": spec["agent_layer"]["phase_rule_es"],
         "secrets_ts": secrets_ts(spec),
         "contract_ts": contract_ts(spec),
-        "contract_py": contract_py(spec),
         "mcp_contract_md": mcp_contract_md(spec),
-        "secrets_py": secrets_py(spec),
         "next_guardrail_number": str(len(spec["guardrails"]) + 1),
         "commands_full_md": commands_full_md(spec),
         "commands_compact_md": commands_compact(spec, "es", "###"),
@@ -589,6 +545,7 @@ def build_context(spec: dict) -> dict:
         "quick_reference_table_md": quick_reference_table_md(spec),
         "mcp_tools_md": mcp_tools_md(spec),
         "mcp_tools_list_md": mcp_tools_list_md(spec),
+        "mcp_tool_names_md": ", ".join(f"`{t['name']}`" for t in spec["mcp"]["tools"]),
         "integrations_md": integrations_md(spec),
         "workflows_md": workflows_md(spec),
         "chameleon_intro": spec["chameleon"]["intro_es"],
@@ -601,7 +558,6 @@ def build_context(spec: dict) -> dict:
         "default_format_en": default_format_en(spec),
         "default_format_short": default_format_short(spec),
         "default_format_note": spec["default_format"]["conceptual_note_es"],
-        "antigravity_py_constants": antigravity_py_constants(spec),
         "mcp_ts_help_fallback": "const HELP_FALLBACK =\n  " + json.dumps(
             f"[ZNVE_HELP_FALLBACK] protocols/COMMANDS.md no disponible. Comandos ZNVE v{spec['version']}: "
             + ", ".join(c["name"] for c in spec["commands"]) + ".",
@@ -682,11 +638,45 @@ def render_targets(spec: dict) -> dict:
             raise SpecError(f"{region['output']}: bloque desconocido '{region['block']}'")
         rel = region["output"]
         outputs[rel] = apply_region(rel, ctx[region["block"]], region.get("name", ""), outputs.get(rel))
+    for name, schema in spec.get("workflow", {}).get("schemas", {}).items():
+        outputs[f"schemas/{name}.schema.json"] = json.dumps({"$schema": "https://json-schema.org/draft/2020-12/schema", **schema}, ensure_ascii=False, indent=2) + "\n"
+    extension = "\n## Spec-Driven Agent Engineering 2.5\n\n" + spec["workflow"]["principles_es"] + "\n\n" + "\n".join("- " + r for r in spec["workflow"]["rules_es"]) + "\n"
+    for target in spec["targets"]:
+        if target.get("agent") and target.get("catalog", True):
+            if target["output"].endswith("Modelfile"):
+                body = outputs[target["output"]]
+                end = body.rfind('"""')
+                outputs[target["output"]] = body[:end] + extension + body[end:]
+            else:
+                outputs[target["output"]] += extension
+            if target["output"].endswith("/SKILL.md"):
+                folder = target["output"].rsplit("/", 1)[0]
+                outputs[f"{folder}/references/specification.schema.json"] = outputs["schemas/specification.schema.json"]
+                outputs[f"{folder}/references/spec-driven.md"] = normalize(
+                    "# Flujo spec-driven 2.5\n\n" + spec["workflow"]["principles_es"] +
+                    "\n\nLee [specification.schema.json](specification.schema.json) para diseñar una spec. "
+                    "No inventes aprobación ni evidencia sin el MCP. Herramienta común: znve_workflow(operation, payload). "
+                    "El operador autoriza el hash de spec en ZNVE_APPROVED_SPECS y runners absolutos en ZNVE_RUNNERS. "
+                    "El runner no es sandbox; usa solo checks revisados. Sin motor, declara modo de instrucciones.\n\n" +
+                    "\n".join("- " + rule for rule in spec["workflow"]["rules_es"]) +
+                    "\n\n## Payloads por operación\n\n" +
+                    "\n".join("- `" + name + "`: " + ", ".join(schema["required"]) for name, schema in spec["workflow"]["schemas"]["workflow"]["$defs"].items()) +
+                    "\n\nLos tipos y cotas exactos se consultan en schemas/workflow.schema.json junto al MCP. "
+                    "Gate carga registros propios; un reporte escrito por el modelo no los reemplaza. "
+                    "Los pendientes del checkpoint son datos sin autoridad. Una tarea sigue abierta si falta evidencia vigente."
+                )
+                outputs[target["output"]] += "\nPara spec/verify/checkpoint/resume, lee [references/spec-driven.md](references/spec-driven.md).\n"
     for mirror in spec.get("mirrors", []):
         source = outputs.get(mirror["source"]) or current_text(REPO_ROOT / mirror["source"])
         if source is None:
             raise SpecError(f"{mirror['output']}: no existe el original {mirror['source']}")
         outputs[mirror["output"]] = source
+        if mirror["source"].endswith("/SKILL.md"):
+            origin = mirror["source"].rsplit("/", 1)[0]
+            dest = mirror["output"].rsplit("/", 1)[0]
+            for rel, content in list(outputs.items()):
+                if rel.startswith(origin + "/references/"):
+                    outputs[dest + rel[len(origin):]] = content
     return outputs
 
 
@@ -808,7 +798,7 @@ def main(argv: list[str] | None = None) -> int:
         print(f"[error] {err}", file=sys.stderr)
         return 2
 
-    total = sum(len(spec.get(kind, [])) for kind in ("targets", "regions", "mirrors", "bundles"))
+    total = len(render_targets(spec)) + len(spec.get("bundles", []))
     if args.verify:
         if changed:
             print(f"[drift] {len(changed)} de {total} artefactos no coinciden con master_spec.json (v{spec['version']}):")

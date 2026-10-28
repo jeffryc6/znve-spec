@@ -1,7 +1,9 @@
+> Compatibilidad: este documento conserva el workflow legacy. Para nuevas tareas 2.5 usa [SPEC_DRIVEN.md](SPEC_DRIVEN.md), [VERIFICATION.md](VERIFICATION.md) y [MEMORY_AND_HANDOFF.md](MEMORY_AND_HANDOFF.md). Los resultados anteriores no demuestran conducta de modelos actuales.
+
 # ==============================================================================
 # ZERO-NOISE VIBE ENGINEERING (ZNVE) — PROTOCOLO DE RESCATE LEGACY
 # Archivo: protocols/ZNVE_LEGACY_PROTOCOL.md
-# Versión: 2.4.2
+# Versión: 2.5.0
 # Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
 # Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
 # ==============================================================================

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "{{name}}",
+  "version": "{{version}}",
+  "description": "Zero-Noise Vibe Engineering (ZNVE v{{version}}): contratos inmutables, cero dependencias parásitas y mínima huella de ejecución.",
+  "author": {
+    "name": "{{author}}",
+    "url": "https://github.com/{{author}}"
+  },
+  "homepage": "{{source}}",
+  "repository": "{{source}}",
+  "license": "{{license_spdx}}",
+  "keywords": ["znve", "contract-first", "zero-noise", "hotfix", "legacy-rescue", "audit"],
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "ZNVE",
+        "shortDescription": "Contratos inmutables, cero dependencias parásitas y mínima huella",
+        "developerName": "{{author}}",
+        "category": "Productivity",
+        "websiteURL": "{{source}}",
+        "defaultPrompt": "Usa $znve help para ver el catálogo de comandos ZNVE."
+      }
+    }
+  }
+}

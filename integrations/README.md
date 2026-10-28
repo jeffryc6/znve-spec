@@ -1,6 +1,6 @@
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
-# Integraciones de ZNVE v2.4.2
+# Integraciones de ZNVE v2.5.0
 
 Una carpeta por asistente. Las directivas, skills y guías se generan desde `znve-auto/master_spec.json`; el código (servidor MCP, cliente de OpenRouter, instaladores) y la integración de DeepSeek Harness se mantienen a mano.
 
@@ -8,13 +8,14 @@ Una carpeta por asistente. Las directivas, skills y guías se generan desde `znv
 |---|---|---|
 | [`claude/`](claude/) | Claude (claude.ai, Claude Code y Claude Projects) | `skills/znve/`, `skills/znve.zip` o `project-instructions.md` |
 | [`gemini/`](gemini/) | Gemini (app y Gemini CLI) | `skills/znve/` y `INSTALL_GEMINI.md` |
-| [`grok/`](grok/) | Grok (app de escritorio) | `skills/znve/` (frontmatter plano, como exige Grok) |
+| Directiva común | Grok | Sin carpeta dedicada; directiva común y MCP si el host lo admite |
+| [`codex/`](codex/) | ChatGPT y Codex (app, CLI e IDE) | `skills/znve/`, `skills/znve.zip`, `plugin.json` e `INSTALL_CODEX.md` |
 | [`antigravity/`](antigravity/) | Google Antigravity (IDE, CLI y SDK) | `SKILL.md`, `INSTALL_ANTIGRAVITY.md` e instaladores |
 | [`cursor/`](cursor/) | Cursor y Windsurf | `cursorrules.md` |
 | [`deepseek/`](deepseek/) | DeepSeek (web, API y DeepSeek Harness) | `directive.md` y `harness/` |
 | [`ollama/`](ollama/) | Ollama (modelos locales) | `Modelfile` |
 | [`openrouter/`](openrouter/) | OpenRouter | `system-prompt.md`, `response-schema.json` y el cliente |
-| [`mcp-server/`](mcp-server/) | Antigravity y otros clientes MCP | `znve-mcp-server.ts` e `install-antigravity.mjs` |
+| [`mcp-server/`](mcp-server/) | Antigravity, Codex y otros clientes MCP | `znve-mcp-server.ts`, `install-antigravity.mjs` e `install-codex.mjs` |
 
 GitHub Copilot lee [`.github/copilot-instructions.md`](../.github/copilot-instructions.md) en la raíz del repositorio.
 
@@ -61,10 +62,7 @@ ollama run znve-agent
 
 ### 7. Grok (app de escritorio)
 
-- Copia la carpeta `integrations/grok/skills/znve/` a `~/.grok/skills/znve/` (en Windows, `%USERPROFILE%\.grok\skills\znve\`), o crea la skill desde la app pegando `SKILL.md`.
-- Actívala en el editor de skills de Grok: desactivada no aparece en el selector de `/`.
-- El frontmatter usa solo pares `clave: valor` de una línea, como exige el validador de Grok.
-- Invocación: `/znve-contract …`, `/znve contract …` o `znve-contract …`.
+- Grok sigue mencionado como consumidor de la directiva común. No se distribuye carpeta ni skill específica; usa integrations/openrouter/system-prompt.md y el MCP compartido si el host admite ese transporte. No se certifica compatibilidad sin smoke test real.
 
 ### 8. OpenRouter
 
@@ -100,3 +98,17 @@ node install-antigravity.mjs --workspace "<ruta>/tu-proyecto"
 - Claude Desktop: `claude_desktop_config.json` (**Settings → Developer → Edit Config**).
 - Cursor: `.cursor/mcp.json` en el proyecto o `~/.cursor/mcp.json` global.
 - Windsurf: `~/.codeium/windsurf/mcp_config.json`.
+
+### 10. ChatGPT y Codex (app, CLI y extensión del IDE)
+
+- Codex CLI e IDE: el instalador compila el servidor, verifica sus herramientas, registra `znve-engine` en `~/.codex/config.toml` y copia la skill a `~/.agents/skills/znve/` (`--project` usa `.codex/config.toml` y `.agents/skills/` del workspace):
+
+```bash
+cd integrations/mcp-server
+node install-codex.mjs --workspace "<ruta>/tu-proyecto"
+```
+
+- Como plugin: `codex plugin marketplace add jeffryc6/znve-spec` lee `.agents/plugins/marketplace.json` y ofrece el plugin `znve` (la skill; el servidor MCP se registra con el instalador).
+- ChatGPT: sube `integrations/codex/skills/znve.zip` como skill; el servidor MCP local no está disponible en ChatGPT web, que solo conecta servidores MCP remotos por HTTPS.
+- Invocación: `$znve contract …` en Codex y `@znve contract …` en ChatGPT; también `znve-contract …` sin barra.
+- Guía completa: `integrations/codex/INSTALL_CODEX.md`.

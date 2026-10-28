@@ -1,6 +1,8 @@
+> Compatibilidad: este documento conserva el workflow legacy. Para nuevas tareas 2.5 usa [SPEC_DRIVEN.md](SPEC_DRIVEN.md), [VERIFICATION.md](VERIFICATION.md) y [MEMORY_AND_HANDOFF.md](MEMORY_AND_HANDOFF.md). Los resultados anteriores no demuestran conducta de modelos actuales.
+
 # GREENFIELD STARTER: ZERO-NOISE VIBE ENGINEERING (ZNVE)
 **Plantilla de Inicio Rápido para Proyectos Nuevos (Día 0)**
-*Versión: 2.4.2 | Estándar: Spec-Driven Agentic Architecture | Modo 1 de [ZNVE_PROTOCOL.md](ZNVE_PROTOCOL.md)*
+*Versión: 2.5.0 | Estándar: Spec-Driven Agentic Architecture | Modo 1 de [ZNVE_PROTOCOL.md](ZNVE_PROTOCOL.md)*
 
 ---
 
@@ -64,7 +66,7 @@ my-new-project/
 | DeepSeek / OpenRouter / Ollama | `integrations/deepseek/directive.md`, `integrations/openrouter/system-prompt.md` u `integrations/ollama/Modelfile`. |
 | Antigravity | Skill: `integrations/antigravity/INSTALL_ANTIGRAVITY.md`. MCP: `integrations/mcp-server/ANTIGRAVITY_INSTALL.md`. |
 
-Comprueba la instalación escribiendo `/znve-help`: debe aparecer el catálogo de 10 comandos.
+Comprueba la instalación escribiendo `/znve-help`: debe aparecer el catálogo de 14 comandos.
 
 ### Paso 2: Declarar el Perímetro y el Contrato Inicial (MODO 1)
 Envía este prompt a tu asistente de IA:

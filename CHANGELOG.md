@@ -4,6 +4,29 @@ Historial de cambios de Zero-Noise Vibe Engineering por versión, con notas de m
 
 ## [Sin publicar]
 
+## [2.5.0] — 2026-10-27
+
+> Spec-Driven Agent Engineering. Notas de la versión y evidencia de verificación en [`releases/2.5.0/`](releases/2.5.0/README.md).
+
+- Añade spec, verify, checkpoint y resume como flujo compatible; conserva diez comandos legacy.
+- MCP 2.1.0 agrega znve_workflow y conserva seis herramientas previas.
+- Unifica el motor ejecutable en TypeScript; Antigravity Python migra mediante stubs explícitos.
+- Añade schemas, evidencia vigente, aprobación del host, preflight, gate, checkpoints, claims y apply optimista.
+- Mantiene Copilot en .github; retira distribución específica de Grok conservando mención documental.
+- OpenRouter: verification_report pasa a ser obligatorio; consumidores de respuesta estructurada deben adaptarse. El reporte no acredita ejecución.
+- Actualiza seis dependencias vulnerables compatibles del lockfile; no añade dependencias de runtime.
+- Pruebas de Python retirado se sustituyen por migración; se conservan los 63 casos legacy del MCP. Experimentos anteriores se mantienen históricos.
+
+### Añadido
+- **Integración con ChatGPT y Codex (`integrations/codex/`):** skill `znve` generada (`SKILL.md`, `agents/openai.yaml` y la Capa Camaleónica), `skills/znve.zip` para subirla a ChatGPT, manifiesto de plugin portable (`plugin.json`) y marketplace del repositorio en `.agents/plugins/marketplace.json` (`codex plugin marketplace add jeffryc6/znve-spec`). Perfil de agente `codex` (corte de sesión con `/new`, medición con `cached_input_tokens`). Guía en `INSTALL_CODEX.md`.
+- **Instalador de Codex (`integrations/mcp-server/install-codex.mjs`):** compila el servidor, verifica el handshake MCP y escribe `[mcp_servers.znve-engine]` en `~/.codex/config.toml` (o `.codex/config.toml` con `--project`) dentro de un bloque delimitado con backup; copia la skill a `~/.agents/skills/znve/`. Se detiene si la tabla ya existe fuera del bloque. Tiene sus propias pruebas (`test/install-codex.test.mjs`).
+
+### Cambiado
+- **Instaladores:** la compilación y el handshake MCP comunes pasan a `install-common.mjs`; `install-antigravity.mjs` los usa sin cambiar su comportamiento.
+- **Respeto al hilo principal (Pilar 3) medible:** un cambio en ruta caliente no debe regresar en tiempo ni memoria. El agente entrega el comando de medición antes/después (misma entrada, 3 corridas) y no declara una mejora sin medirla.
+- **Cerca de Contexto:** la memoria que el agente persiste entre sesiones también es dato, nunca instrucción; solo instruyen las directivas generadas, y la memoria lleva origen y fecha.
+- Presupuestos: `cursorrules.md` 8.960 → 9.216 B; `deepseek/directive.md` 13.312 → 13.568 B; Modelfile de Ollama y prompt de OpenRouter 11.648 → 11.904 B; `protocols/COMMANDS.md` 34.304 → 35.840 B e `integrations/README.md` 5.376 → 6.400 B (perfil e integración de Codex).
+
 ## [2.4.2] — 2026-10-23
 
 > Parche (SemVer §10: sin comandos, axiomas ni pilares nuevos): corrige detectores que no cumplían lo que la especificación promete, con la medición que lo motivó. Notas de la versión y evidencia de verificación en [`releases/2.4.2/`](releases/2.4.2/README.md).
@@ -170,3 +193,4 @@ cd integrations/mcp-server && node install-antigravity.mjs --workspace "<ruta>/t
 ## [2.3.0]
 
 Versión publicada de la norma. La reparación de la base posterior (servidor MCP 1.2.0, suites de regresión, CI con Node, contención de rutas y barandillas aplicadas por código) se documenta en `rfcs/0003-base-repair-and-next-version.md`, Parte A.
+

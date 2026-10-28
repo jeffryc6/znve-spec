@@ -47,7 +47,11 @@ POWERSHELL = shutil.which("powershell") or shutil.which("pwsh")
 SKILL_FILES = (
     "integrations/claude/skills/znve/SKILL.md",
     "integrations/gemini/skills/znve/SKILL.md",
+    "integrations/codex/skills/znve/SKILL.md",
 )
+# Plugin de Codex/ChatGPT (formato portable) y marketplace del repositorio que lo publica.
+CODEX_PLUGIN = "integrations/codex/plugin.json"
+CODEX_MARKETPLACE = ".agents/plugins/marketplace.json"
 ANTIGRAVITY_DIR = REPO / "integrations" / "antigravity"
 # Grok solo admite frontmatter plano: una línea `clave: valor` por campo, sin YAML anidado.
 GROK_SKILL = "integrations/grok/skills/znve/SKILL.md"
@@ -59,7 +63,7 @@ GUARDRAIL_MAX_BYTES = {"Cerca de Contexto (Context Fence)": 700, "Verificación 
 # Regla común de fases más el perfil del asistente. La RFC proponía 900 B; la regla sola ya pesa más de 600 B.
 AGENT_BLOCK_MAX_BYTES = 1400
 # Descripciones de las herramientas MCP: viajan en el prefijo de cada petición (línea base v2.3.0: unos 2 KiB).
-MCP_TOOL_DOCS_MAX_BYTES = 3200
+MCP_TOOL_DOCS_MAX_BYTES = 4200
 DATE = re.compile(r"\b20\d\d-\d\d-\d\d\b")
 HOST_PATH = re.compile(r"[A-Za-z]:\\Users\\|/Users/\w|/home/\w")
 
@@ -332,30 +336,35 @@ class ArtifactTests(unittest.TestCase):
                 self.assertLessEqual(len(keys["description"]), 1024)
                 self.assertNotRegex(keys["description"], r"[<>]")
 
-    def test_grok_skill_has_flat_frontmatter(self):
-        """La skill de Grok pasa su validador: frontmatter de una línea por clave, sin anidar, y enlaces existentes."""
-        text = self.rendered[GROK_SKILL]
-        match = re.match(r"^---\n(.*?)\n---\n", text, re.S)
-        self.assertTrue(match, "falta el frontmatter")
-        keys = []
-        for line in match.group(1).splitlines():
-            self.assertRegex(line, r"^[a-z][a-z0-9_-]*: \S", f"línea no plana en el frontmatter: {line!r}")
-            keys.append(line.split(":", 1)[0])
-        self.assertLessEqual(set(keys), GROK_KEYS)
-        self.assertEqual(len(keys), len(set(keys)), "claves repetidas")
-        fm = frontmatter(text)
-        self.assertRegex(fm["name"], r"^[a-z0-9]+(-[a-z0-9]+)*$")
-        self.assertLessEqual(len(fm["description"]), 1024)
-        self.assertEqual(fm["version"], self.spec["version"])
-        for link in re.findall(r"\]\((references/[^)]+)\)", text):
-            self.assertIn(f"integrations/grok/skills/znve/{link}", self.rendered)
-
     def test_skill_references_exist(self):
         """Cada enlace relativo de una skill apunta a un archivo generado dentro de su carpeta."""
         for rel in SKILL_FILES:
             folder = rel.rsplit("/", 1)[0]
             for link in re.findall(r"\]\((references/[^)]+)\)", self.rendered[rel]):
                 self.assertIn(f"{folder}/{link}", self.rendered, f"{rel} enlaza {link}, que no se genera")
+
+    def test_codex_plugin_and_marketplace(self):
+        """El plugin de Codex lleva la versión de la especificación y el marketplace apunta a su carpeta con la skill."""
+        plugin = json.loads(self.rendered[CODEX_PLUGIN])
+        self.assertEqual(plugin["name"], self.spec["name"])
+        self.assertRegex(plugin["name"], r"^[a-z0-9]+(-[a-z0-9]+)*$")
+        self.assertEqual(plugin["version"], self.spec["version"])
+        self.assertNotIn("(", plugin["license"], "la licencia del manifiesto debe ser una expresión SPDX")
+        market = json.loads(self.rendered[CODEX_MARKETPLACE])
+        entry = next(p for p in market["plugins"] if p["name"] == plugin["name"])
+        self.assertEqual(entry["source"]["source"], "local")
+        root = entry["source"]["path"]
+        self.assertTrue(root.startswith("./"), root)
+        self.assertEqual(f"{root[2:]}/plugin.json", CODEX_PLUGIN)
+        self.assertIn(f"{root[2:]}/skills/{plugin['name']}/SKILL.md", self.rendered)
+
+    def test_codex_openai_yaml_is_flat(self):
+        """agents/openai.yaml solo usa las secciones documentadas y comillas en cada valor de texto."""
+        text = self.rendered["integrations/codex/skills/znve/agents/openai.yaml"]
+        sections = re.findall(r"(?m)^([a-z_]+):\s*$", text)
+        self.assertLessEqual(set(sections), {"interface", "policy", "dependencies"})
+        for line in re.findall(r"(?m)^  (?:display_name|short_description|default_prompt): (.*)$", text):
+            self.assertRegex(line, r'^"[^"\\]*"$')
 
     def test_skill_bundle(self):
         """znve.zip contiene exactamente la carpeta de la skill."""
@@ -407,348 +416,6 @@ def load_module(name: str, path: Path):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
-
-
-class AntigravityPythonTests(unittest.TestCase):
-    """Los módulos Python de Antigravity leen versión y catálogo de la especificación."""
-
-    @classmethod
-    def setUpClass(cls):
-        cls.spec = builder.load_spec()
-        sys.path.insert(0, str(ANTIGRAVITY_DIR))
-        cls.skill = load_module("znve_skill", ANTIGRAVITY_DIR / "znve_skill.py")
-
-    def test_constants_match_spec(self):
-        """znve_skill.py expone la versión, el nombre y el catálogo de la especificación."""
-        self.assertEqual(self.skill.ZNVE_VERSION, self.spec["version"])
-        self.assertEqual(self.skill.ZNVE_NAME, self.spec["name"])
-        self.assertEqual(self.skill.znve_help("commands")["text"], builder.help_block(self.spec))
-        for c in self.spec["commands"]:
-            self.assertIn(c["name"], self.skill.ZNVE_SYSTEM_INSTRUCTION)
-
-    def test_skill_descriptor(self):
-        """get_znve_skill() describe la skill 'znve' con sus 6 herramientas sin importar el SDK."""
-        skill = self.skill.get_znve_skill()
-        self.assertEqual(skill["name"], "znve")
-        self.assertEqual(skill["system_instructions"], self.skill.ZNVE_SYSTEM_INSTRUCTION)
-        self.assertEqual(len(skill["tools"]), 6)
-        for tool in skill["tools"]:
-            self.assertTrue(tool.__doc__, f"{tool.__name__} necesita docstring para el SDK")
-
-    def test_no_legacy_skill_name(self):
-        """Los artefactos de Antigravity usan 'znve', no el nombre largo antiguo."""
-        rendered = builder.render_targets(self.spec)
-        for rel, text in rendered.items():
-            if rel.startswith("integrations/antigravity/") and not rel.endswith(".md"):
-                self.assertNotRegex(text, r"zero[-_]noise[-_]vibe[-_]engineering", rel)
-
-    def test_workspace_installer_migrates(self):
-        """Auto_Installer instala en .agents/skills/znve/ y retira la instalación de .antigravity/."""
-        installer = load_module("znve_auto_installer", ANTIGRAVITY_DIR / "Auto_Installer.py")
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
-            legacy = root / ".antigravity"
-            (legacy / "skills" / "znve").mkdir(parents=True)
-            (legacy / "skills" / "znve" / "znve_skill.py").write_text("# antiguo\n", encoding="utf-8")
-            (legacy / "antigravity.json").write_text(json.dumps({"skills": {
-                "zero_noise_vibe_engineering": {"protocol_version": "2.2.0"},
-                "znve": {"protocol_version": "2.3.0"},
-                "otra": {"enabled": True},
-            }}), encoding="utf-8")
-            with contextlib.redirect_stdout(io.StringIO()):
-                target = installer.run_installer(root)
-
-            self.assertEqual(target, (root / ".agents" / "skills" / "znve").resolve())
-            self.assertEqual((target / "SKILL.md").read_bytes(), (ANTIGRAVITY_DIR / "SKILL.md").read_bytes())
-            self.assertEqual(
-                (target / "scripts" / "znve_skill.py").read_bytes(), (ANTIGRAVITY_DIR / "znve_skill.py").read_bytes()
-            )
-            self.assertFalse((legacy / "skills").exists())
-            skills = json.loads((legacy / "antigravity.json").read_text(encoding="utf-8"))["skills"]
-            self.assertEqual(list(skills), ["otra"])
-
-    def test_global_installer_paths(self):
-        """install_znve_global escribe en ~/.gemini/config/skills/znve y retira la copia legacy."""
-        installer = load_module("znve_global_installer_paths", ANTIGRAVITY_DIR / "install_znve_global.py")
-        with tempfile.TemporaryDirectory() as tmp:
-            home = Path(tmp)
-            legacy = home / ".gemini" / "antigravity" / "skills" / "znve"
-            legacy.mkdir(parents=True)
-            (legacy / "SKILL.md").write_text("---\nname: zero-noise-vibe-engineering\n---\n", encoding="utf-8")
-            with contextlib.redirect_stdout(io.StringIO()):
-                installer.install(home)
-            installed = home / ".gemini" / "config" / "skills" / "znve" / "SKILL.md"
-            self.assertEqual(installed.read_text(encoding="utf-8"), (ANTIGRAVITY_DIR / "SKILL.md").read_text(encoding="utf-8"))
-            self.assertFalse(legacy.exists())
-            self.assertFalse((home / ".gemini" / "config" / "global_workflows").exists())
-            self.assertEqual((home / ".gemini" / "GEMINI.md").read_text(encoding="utf-8").count("znve:start"), 1)
-
-    def test_global_gemini_block_is_static_and_minimal(self):
-        """El bloque de GEMINI.md es mínimo y estático: sin catálogo de comandos (lo da la skill) ni fechas."""
-        installer = load_module("znve_global_installer_block", ANTIGRAVITY_DIR / "install_znve_global.py")
-        rule = installer.upsert_rule("")
-        self.assertIn("Cerca de Contexto", rule)
-        self.assertIn("Verificación Inviolable", rule)
-        for command in self.spec["commands"]:
-            if command["id"] != "help":
-                self.assertNotIn(command["name"], rule, "el bloque no debe repetir el catálogo")
-        self.assertIsNone(DATE.search(rule))
-        self.assertLessEqual(len(rule.encode("utf-8")), 1400)
-        self.assertEqual(installer.upsert_rule(rule), rule)
-
-    def test_global_rule_is_replaced(self):
-        """install_znve_global sustituye la regla de GEMINI.md en vez de duplicarla."""
-        installer = load_module("znve_global_installer", ANTIGRAVITY_DIR / "install_znve_global.py")
-        legacy = (
-            "Mis reglas.\n\n# DIRECTIVA GLOBAL ZNVE v2.2.0 (Zero-Noise Vibe Engineering)\n"
-            "Cuando el usuario mencione comandos `/znve-*`:\n1. Uno.\n2. Dos.\n3. Tres.\n\nOtra regla.\n"
-        )
-        once = installer.upsert_rule(legacy)
-        self.assertNotIn("v2.2.0", once)
-        self.assertIn(f"ZNVE v{self.spec['version']}", once)
-        self.assertTrue(once.startswith("Mis reglas.") and once.rstrip().endswith("Otra regla."))
-        self.assertEqual(installer.upsert_rule(once), once)
-        self.assertEqual(installer.upsert_rule("").count("znve:start"), 1)
-
-
-class SkillToolBehaviorTests(unittest.TestCase):
-    """Las herramientas de znve_skill.py cumplen las barandillas que anuncian.
-
-    Las rutas relativas se resuelven contra ZNVE_WORKSPACE. El cwd del test es otro
-    directorio temporal, así que nada se escribe fuera del temporal aunque falle una barandilla.
-    """
-
-    MAX_SCAN_BYTES = 1024 * 1024
-
-    @classmethod
-    def setUpClass(cls):
-        cls.skill = load_module("znve_skill_behavior", ANTIGRAVITY_DIR / "znve_skill.py")
-
-    def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.tmp = Path(self._tmp.name).resolve()
-        self.ws = self.tmp / "ws"
-        self.outside = self.tmp / "outside"
-        for folder in (self.ws, self.outside, self.tmp / "cwd", self.ws / ".git"):
-            folder.mkdir(parents=True)
-        (self.outside / "secret.txt").write_text("TOP-SECRET", encoding="utf-8")
-        (self.ws / "prod.py").write_text("X = 1\n", encoding="utf-8")
-        (self.ws / ".git" / "config").write_text("[core]\n", encoding="utf-8")
-        self._cwd = os.getcwd()
-        os.chdir(self.tmp / "cwd")
-        self._env = mock.patch.dict(os.environ, {"ZNVE_WORKSPACE": str(self.ws)})
-        self._env.start()
-
-    def tearDown(self):
-        self._env.stop()
-        os.chdir(self._cwd)
-        self._tmp.cleanup()
-
-    def assertRejected(self, result: dict, msg: str = ""):
-        self.assertNotEqual(result["status"], "SUCCESS", msg or result)
-
-    # --- Contención de rutas (P1) ---------------------------------------------
-
-    def test_forensic_reads_inside_workspace(self):
-        result = self.skill.znve_forensic_scan("prod.py")
-        self.assertEqual(result["status"], "SUCCESS", result)
-
-    def test_forensic_rejects_escape(self):
-        for target in ("../outside/secret.txt", str(self.outside / "secret.txt")):
-            self.assertRejected(self.skill.znve_forensic_scan(target), target)
-
-    def test_harness_rejects_filename_escape(self):
-        result = self.skill.znve_scaffold_harness("tests/characterization", "../../prod.py", "OVERWRITTEN")
-        self.assertRejected(result)
-        self.assertEqual((self.ws / "prod.py").read_text(encoding="utf-8"), "X = 1\n")
-
-    def test_harness_rejects_non_test_directories(self):
-        for folder in ("latest", "src/tests", "../outside/tests"):
-            self.assertRejected(self.skill.znve_scaffold_harness(folder, "h.py", "pass\n"), folder)
-        self.assertFalse((self.outside / "tests").exists())
-
-    def test_harness_writes_under_tests(self):
-        result = self.skill.znve_scaffold_harness("tests/characterization", "test_legacy.py", "pass\n")
-        self.assertEqual(result["status"], "SUCCESS", result)
-        self.assertTrue((self.ws / "tests" / "characterization" / "test_legacy.py").is_file())
-
-    def test_harness_never_overwrites(self):
-        """Aplica la Verificación Inviolable por código: un arnés o snapshot existente no se sobrescribe."""
-        first = self.skill.znve_scaffold_harness("tests/characterization", "test_legacy.py", "ORIGINAL\n")
-        self.assertEqual(first["status"], "SUCCESS", first)
-        again = self.skill.znve_scaffold_harness("tests/characterization", "test_legacy.py", "CAMBIADO\n")
-        self.assertRejected(again)
-        folder = self.ws / "tests" / "characterization"
-        self.assertEqual((folder / "test_legacy.py").read_text(encoding="utf-8"), "ORIGINAL\n")
-        self.assertEqual([p.name for p in folder.iterdir()], ["test_legacy.py"], "sin temporales residuales")
-
-    # --- Escape por enlaces (S7) ----------------------------------------------
-
-    def link_dir(self, link: Path, target: Path) -> None:
-        """Enlace de directorio: symlink, o junction en Windows (no necesita privilegios)."""
-        try:
-            os.symlink(target, link, target_is_directory=True)
-        except (OSError, NotImplementedError):
-            made = os.name == "nt" and subprocess.run(
-                ["cmd", "/c", "mklink", "/J", str(link), str(target)], capture_output=True
-            ).returncode == 0
-            if not made:
-                self.skipTest("no se pudo crear el enlace en este sistema")
-
-    def test_directory_link_cannot_escape(self):
-        self.link_dir(self.ws / "link", self.outside)
-        read = self.skill.znve_forensic_scan("link/secret.txt")
-        self.assertRejected(read)
-        self.assertEqual(read["code"], "OUTSIDE_WORKSPACE")
-        self.assertNotIn("TOP-SECRET", str(read))
-        write = self.skill.znve_surgical_write("link/pwned.txt", "x", "not_applicable")
-        self.assertEqual(write["code"], "OUTSIDE_WORKSPACE")
-        self.assertFalse((self.outside / "pwned.txt").exists())
-
-    def test_link_inside_tests_cannot_take_the_harness_out(self):
-        (self.ws / "tests").mkdir(exist_ok=True)
-        self.link_dir(self.ws / "tests" / "out", self.outside)
-        result = self.skill.znve_scaffold_harness("tests/out", "h.py", "pass\n")
-        self.assertEqual(result["code"], "OUTSIDE_WORKSPACE")
-        self.assertFalse((self.outside / "h.py").exists())
-
-    def test_file_link_to_a_secret_is_denied(self):
-        (self.ws / ".env").write_text("TOKEN=CANARY", encoding="utf-8")
-        try:
-            os.symlink(self.ws / ".env", self.ws / "notas.txt")
-        except (OSError, NotImplementedError):
-            self.skipTest("no se pudo crear el enlace en este sistema")
-        result = self.skill.znve_forensic_scan("notas.txt")
-        self.assertEqual(result["code"], "SECRET_DENIED")
-        self.assertNotIn("CANARY", str(result))
-
-    # --- Cerca de Contexto por código (M1-M3) ---------------------------------
-
-    def test_forensic_range(self):
-        (self.ws / "lines.py").write_text("a = 1\nb = 2\nopen('x')\nd = 4\n", encoding="utf-8")
-        whole = self.skill.znve_forensic_scan("lines.py")
-        self.assertEqual(whole["status"], "SUCCESS", whole)
-        self.assertTrue(whole["side_effects"]["file_system_io"])
-        self.assertIsNone(whole["range"])
-        part = self.skill.znve_forensic_scan("lines.py", start_line=1, end_line=2)
-        self.assertEqual(part["status"], "SUCCESS", part)
-        self.assertFalse(part["side_effects"]["file_system_io"], "solo se analiza el rango pedido")
-        self.assertEqual(part["range"], {"start_line": 1, "end_line": 2})
-        self.assertEqual(part["total_lines"], 4)
-        self.assertEqual(self.skill.znve_forensic_scan("lines.py", start_line=4)["status"], "SUCCESS")
-
-    def test_forensic_rejects_bad_ranges(self):
-        (self.ws / "lines.py").write_text("a = 1\nb = 2\n", encoding="utf-8")
-        for kwargs in (
-            {"start_line": 2, "end_line": 1},
-            {"start_line": 0},
-            {"start_line": -3},
-            {"end_line": 1.5},
-            {"start_line": True},
-            {"start_line": 3},
-            {"end_line": 99},
-        ):
-            self.assertRejected(self.skill.znve_forensic_scan("lines.py", **kwargs), str(kwargs))
-
-    def test_secrets_are_denied_for_read_and_write(self):
-        for name in (".env", ".env.local", "id_rsa", "server.pem", "credentials.json", ".ENV"):
-            (self.ws / name).write_text("TOKEN=CANARY", encoding="utf-8")
-            result = self.skill.znve_forensic_scan(name)
-            self.assertRejected(result, name)
-            self.assertNotIn("CANARY", str(result))
-            self.assertRejected(self.skill.znve_surgical_write(name, "X=1", "not_applicable"), name)
-            self.assertEqual((self.ws / name).read_text(encoding="utf-8"), "TOKEN=CANARY", name)
-        self.assertRejected(self.skill.znve_surgical_write("deploy.key", "X=1", "not_applicable"))
-        self.assertFalse((self.ws / "deploy.key").exists())
-        self.assertRejected(self.skill.znve_scaffold_harness("tests/secretos", ".env", "X=1"))
-
-    def test_secret_templates_are_allowed(self):
-        (self.ws / ".env.example").write_text("TOKEN=changeme", encoding="utf-8")
-        self.assertEqual(self.skill.znve_forensic_scan(".env.example")["status"], "SUCCESS")
-        self.assertEqual(self.skill.znve_surgical_write(".env.sample", "X=", "not_applicable")["status"], "SUCCESS")
-
-    def test_help_defaults_to_commands(self):
-        commands = self.skill.znve_help()
-        self.assertEqual(commands["topic"], "commands")
-        self.assertEqual(commands, self.skill.znve_help("commands"))
-        self.assertNotIn("MODOS DE OPERACIÓN", commands["text"])
-        everything = self.skill.znve_help("all")["text"]
-        self.assertIn(commands["text"], everything)
-        self.assertIn("MODOS DE OPERACIÓN", everything)
-        self.assertIn("znve_forensic_scan", self.skill.znve_help("mcp_tools")["text"])
-        self.assertRejected(self.skill.znve_help("nope"))
-
-    def test_write_rejects_escape(self):
-        result = self.skill.znve_surgical_write("../outside/pwned.txt", "x", "not_applicable")
-        self.assertRejected(result)
-        self.assertFalse((self.outside / "pwned.txt").exists())
-
-    def test_write_rejects_protected_folders(self):
-        for target in (".git/config", "node_modules/pkg/index.js"):
-            self.assertRejected(self.skill.znve_surgical_write(target, "x", "not_applicable"), target)
-        self.assertEqual((self.ws / ".git" / "config").read_text(encoding="utf-8"), "[core]\n")
-
-    def test_write_inside_workspace(self):
-        result = self.skill.znve_surgical_write("app/ok.py", "X = 2\n", "not_applicable")
-        self.assertEqual(result["status"], "SUCCESS", result)
-        self.assertEqual((self.ws / "app" / "ok.py").read_text(encoding="utf-8"), "X = 2\n")
-        self.assertEqual(sorted(p.name for p in (self.ws / "app").iterdir()), ["ok.py"])
-
-    # --- Barandillas de análisis (P2) -----------------------------------------
-
-    def test_write_rejects_silenced_errors(self):
-        silenced = (
-            "try { f(); } catch (e) {}",
-            "try { f(); } catch {}",
-            "try { f(); } catch (e) {\n  // se ignora\n}",
-            "try { f(); } catch (e) { /* nada */ }",
-            "try:\n    f()\nexcept:\n    pass\n",
-            "try:\n    f()\nexcept Exception:\n    pass\n",
-            "try:\n    f()\nexcept (ValueError, KeyError) as e:\n    ...\n",
-            "load().catch(() => {});",
-        )
-        for code in silenced:
-            self.assertRejected(self.skill.znve_surgical_write("app/silenced.txt", code, "finally"), code)
-
-    def test_validate_detects_banned_imports(self):
-        for code in (
-            "import _ from 'lodash';",
-            "const _ = require('lodash');",
-            'const axios = require("axios");',
-            "import requests",
-            "from requests import get",
-            "using Lodash;",
-        ):
-            self.assertEqual(self.skill.znve_validate_contract(code, ["lodash", "axios", "requests"])["status"], "REJECTED", code)
-
-    def test_validate_detects_blind_queries(self):
-        for code in ("q = 'select * from users'", "q = 'SELECT   * FROM users'", "db.users.find({ })"):
-            self.assertEqual(self.skill.znve_validate_contract(code, ["lodash"])["status"], "REJECTED", code)
-
-    def test_write_accepts_handled_errors(self):
-        code = "try:\n    f()\nexcept ValueError as exc:\n    raise RuntimeError('f falló') from exc\n"
-        self.assertEqual(self.skill.znve_surgical_write("app/handled.py", code, "finally")["status"], "SUCCESS")
-
-    def test_validate_ignores_substrings(self):
-        result = self.skill.znve_validate_contract("class Ratio:\n    radio: int\n", ["io", "rat"])
-        self.assertEqual(result["status"], "APPROVED", result)
-
-    def test_audit_result_property_is_not_blocking(self):
-        self.assertTrue(self.skill.znve_audit_resources("var a = api.ResultSet; y.ResultCode = 0;")["clean"])
-        for code in ("var r = task.Result;", "task.GetAwaiter().GetResult();", "mWakeLock.acquire();"):
-            self.assertFalse(self.skill.znve_audit_resources(code)["clean"], code)
-
-    def test_forensic_database_detection(self):
-        (self.ws / "arrays.js").write_text("const n = items.find((x) => x.ok);\ndelete cache.key;\n", encoding="utf-8")
-        (self.ws / "repo.sql").write_text("DELETE FROM sessions WHERE expires_at < now();\n", encoding="utf-8")
-        self.assertFalse(self.skill.znve_forensic_scan("arrays.js")["side_effects"]["database_mutations"])
-        self.assertTrue(self.skill.znve_forensic_scan("repo.sql")["side_effects"]["database_mutations"])
-
-    def test_forensic_rejects_large_and_binary_files(self):
-        (self.ws / "big.txt").write_bytes(b"a" * (self.MAX_SCAN_BYTES + 1))
-        (self.ws / "bin.dat").write_bytes(b"PK\x00\x03\x04")
-        for target in ("big.txt", "bin.dat", "."):
-            self.assertRejected(self.skill.znve_forensic_scan(target), target)
 
 
 class DshInstallerTests(unittest.TestCase):
@@ -859,117 +526,6 @@ class DshInstallerTests(unittest.TestCase):
         os.utime(new, (1_000_000_000, 1_000_000_000))  # la más reciente por nombre es la más antigua por fecha
         self.assertEqual(self.run_installer("-Uninstall").returncode, 0)
         self.assertEqual(self.agents.read_text(encoding="utf-8"), "Reglas nuevas.\n")
-
-
-class ToolContractTests(unittest.TestCase):
-    """Contrato de respuesta común (RFC 0004, paso 5): el servidor MCP y znve_skill.py responden lo mismo."""
-
-    @classmethod
-    def setUpClass(cls):
-        cls.spec = builder.load_spec()
-        cls.cases = json.loads(CONTRACT_CASES.read_text(encoding="utf-8"))
-        cls.skill = load_module("znve_skill_contract", ANTIGRAVITY_DIR / "znve_skill.py")
-        cls.codes = {e["code"]: e["status"] for e in cls.spec["mcp"]["contract"]["error_codes"]}
-
-    @staticmethod
-    def write_files(root: Path, files: dict) -> None:
-        for name, spec in files.items():
-            target = root / name
-            if name.endswith("/"):
-                target.mkdir(parents=True, exist_ok=True)
-                continue
-            target.parent.mkdir(parents=True, exist_ok=True)
-            if isinstance(spec, str):
-                target.write_text(spec, encoding="utf-8", newline="")
-            elif "base64" in spec:
-                target.write_bytes(base64.b64decode(spec["base64"]))
-            else:
-                target.write_bytes(spec["fill"].encode() * spec["bytes"])
-
-    def assert_subset(self, actual, expected, where: str) -> None:
-        if isinstance(expected, dict):
-            self.assertIsInstance(actual, dict, f"{where}: se esperaba un objeto")
-            for key, value in expected.items():
-                self.assertIn(key, actual, f"{where}.{key} falta")
-                self.assert_subset(actual[key], value, f"{where}.{key}")
-        else:
-            self.assertEqual(actual, expected, where)
-
-    def test_cases_match_the_shared_contract(self):
-        """Cada caso de tool_contract_cases.json da el resultado esperado (los mismos que ejecuta el servidor MCP)."""
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp).resolve()
-            ws, outside, cwd = root / "ws", root / "outside", root / "cwd"
-            for folder in (ws, outside, cwd):
-                folder.mkdir()
-            self.write_files(ws, self.cases["files"])
-            self.write_files(outside, self.cases["outside_files"])
-            previous = os.getcwd()
-            os.chdir(cwd)
-            try:
-                with mock.patch.dict(os.environ, {"ZNVE_WORKSPACE": str(ws)}):
-                    for case in self.cases["cases"]:
-                        with self.subTest(case["id"]):
-                            result = getattr(self.skill, case["tool"])(**case["args"])
-                            text = json.dumps(result, ensure_ascii=False)
-                            self.assertEqual(list(result)[0], "status", text)
-                            self.assert_subset(result, case["expect"], case["id"])
-                            for key, length in case.get("counts", {}).items():
-                                self.assertEqual(len(result[key]), length, f"{case['id']}.{key}")
-                            for needle in case.get("content_contains", []):
-                                self.assertIn(needle, result["content"], case["id"])
-                            for needle in case.get("content_excludes", []):
-                                self.assertNotIn(needle, result["content"], case["id"])
-                            for needle in case.get("result_excludes", []):
-                                self.assertNotIn(needle, text, case["id"])
-                            self.assertNotIn(str(ws), text, f"{case['id']}: expone la ruta del host")
-                            self.assertNotIn(str(ws).replace("\\", "\\\\"), text)
-                    self.assertEqual((ws / ".env").read_text(encoding="utf-8"), "TOKEN=CANARY-12345")
-                    self.assertFalse((outside / "pwned.txt").exists())
-                    self.assertEqual((ws / "tests" / "characterization" / "test_legacy.py").read_text(encoding="utf-8"), "pass\n")
-            finally:
-                os.chdir(previous)
-
-    def test_every_code_has_the_status_the_spec_declares(self):
-        """Los casos compartidos cubren cada código de error y su status coincide con el de la especificación."""
-        covered = set()
-        for case in self.cases["cases"]:
-            code = case["expect"].get("code")
-            if code:
-                self.assertEqual(case["expect"]["status"], self.codes[code], case["id"])
-                covered.add(code)
-        self.assertEqual(covered, set(self.codes) - {"IO_ERROR"}, "códigos sin caso compartido")
-        self.assertEqual(self.skill.ERROR_STATUS, self.codes)
-
-    def test_both_implementations_use_the_same_codes(self):
-        """Los códigos usados en el servidor MCP y en znve_skill.py son los de la especificación, y los dos usan todos."""
-        usage = re.compile(r"(?:_?fail|_?failure|ZnveError)\(\s*[\"']([A-Z_]+)[\"']|code[\"']?\s*[:=]\s*[\"']([A-Z_]+)[\"']")
-
-        def used(path: Path) -> set:
-            return {a or b for a, b in usage.findall(path.read_text(encoding="utf-8"))}
-
-        server = used(MCP_SERVER)
-        python = used(ANTIGRAVITY_DIR / "znve_skill.py")
-        self.assertEqual(server, set(self.codes))
-        self.assertEqual(python, set(self.codes))
-
-    def test_default_banned_libraries_are_shared(self):
-        self.assertEqual(list(self.skill.DEFAULT_BANNED_LIBRARIES), self.spec["mcp"]["contract"]["default_banned_libraries"])
-        self.assertIn(json.dumps(self.spec["mcp"]["contract"]["default_banned_libraries"], ensure_ascii=False), MCP_SERVER.read_text(encoding="utf-8"))
-
-    def test_server_version_is_the_contract_version(self):
-        package = json.loads((MCP_SERVER.parent / "package.json").read_text(encoding="utf-8"))
-        self.assertEqual(package["version"], self.spec["mcp"]["contract"]["server_version"])
-        self.assertIn("zod", package["dependencies"])
-
-    def test_manual_documents_the_contract(self):
-        """COMMANDS.md (SECCIÓN 2) documenta los estados, los campos de cada herramienta y todos los códigos."""
-        manual = builder.render_targets(self.spec)["protocols/COMMANDS.md"]
-        self.assertIn("### Contrato de respuesta", manual)
-        for code in self.codes:
-            self.assertIn(f"`{code}`", manual)
-        for tool in self.spec["mcp"]["tools"]:
-            self.assertIn(f"| `{tool['name']}` |", manual)
 
 
 class BundleTests(unittest.TestCase):

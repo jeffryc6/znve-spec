@@ -1,6 +1,6 @@
 {
   "name": "znve-mcp-server",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "ZNVE MCP Protocol Server",
   "type": "module",
   "main": "dist/znve-mcp-server.js",
@@ -13,14 +13,14 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/znve-mcp-server.js",
-    "test": "tsc && node --test test/server.test.mjs test/security-gaps.test.mjs",
+    "test": "tsc && node --test test/server.test.mjs test/security-gaps.test.mjs test/install-codex.test.mjs test/workflow.test.mjs",
     "check:openrouter": "tsc --noEmit --strict --target es2022 --module nodenext --moduleResolution nodenext --skipLibCheck --typeRoots ./node_modules/@types --types node ../openrouter/znve-openrouter-client.ts",
     "install:antigravity": "node install-antigravity.mjs",
     "uninstall:antigravity": "node install-antigravity.mjs --uninstall"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.32.0",
-    "zod": "^3.25 || ^4.0"
+    "zod": "^4.6.6"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

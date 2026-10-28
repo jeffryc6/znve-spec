@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 /**
  * ==============================================================================
- * ZNVE MCP SERVER: Spec-Driven Model Context Protocol Server for Antigravity
+ * ZNVE MCP SERVER: Shared Spec-Driven Model Context Protocol Server
  * >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano)
- * Framework: Zero-Noise Vibe Engineering (ZNVE) v2.4.2
+ * Framework: Zero-Noise Vibe Engineering (ZNVE) v2.5.0
  * Axioma 1: "Inteligencia pesada en el diseño; huella casi nula en la ejecución."
  * Axioma 2: "La IA no inventa arquitectura; ejecuta contratos deterministas."
  * <<< znve:generated
@@ -19,6 +19,7 @@ import * as fs from "node:fs/promises";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
 import { z } from "zod";
+import { Workflow, WorkflowError } from "./workflow.js";
 
 // Antigravity lanza el proceso con un cwd arbitrario: la raíz del workspace se declara con ZNVE_WORKSPACE.
 const WORKSPACE_ROOT = path.resolve(process.env.ZNVE_WORKSPACE || process.cwd());
@@ -41,7 +42,7 @@ const HELP_TOPIC_HEADINGS: Record<string, string> = {
 
 // >>> znve:generated:fallback (znve-auto/builder.py desde master_spec.json; no editar a mano)
 const HELP_FALLBACK =
-  "[ZNVE_HELP_FALLBACK] protocols/COMMANDS.md no disponible. Comandos ZNVE v2.4.2: /znve-help, /znve-contract, /znve-execute, /znve-triage, /znve-hotfix, /znve-upgrade, /znve-forensic, /znve-harness, /znve-legacy-rescue, /znve-audit.";
+  "[ZNVE_HELP_FALLBACK] protocols/COMMANDS.md no disponible. Comandos ZNVE v2.5.0: /znve-help, /znve-contract, /znve-execute, /znve-triage, /znve-hotfix, /znve-upgrade, /znve-forensic, /znve-harness, /znve-legacy-rescue, /znve-audit, /znve-spec, /znve-verify, /znve-checkpoint, /znve-resume.";
 // <<< znve:generated:fallback
 
 // >>> znve:generated:tools (znve-auto/builder.py desde master_spec.json; no editar a mano)
@@ -88,12 +89,19 @@ const TOOL_DOCS: Record<string, { description: string; params: Record<string, st
     "params": {
       "code_snippet": "Fragmento de código a evaluar."
     }
+  },
+  "znve_workflow": {
+    "description": "Motor común 2.5: spec_validate, preflight, verify, gate, checkpoint, resume, claim, apply y stall_detect. Validación estructural no es aprobación. verify/apply/claim requieren hash de spec autorizado por el host; verify usa runners absolutos autorizados, sin shell ni salida cruda. gate exige evidencia vigente. Lock cooperativo entre procesos; no es sandbox. Límites en protocols/VERIFICATION.md.",
+    "params": {
+      "operation": "Operación del flujo; esquemas en schemas/workflow.schema.json.",
+      "payload": "Objeto estricto de la operación seleccionada."
+    }
   }
 };
 // <<< znve:generated:tools
 
 // >>> znve:generated:contract (znve-auto/builder.py desde master_spec.json; no editar a mano)
-const ZNVE_VERSION = "2.4.2";
+const ZNVE_VERSION = "2.5.0";
 const ERROR_STATUS: Record<string, "REJECTED" | "ERROR"> = { BAD_ARGUMENT: "REJECTED", BAD_RANGE: "REJECTED", OUTSIDE_WORKSPACE: "REJECTED", NOT_FOUND: "ERROR", NOT_A_FILE: "REJECTED", TOO_LARGE: "REJECTED", BINARY_FILE: "REJECTED", SECRET_DENIED: "REJECTED", PROTECTED_DIR: "REJECTED", NOT_HARNESS_DIR: "REJECTED", ALREADY_EXISTS: "REJECTED", SILENT_CATCH: "REJECTED", UNDISPOSED_RESOURCE: "REJECTED", CONTRACT_VIOLATION: "REJECTED", IO_ERROR: "ERROR" };
 const DEFAULT_BANNED_LIBRARIES: string[] = ["lodash", "axios", "moment", "requests", "jquery"];
 // <<< znve:generated:contract
@@ -106,7 +114,7 @@ const SECRET_ALLOW: string[] = [".env.example", ".env.sample", ".env.template", 
 // Únicos directorios (primer segmento bajo el workspace) donde znve_scaffold_harness puede escribir.
 const HARNESS_ROOTS = ["tests", "sandbox"];
 // Directorios en los que ninguna herramienta escribe, a cualquier profundidad.
-const PROTECTED_DIRS = [".git", "node_modules"];
+const PROTECTED_DIRS = [".git", "node_modules", ".znve"];
 const DISPOSAL_PATTERNS = ["dispose", "close", "finally", "autocloseable", "not_applicable"] as const;
 // El primer tema es el predeterminado: las secciones son pequeñas; el manual completo (all) se pide de forma explícita.
 const HELP_TOPICS = ["commands", "mcp_tools", "modes", "all"] as const;
@@ -406,6 +414,7 @@ async function guard(run: () => Promise<Result>): Promise<CallToolResult> {
   try {
     return reply(await run());
   } catch (err: any) {
+    if (err instanceof WorkflowError) return reply({ status: err.code === "IO_ERROR" ? "ERROR" : "REJECTED", code: err.code, message: "Solicitud workflow rechazada: " + err.message });
     if (err instanceof ZnveError) return reply(failure(err.code, await publicMessage(err)));
     return reply(failure("IO_ERROR", `Fallo de E/S (${typeof err?.code === "string" ? err.code : "desconocido"}).`));
   }
@@ -432,6 +441,7 @@ async function forensicScan(filePath: string, startLine?: number, endLine?: numb
   requireText(filePath, "file_path");
   const target = await resolveInWorkspace(filePath);
   assertNotSecret(target, "Lectura");
+  if ([target.relative, target.realRelative].some(rel => rel.split(path.sep).some(part => part.toLowerCase() === ".znve"))) fail("PROTECTED_DIR", "Estado interno protegido");
   const stat = await fs.stat(target.absolute).catch((err) => {
     throw err.code === "ENOENT" ? new ZnveError("NOT_FOUND", `No existe '${filePath}' en ZNVE_WORKSPACE.`) : err;
   });
@@ -656,6 +666,34 @@ mcp.registerTool(
     annotations: READ_ONLY,
   },
   ({ code_snippet }) => guard(async () => auditResources(code_snippet))
+);
+
+const workflow = new Workflow({
+  root: WORKSPACE_ROOT,
+  validateContent: (content) => {
+    if (silentErrorBlocks(content) > 0) fail("SILENT_CATCH", "El cambio silencia excepciones");
+  },
+  resolve: async (file, write = false) => {
+    const target = await resolveInWorkspace(file);
+    assertNotSecret(target, write ? "Escritura" : "Lectura");
+    // Internal state cannot be supplied as source, evidence or patch through public paths.
+    if ([target.relative, target.realRelative].some(rel => rel.split(path.sep).some(part => part.toLowerCase() === ".znve"))) fail("PROTECTED_DIR", "Estado interno protegido");
+    if (write) assertWritable(target);
+    return await realpathOfExisting(target.absolute);
+  },
+});
+
+mcp.registerTool(
+  "znve_workflow",
+  {
+    description: doc("znve_workflow"),
+    inputSchema: {
+      operation: z.enum(["spec_validate", "preflight", "verify", "gate", "checkpoint", "resume", "claim", "apply", "stall_detect"]).describe(param("znve_workflow", "operation")),
+      payload: z.record(z.string(), z.unknown()).describe(param("znve_workflow", "payload")),
+    },
+    annotations: { readOnlyHint: false, destructiveHint: true, idempotentHint: false, openWorldHint: true },
+  },
+  ({ operation, payload }) => guard(async () => await workflow.dispatch(operation, payload) as Result)
 );
 
 // Arranque por stdio

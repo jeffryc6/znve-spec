@@ -13,6 +13,7 @@ import * as fs from "node:fs";
 import * as os from "node:os";
 import * as path from "node:path";
 import { fileURLToPath } from "node:url";
+import { createHash } from "node:crypto";
 
 const MCP_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const REPO_ROOT = path.resolve(MCP_DIR, "../..");
@@ -27,10 +28,10 @@ let tmp, ws, outside, server, linkOk;
 // Cliente JSON-RPC mínimo por stdio
 // ---------------------------------------------------------------------------
 
-function startServer(workspace, cwd) {
+function startServer(workspace, cwd, extraEnv = {}) {
   const child = spawn(process.execPath, [SERVER_JS], {
     cwd,
-    env: { ...process.env, ZNVE_WORKSPACE: workspace },
+    env: { ...process.env, ZNVE_WORKSPACE: workspace, ...extraEnv },
     stdio: ["pipe", "pipe", "pipe"],
   });
   const pending = new Map();
@@ -106,7 +107,17 @@ before(async () => {
     linkOk = false;
   }
 
-  server = startServer(ws, path.join(tmp, "cwd"));
+  const workflowSpec = JSON.stringify({
+    id:"mcp-real",revision:1,objective:"El archivo conserva initial",allowed_files:["workflow-target.js"],required_files:[],
+    criteria:[{id:"content",description:"Contenido real comprobado",required:true,check_id:"read"}],
+    checks:[{id:"read",runner:"node",argv:["-e","if(require('fs').readFileSync('workflow-target.js','utf8')!=='initial')process.exit(1)"],timeout_ms:3000}],assumptions:[]
+  });
+  fs.writeFileSync(path.join(ws,"workflow-spec.json"),workflowSpec);
+  fs.writeFileSync(path.join(ws,"workflow-target.js"),"initial");
+  server = startServer(ws, path.join(tmp, "cwd"), {
+    ZNVE_APPROVED_SPECS: createHash("sha256").update(workflowSpec).digest("hex"),
+    ZNVE_RUNNERS: JSON.stringify({node:process.execPath}),
+  });
   const init = await server.request("initialize", {
     protocolVersion: "2025-06-18",
     capabilities: {},
@@ -170,6 +181,53 @@ describe("contrato", () => {
 // ---------------------------------------------------------------------------
 // P1: contención de rutas y validación de argumentos
 // ---------------------------------------------------------------------------
+
+describe("workflow 2.5 por MCP real", () => {
+  test("flujo real de aprobación, proceso, evidencia, recuperación y apply", async () => {
+    const workflow = async (operation,payload={}) => {
+      const result=await call("znve_workflow",{operation,payload:{spec_path:"workflow-spec.json",...payload}});
+      assert.equal(result.isError,false,result.text);
+      return json(result);
+    };
+    assert.equal((await workflow("preflight")).ready,true);
+    const {evidence}=await workflow("verify",{check_id:"read"});
+    assert.equal(evidence.state,"passed");
+    assert.equal((await workflow("gate",{evidence_ids:[evidence.id]})).accepted,true);
+    const {checkpoint}=await workflow("checkpoint",{pending:["Review next change"],evidence_ids:[evidence.id]});
+    assert.equal((await workflow("resume",{checkpoint_id:checkpoint.id})).validity,"current");
+    const {claim}=await workflow("claim",{owner:"test",files:["workflow-target.js"],ttl_seconds:60});
+    const expected_hash=createHash("sha256").update("initial").digest("hex");
+    const denied=await call("znve_workflow",{operation:"apply",payload:{spec_path:"workflow-spec.json",claim_id:claim.id,file:"workflow-target.js",expected_hash,content:"try { x() } catch {}"}});
+    assert.equal(denied.isError,true); assert.equal(json(denied).code,"SILENT_CATCH");
+    await workflow("apply",{claim_id:claim.id,file:"workflow-target.js",expected_hash,content:"changed"});
+    assert.equal((await workflow("gate",{evidence_ids:[evidence.id]})).accepted,false);
+    assert.equal((await workflow("resume",{checkpoint_id:checkpoint.id})).validity,"stale");
+    assert.equal((await workflow("verify",{check_id:"read"})).evidence.state,"failed");
+  });
+  test("discrimina operación y rechaza éxito aportado por el cliente", async () => {
+    const result = await call("znve_workflow", { operation: "gate", payload: { spec_path: "spec.json", evidence_ids: [], accepted: true } });
+    assert.equal(result.isError, true);
+    assert.equal(json(result).code, "BAD_ARGUMENT");
+  });
+  test("el detector de repetición responde sin ejecutar ni escribir código", async () => {
+    const result = await call("znve_workflow", {operation:"stall_detect", payload:{window:2,events:[{action:"missing",new_evidence:false},{action:"missing",new_evidence:false}]}});
+    assert.equal(result.isError,false);
+    assert.equal(json(result).stalled,true);
+  });
+  test("la spec no puede leerse de secretos o fuera del workspace", async () => {
+    for (const [file,code] of [[".env","SECRET_DENIED"],["../outside/secret.txt","OUTSIDE_WORKSPACE"]]) {
+      const result=await call("znve_workflow",{operation:"spec_validate",payload:{spec_path:file}});
+      assert.equal(result.isError,true);
+      assert.equal(json(result).code,code);
+    }
+  });
+  test("la API legacy no puede leer ni alterar evidencia interna", async () => {
+    const result=await call("znve_surgical_write",{target_file:".znve/state/evidence-fake.json",code_content:"fake",disposal_pattern:"not_applicable"});
+    assert.equal(result.isError,true); assert.equal(json(result).code,"PROTECTED_DIR");
+    const read=await call("znve_forensic_scan",{file_path:".znve/state/evidence-fake.json"});
+    assert.equal(read.isError,true); assert.equal(json(read).code,"PROTECTED_DIR");
+  });
+});
 
 describe("znve_forensic_scan", () => {
   test("lee un archivo relativo al workspace", async () => {

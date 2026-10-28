@@ -1,0 +1,20 @@
+{
+  "name": "znve-spec",
+  "interface": {
+    "displayName": "ZNVE Universal Specification"
+  },
+  "plugins": [
+    {
+      "name": "znve",
+      "source": {
+        "source": "local",
+        "path": "./integrations/codex"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -1,0 +1,101 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"
+    },
+    "spec_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"
+    },
+    "spec_hash": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^(missing|[a-f0-9]{64})$"
+    },
+    "check_id": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"
+    },
+    "files": {
+      "type": "object",
+      "additionalProperties": true
+    },
+    "created_at": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 4096
+    },
+    "validity": {
+      "type": "string",
+      "enum": [
+        "current",
+        "stale"
+      ]
+    },
+    "state": {
+      "type": "string",
+      "enum": [
+        "passed",
+        "failed"
+      ]
+    },
+    "exit_code": {},
+    "timed_out": {
+      "type": "boolean"
+    },
+    "output_limited": {
+      "type": "boolean"
+    },
+    "output_bytes": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 1000000000
+    },
+    "output_digest": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 64,
+      "pattern": "^(missing|[a-f0-9]{64})$"
+    },
+    "runner": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 80,
+      "pattern": "^[a-zA-Z0-9][a-zA-Z0-9_.-]{0,79}$"
+    },
+    "argv_digest": {
+      "type": "string",
+      "pattern": "^[a-f0-9]{64}$",
+      "minLength": 64,
+      "maxLength": 64
+    }
+  },
+  "required": [
+    "id",
+    "spec_id",
+    "spec_hash",
+    "check_id",
+    "files",
+    "created_at",
+    "validity",
+    "state",
+    "exit_code",
+    "timed_out",
+    "output_limited",
+    "output_bytes",
+    "output_digest",
+    "runner",
+    "argv_digest"
+  ],
+  "additionalProperties": false
+}

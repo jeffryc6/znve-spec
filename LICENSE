@@ -26,6 +26,7 @@ su ubicación:
 
 3. CÓDIGO Y HERRAMIENTAS DEL REPOSITORIO: MIT
    - /znve-auto (especificación maestra, compilador, plantillas y pruebas)
+   - /schemas (esquemas generados de especificación, evidencia y continuidad)
    - /.github (instrucciones de Copilot y flujos de CI)
    - /field-tests (los scripts de medición, *.py)
    - index.html

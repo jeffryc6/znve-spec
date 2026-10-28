@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Zero-Noise Vibe Engineering (ZNVE) v2.4.2: metodología abierta para programar con IA sin dependencias parásitas, sin logs de relleno y sin deuda técnica. Open methodology for AI-assisted development without parasitic dependencies, noise or technical debt.">
+  <meta name="description" content="Zero-Noise Vibe Engineering (ZNVE) v2.5.0: metodología abierta para programar con IA sin dependencias parásitas, sin logs de relleno y sin deuda técnica. Open methodology for AI-assisted development without parasitic dependencies, noise or technical debt.">
   <title>Zero-Noise Vibe Engineering (ZNVE) | Spec-Driven Agentic Architecture</title>
   <link rel="alternate" hreflang="es" href="https://jeffryc6.github.io/znve-spec/?lang=es">
   <link rel="alternate" hreflang="en" href="https://jeffryc6.github.io/znve-spec/?lang=en">
@@ -372,6 +372,7 @@
   </style>
 </head>
 <body>
+<aside style="padding:1rem;text-align:center" aria-label="Version status">ZNVE 2.5.0 · Spec-Driven Agent Engineering · Specs, evidence, checkpoints and one shared MCP. Local release: no universal drift or token-saving claims. <a href="protocols/SPEC_DRIVEN.md">2.5 workflow</a></aside>
   <canvas id="node-canvas" aria-hidden="true"></canvas>
 
   <nav class="top" aria-label="Secciones / Sections">
@@ -406,10 +407,10 @@
         <p class="lead" data-l="es">ZNVE es una metodología abierta que convierte a tu asistente de IA (Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter, Antigravity o Grok) en un ejecutor disciplinado. Primero se diseña un <strong>contrato</strong>; después la IA escribe solo el código necesario, sin dependencias parásitas, sin logs de relleno y sin errores silenciados.</p>
         <p class="lead" data-l="en" lang="en">ZNVE is an open methodology that turns your AI assistant (Claude, Gemini, Copilot, Cursor, DeepSeek, Ollama, OpenRouter, Antigravity or Grok) into a disciplined executor. First you design a <strong>contract</strong>; then the AI writes only the code that is needed, with no parasitic dependencies, no filler logs and no swallowed errors.</p>
         <div class="badges">
-          <span class="badge"><span data-l="es">Norma v2.4.2</span><span data-l="en" lang="en">Standard v2.4.2</span></span>
-          <span class="badge"><span data-l="es">10 comandos /znve-*</span><span data-l="en" lang="en">10 /znve-* commands</span></span>
+          <span class="badge"><span data-l="es">Norma v2.5.0</span><span data-l="en" lang="en">Standard v2.5.0</span></span>
+          <span class="badge"><span data-l="es">14 comandos /znve-*</span><span data-l="en" lang="en">14 /znve-* commands</span></span>
           <span class="badge"><span data-l="es">8 asistentes sincronizados</span><span data-l="en" lang="en">8 assistants in sync</span></span>
-          <span class="badge"><span data-l="es">Servidor MCP · 6 herramientas</span><span data-l="en" lang="en">MCP server · 6 tools</span></span>
+          <span class="badge"><span data-l="es">Servidor MCP · 7 herramientas</span><span data-l="en" lang="en">MCP server · 7 tools</span></span>
           <span class="badge">CC BY 4.0 &amp; MIT</span>
         </div>
         <div class="cta">
@@ -830,8 +831,8 @@ def test_golden_master():  # ✓ must pass 100% against the intact code
       <p class="eyebrow"><span data-l="es">06 · Comandos</span><span data-l="en" lang="en">06 · Commands</span></p>
       <h2 data-l="es">🛠️ Comandos Agénticos (/znve-*)</h2>
       <h2 data-l="en" lang="en">🛠️ Agentic Commands (/znve-*)</h2>
-      <p class="lead" data-l="es">Los mismos 10 comandos funcionan en todos los asistentes. Se escriben como <code>/znve-contract</code>, <code>/znve contract</code> o <code>/znve -contract</code>. Sin comando, la respuesta sigue los 4 bloques.</p>
-      <p class="lead" data-l="en" lang="en">The same 10 commands work in every assistant. Write them as <code>/znve-contract</code>, <code>/znve contract</code> or <code>/znve -contract</code>. Without a command, the answer follows the 4 blocks.</p>
+      <p class="lead" data-l="es">Los mismos 14 comandos funcionan en todos los asistentes. Se escriben como <code>/znve-contract</code>, <code>/znve contract</code> o <code>/znve -contract</code>. Sin comando, la respuesta sigue los 4 bloques.</p>
+      <p class="lead" data-l="en" lang="en">The same 14 commands work in every assistant. Write them as <code>/znve-contract</code>, <code>/znve contract</code> or <code>/znve -contract</code>. Without a command, the answer follows the 4 blocks.</p>
       <div class="terminal">
         <div class="bar"><i></i><i></i><i></i><span>/znve help · master_spec.json</span></div>
         <!-- >>> znve:generated (znve-auto/builder.py desde master_spec.json; no editar a mano) -->
@@ -845,7 +846,11 @@ def test_golden_master():  # ✓ must pass 100% against the intact code
 /znve-forensic       --&gt; Ingesta en solo lectura, matriz I/O y efectos secundarios.
 /znve-harness        --&gt; Suite Golden Master de caja negra sobre código intacto.
 /znve-legacy-rescue  --&gt; Orquestación integral en 5 fases para código legacy.
-/znve-audit          --&gt; Hardening de hilos, memoria, descriptores y seguridad.</pre>
+/znve-audit          --&gt; Hardening de hilos, memoria, descriptores y seguridad.
+/znve-spec           --&gt; Diseña comportamiento, interfaces, límites, efectos, supuestos y criterios de aceptación.
+/znve-verify         --&gt; Ejecuta checks autorizados y evalúa criterios con gate.
+/znve-checkpoint     --&gt; Persiste pendientes, hashes y referencias a evidencia.
+/znve-resume         --&gt; Contrasta checkpoint, spec y archivos actuales.</pre>
         <pre class="commands" data-l="en" lang="en">
 /znve-help           --&gt; Operating manual and command index.
 /znve-contract       --&gt; Immutable interfaces, DTOs and Anti-Bloat Fence.
@@ -856,7 +861,11 @@ def test_golden_master():  # ✓ must pass 100% against the intact code
 /znve-forensic       --&gt; Read-only ingestion, I/O matrix and side effects.
 /znve-harness        --&gt; Black-box Golden Master suite on intact code.
 /znve-legacy-rescue  --&gt; End-to-end 5-phase legacy orchestration.
-/znve-audit          --&gt; Hardening of threads, memory, descriptors and security.</pre>
+/znve-audit          --&gt; Hardening of threads, memory, descriptors and security.
+/znve-spec           --&gt; Design a verifiable specification.
+/znve-verify         --&gt; Run authorized checks and evaluate the gate.
+/znve-checkpoint     --&gt; Persist task state and evidence references.
+/znve-resume         --&gt; Resume against current spec and file hashes.</pre>
         <!-- <<< znve:generated -->
       </div>
       <p class="muted" data-l="es">Formatos de salida exactos de cada comando: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/COMMANDS.md">protocols/COMMANDS.md</a> · Plantillas de prompts listas para copiar: <a data-doc href="https://github.com/jeffryc6/znve-spec/blob/main/protocols/PROMPT_GUIDE.md">PROMPT_GUIDE.md</a></p>
@@ -942,7 +951,7 @@ def test_golden_master():  # ✓ must pass 100% against the intact code
       <p class="eyebrow"><span data-l="es">08 · Instalación</span><span data-l="en" lang="en">08 · Installation</span></p>
       <h2 data-l="es">Instálalo en tu asistente</h2>
       <h2 data-l="en" lang="en">Install it in your assistant</h2>
-      <p class="lead" data-l="es">Elige tu herramienta. Todas reciben los mismos comandos y reglas. Para comprobarlo, escribe <code>/znve help</code>: debe aparecer el catálogo de 10 comandos.</p>
+      <p class="lead" data-l="es">Elige tu herramienta. Todas reciben los mismos comandos y reglas. Para comprobarlo, escribe <code>/znve help</code>: debe aparecer el catálogo de 14 comandos.</p>
       <p class="lead" data-l="en" lang="en">Pick your tool. They all get the same commands and rules. To check it, type <code>/znve help</code>: the 10-command catalog should appear. The directives answer in Spanish by default; ask the assistant to reply in English if you prefer.</p>
 
       <div class="tabs" role="tablist" aria-label="Instalación / Installation">
@@ -1028,15 +1037,15 @@ ollama run znve-agent</code></pre><button class="copy" data-copy="cmd-ollama"></
 <pre id="cmd-mcp"><code data-lang="sh">git clone https://github.com/jeffryc6/znve-spec.git
 cd znve-spec/integrations/mcp-server
 node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><button class="copy" data-copy="cmd-mcp"></button></div>
-            <p class="muted" data-l="es">Instala dependencias, compila, verifica las 6 herramientas con un handshake real, guarda un backup de <code>mcp_config.json</code> y registra <code>znve-engine</code>. Después: <em>Manage MCP Servers → Refresh</em>. Prueba antes con <code>--dry-run</code>.</p>
-            <p class="muted" data-l="en" lang="en">It installs dependencies, builds, verifies the 6 tools with a real handshake, backs up <code>mcp_config.json</code> and registers <code>znve-engine</code>. Then: <em>Manage MCP Servers → Refresh</em>. Try <code>--dry-run</code> first, and replace the path with your own project folder.</p>
+            <p class="muted" data-l="es">Instala dependencias, compila, verifica las 7 herramientas con un handshake real, guarda un backup de <code>mcp_config.json</code> y registra <code>znve-engine</code>. Después: <em>Manage MCP Servers → Refresh</em>. Prueba antes con <code>--dry-run</code>.</p>
+            <p class="muted" data-l="en" lang="en">It installs dependencies, builds, verifies the 7 tools with a real handshake, backs up <code>mcp_config.json</code> and registers <code>znve-engine</code>. Then: <em>Manage MCP Servers → Refresh</em>. Try <code>--dry-run</code> first, and replace the path with your own project folder.</p>
           </div>
           <div>
             <h3 data-l="es">Skill global para Antigravity IDE</h3><h3 data-l="en" lang="en">Global skill for Antigravity IDE</h3>
             <div class="code-wrap terminal"><div class="bar"><i></i><i></i><i></i><span>Python 3.10+</span></div>
-<pre id="cmd-ag"><code data-lang="sh">python znve-spec/integrations/antigravity/install_znve_global.py</code></pre><button class="copy" data-copy="cmd-ag"></button></div>
-            <p class="muted" data-l="es">Instala la skill <code>znve</code> en <code>~/.gemini/config/skills/</code>, el workflow <code>/znve-help</code> y la regla global, y retira la copia antigua. Para un solo proyecto: <code>Auto_Installer.py</code> desde la raíz del proyecto (instala en <code>.agents/skills/znve/</code>).</p>
-            <p class="muted" data-l="en" lang="en">Installs the <code>znve</code> skill in <code>~/.gemini/config/skills/</code>, the <code>/znve-help</code> workflow and the global rule, and removes the old copy. For a single project: run <code>Auto_Installer.py</code> from the project root (installs into <code>.agents/skills/znve/</code>).</p>
+<pre id="cmd-ag"><code data-lang="sh">node znve-spec/integrations/mcp-server/install-antigravity.mjs --workspace "&lt;proyecto&gt;"</code></pre><button class="copy" data-copy="cmd-ag"></button></div>
+            <p class="muted" data-l="es">Copia SKILL.md a la ruta de skills de tu host y registra el MCP compartido. El motor Python se retiró con error explícito. Revisa protocols/VERIFICATION.md antes de autorizar runners.</p>
+            <p class="muted" data-l="en" lang="en">Copy SKILL.md to your host skill path and register the shared MCP. The retired Python engine fails explicitly. Read protocols/VERIFICATION.md before authorizing runners.</p>
           </div>
         </div>
       </div>
@@ -1064,7 +1073,7 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
       <p class="lead" data-l="es">Mantener las mismas reglas en 8 asistentes a mano provocaba versiones desalineadas. Hoy la metodología se declara una vez en <code>znve-auto/master_spec.json</code>, un compilador sin dependencias genera cada directiva y el CI rechaza cualquier desvío.</p>
       <p class="lead" data-l="en" lang="en">Keeping the same rules across 8 assistants by hand led to drifting versions. Today the methodology is declared once in <code>znve-auto/master_spec.json</code>, a dependency-free compiler generates every directive and CI rejects any drift.</p>
       <div class="flow">
-        <div class="step"><b>master_spec.json</b><small data-l="es">Versión, guardrails, modos y 10 comandos</small><small data-l="en" lang="en">Version, guardrails, modes and 10 commands</small></div>
+        <div class="step"><b>master_spec.json</b><small data-l="es">Versión, guardrails, modos y 14 comandos</small><small data-l="en" lang="en">Version, guardrails, modes and 14 commands</small></div>
         <div class="arrow">→</div>
         <div class="step"><b>builder.py</b><small data-l="es">17 plantillas + bloques gestionados</small><small data-l="en" lang="en">17 templates + managed regions</small></div>
         <div class="arrow">→</div>
@@ -1089,7 +1098,7 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
 │   ├── claude/ gemini/ cursor/
 │   ├── deepseek/ ollama/ openrouter/
 │   ├── antigravity/       skill e instaladores
-│   └── mcp-server/        servidor MCP (6 herramientas)
+│   └── mcp-server/        servidor MCP (7 herramientas)
 ├── field-tests/           pruebas de campo archivadas
 ├── znve-auto/              fuente única + builder + tests
 └── index.html              esta página</pre>
@@ -1105,7 +1114,7 @@ node install-antigravity.mjs --workspace "/ruta/a/tu-proyecto"</code></pre><butt
 │   ├── claude/ gemini/ cursor/
 │   ├── deepseek/ ollama/ openrouter/
 │   ├── antigravity/       skill and installers
-│   └── mcp-server/        MCP server (6 tools)
+│   └── mcp-server/        MCP server (7 tools)
 ├── field-tests/           archived field tests
 ├── znve-auto/              single source + builder + tests
 └── index.html              this page</pre>

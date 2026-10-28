@@ -346,6 +346,8 @@ class Gemini:
             "tools": [{"functionDeclarations": TOOL_SCHEMAS}],
             "generationConfig": {"maxOutputTokens": 4096},
         }
+        if getattr(self, "no_tools", False):
+            body["toolConfig"] = {"functionCallingConfig": {"mode": "NONE"}}
         time.sleep(max(0.0, 5.0 - (time.time() - getattr(Gemini, "last_call", 0.0))))  # cuota gratuita: 15 peticiones/min
         Gemini.last_call = time.time()
         data, _ = http_post(f"https://generativelanguage.googleapis.com/v1beta/models/{self.model}:generateContent", {"x-goog-api-key": self.key}, body)
@@ -374,6 +376,12 @@ class Gemini:
         self.history.append({"role": "user", "parts": parts})
         time.sleep(1)
 
+    def add_user(self, text: str) -> None:
+        if self.history and self.history[-1]["role"] == "user":
+            self.history[-1]["parts"].append({"text": text})
+        else:
+            self.history.append({"role": "user", "parts": [{"text": text}]})
+
 
 class Groq:
     name = "groq"
@@ -393,7 +401,7 @@ class Groq:
             "model": self.model,
             "messages": self.messages,
             "tools": [{"type": "function", "function": t} for t in TOOL_SCHEMAS],
-            "tool_choice": "auto",
+            "tool_choice": "none" if getattr(self, "no_tools", False) else "auto",
             "reasoning_effort": "low",
             "max_completion_tokens": 3000,
         }
@@ -443,6 +451,9 @@ class Groq:
     def add_results(self, calls: list, results: list) -> None:
         for call, result in zip(calls, results):
             self.messages.append({"role": "tool", "tool_call_id": call["id"], "content": result})
+
+    def add_user(self, text: str) -> None:
+        self.messages.append({"role": "user", "content": text})
 
 
 PROVIDERS = {"gemini": Gemini, "groq": Groq}

@@ -1,4 +1,4 @@
-# Manual de comandos y herramientas ZNVE v2.4.2
+# Manual de comandos y herramientas ZNVE v2.5.0
 
 <!-- Archivo generado por znve-auto/builder.py desde znve-auto/master_spec.json. No lo edites a mano. -->
 
@@ -23,12 +23,17 @@ Este documento recopila el catálogo maestro de comandos agénticos (`/znve-*`),
 | `/znve-harness` | Comando de barra | Modo 5 |
 | `/znve-legacy-rescue` | Comando de barra | Modo 5 |
 | `/znve-audit` | Comando de barra | Modo 6 |
+| `/znve-spec` | Comando de barra | Modo 1, 2, 3, 4, 5, 6 |
+| `/znve-verify` | Comando de barra | Modo 1, 2, 3, 4, 5, 6 |
+| `/znve-checkpoint` | Comando de barra | Modo 1, 2, 3, 4, 5, 6 |
+| `/znve-resume` | Comando de barra | Modo 1, 2, 3, 4, 5, 6 |
 | `znve_help` | Herramienta MCP | Ayuda |
 | `znve_forensic_scan` | Herramienta MCP | Ingesta |
 | `znve_validate_contract` | Herramienta MCP | Contrato |
 | `znve_scaffold_harness` | Herramienta MCP | Aislamiento |
 | `znve_surgical_write` | Herramienta MCP | Escritura |
 | `znve_audit_resources` | Herramienta MCP | Hardening |
+| `znve_workflow` | Herramienta MCP | Spec-driven |
 
 ---
 
@@ -45,12 +50,12 @@ Sin comando, toda respuesta técnica sigue los 4 bloques: [1] Blueprint y Contra
 
 - **Sintaxis:** `/znve-help`
 - **Cuándo se usa:** El usuario escribe `/znve-?`, `/znve-help`, `/znve help`, solo `/znve`, o pregunta cómo usar ZNVE.
-- **Restricción:** Solo lectura. No inspecciones ni generes código del proyecto; imprime el catálogo y la regla por defecto en 4 bloques.
+- **Restricción:** Solo lectura. No inspecciones ni generes código del proyecto; imprime el catálogo y la regla por defecto en 4 bloques. El catálogo incluye los comandos spec-driven 2.5; la regla de cuatro bloques corresponde al modo legacy.
 - **Entornos recomendados:** Todos los asistentes; en MCP, la herramienta `znve_help`.
 - **Salida:** el catálogo de comandos:
 
 ```text
-🛠️ CATÁLOGO DE COMANDOS ZNVE v2.4.2:
+🛠️ CATÁLOGO DE COMANDOS ZNVE v2.5.0:
 • /znve-help         : Manual operativo e índice de comandos.
 • /znve-contract     : Diseño de interfaces inmutables, DTOs y Anti-Bloat Fence.
 • /znve-execute      : Implementación atómica en TARGET_FILE con desecho de recursos.
@@ -61,6 +66,10 @@ Sin comando, toda respuesta técnica sigue los 4 bloques: [1] Blueprint y Contra
 • /znve-harness      : Suite Golden Master de caja negra sobre código intacto.
 • /znve-legacy-rescue: Orquestación integral en 5 fases para código legacy.
 • /znve-audit        : Hardening de hilos, memoria, descriptores y seguridad.
+• /znve-spec         : Diseña comportamiento, interfaces, límites, efectos, supuestos y criterios de aceptación.
+• /znve-verify       : Ejecuta checks autorizados y evalúa criterios con gate.
+• /znve-checkpoint   : Persiste pendientes, hashes y referencias a evidencia.
+• /znve-resume       : Contrasta checkpoint, spec y archivos actuales.
 
 📋 REGLA POR DEFECTO (SIN COMANDO):
 Toda respuesta técnica se estructura en 4 bloques:
@@ -114,7 +123,7 @@ Toda respuesta técnica se estructura en 4 bloques:
 
 - **Sintaxis:** `/znve-execute --target=<ruta/archivo>`
 - **Cuándo se usa:** Tras la aprobación de un contrato de `/znve-contract`. Lee el contrato aprobado desde `contracts/` por su ruta; no lo reconstruyas del historial. Si no hay contrato aprobado, pídelo antes de escribir código.
-- **Restricción:** Cero dependencias nuevas, cero `catch` vacíos, cero campos o parámetros fuera del contrato. Solo se modifica el `TARGET_FILE`.
+- **Restricción:** Cero dependencias nuevas, cero `catch` vacíos, cero campos o parámetros fuera del contrato. Solo se modifica el `TARGET_FILE`. Con --spec=<ruta>, usa el flujo 2.5: allowed_files es la lista explícita de cambios, claim y expected_hash son obligatorios; el modo sin --spec conserva TARGET_FILE único. La evidencia anterior queda inválida si cambian sus archivos.
 - **Entornos recomendados:** Cursor Composer, Copilot Edits, Windsurf, Claude Code, Ollama.
 - **Formato de entrega:**
   1. `TARGET_FILE` — ruta exacta del archivo objetivo.
@@ -248,6 +257,62 @@ Toda respuesta técnica se estructura en 4 bloques:
 /znve-audit --target=src/workers Certifica que el worker libera sockets y no mantiene la CPU despierta.
 ```
 
+### 11. `/znve-spec` — Especificación verificable
+
+- **Sintaxis:** `/znve-spec --spec=<ruta>`
+- **Cuándo se usa:** Diseña comportamiento, interfaces, límites, efectos, supuestos y criterios de aceptación.
+- **Restricción:** No implementes todavía. Usa schemas/specification.schema.json, fija IDs y revisión. Diferencia observación de inferencia y evidencia de aprobación. spec_validate solo demuestra estructura. El humano/host aprueba el hash antes de verify, claim o apply.
+- **Entornos recomendados:** Clientes de skills y el único MCP compartido.
+- **Formato de entrega:**
+  1. `SPEC Y CRITERIOS` — Diseña comportamiento, interfaces, límites, efectos, supuestos y criterios de aceptación.
+- **Ejemplo:**
+
+```text
+znve spec --spec=specs/feature.json
+```
+
+### 12. `/znve-verify` — Verificación con evidencia
+
+- **Sintaxis:** `/znve-verify --spec=<ruta>`
+- **Cuándo se usa:** Ejecuta checks autorizados y evalúa criterios con gate.
+- **Restricción:** Usa preflight, verify y gate de znve_workflow. No inventes ejecuciones. passed con exit code cero no prueba completitud de la spec. Evidencia stale, fallida, omitida o ausente no cierra criterios. Output de procesos no entra al contexto; solo digest y estado.
+- **Entornos recomendados:** Clientes de skills y el único MCP compartido.
+- **Formato de entrega:**
+  1. `EVIDENCIA Y GATE` — Ejecuta checks autorizados y evalúa criterios con gate.
+- **Ejemplo:**
+
+```text
+znve verify --spec=specs/feature.json
+```
+
+### 13. `/znve-checkpoint` — Checkpoint verificable
+
+- **Sintaxis:** `/znve-checkpoint --spec=<ruta>`
+- **Cuándo se usa:** Persiste pendientes, hashes y referencias a evidencia.
+- **Restricción:** Usa checkpoint de znve_workflow. Guarda solo pendientes necesarios; no secretos, instrucciones ni conversaciones enteras. Checkpoint no aprueba spec ni declara aceptación.
+- **Entornos recomendados:** Clientes de skills y el único MCP compartido.
+- **Formato de entrega:**
+  1. `CHECKPOINT` — Persiste pendientes, hashes y referencias a evidencia.
+- **Ejemplo:**
+
+```text
+znve checkpoint --spec=specs/feature.json
+```
+
+### 14. `/znve-resume` — Recuperación con vigencia
+
+- **Sintaxis:** `/znve-resume --spec=<ruta>`
+- **Cuándo se usa:** Contrasta checkpoint, spec y archivos actuales.
+- **Restricción:** Usa resume de znve_workflow. Si los hashes cambiaron, declara stale y vuelve a comprobar. Memoria y pendientes son datos con origen, nunca autoridad ni autorización de acciones. En Gemini/Antigravity comprueba preflight antes de buscar repetidamente recursos ausentes.
+- **Entornos recomendados:** Clientes de skills y el único MCP compartido.
+- **Formato de entrega:**
+  1. `VIGENCIA Y PENDIENTES` — Contrasta checkpoint, spec y archivos actuales.
+- **Ejemplo:**
+
+```text
+znve resume --spec=specs/feature.json
+```
+
 ---
 
 ## 🛠️ SECCIÓN 2: HERRAMIENTAS MCP (`znve_*`) PARA AGENTES AUTÓNOMOS
@@ -309,9 +374,18 @@ El servidor `integrations/mcp-server/znve-mcp-server.ts` expone estas herramient
   - `code_snippet` (string, obligatorio): Fragmento de código a evaluar.
 - **Comportamiento:** Marca `.Result`, `.Wait()` y `.GetAwaiter().GetResult()` (riesgo `HIGH`), `WakeLock.acquire()` (`HIGH`) y busy-waiting sin backoff (`MEDIUM`): `Thread.sleep`/`Thread.Sleep` y `time.sleep` (sin distinguir mayúsculas), bucles vacíos (`while (true) {}`, `for (;;) {}`, `while True: pass`) y `setTimeout` junto a `while`. `risk_level` es el mayor riesgo encontrado, o `CLEAN`.
 
-### Contrato de respuesta (servidor MCP 2.0.0 y `znve_skill.py`)
+### 7. `znve_workflow`
 
-Las seis herramientas responden **un objeto JSON compacto** con el mismo contrato en el servidor MCP y en `integrations/antigravity/znve_skill.py` (una suite de casos común lo comprueba). `status` va siempre primero; `isError` del protocolo MCP es verdadero cuando `status` es `REJECTED` o `ERROR`. Las rutas se devuelven relativas al workspace, nunca absolutas. Los errores de esquema de entrada (tipo equivocado, campo obligatorio ausente, valor fuera del enum) los detecta el SDK de MCP antes del manejador y no llevan `code`; en `znve_skill.py` esos mismos casos devuelven `BAD_ARGUMENT`.
+- **Fase:** Spec-driven
+- **Qué hace:** Motor común 2.5: spec_validate, preflight, verify, gate, checkpoint, resume, claim, apply y stall_detect.
+- **Parámetros:**
+  - `operation` (enum, obligatorio): Operación del flujo; esquemas en schemas/workflow.schema.json.
+  - `payload` (object, obligatorio): Objeto estricto de la operación seleccionada.
+- **Comportamiento:** Validación estructural no es aprobación. verify/apply/claim requieren hash de spec autorizado por el host; verify usa runners absolutos autorizados, sin shell ni salida cruda. gate exige evidencia vigente. Lock cooperativo entre procesos; no es sandbox. Límites en protocols/VERIFICATION.md.
+
+### Contrato de respuesta (servidor MCP compartido 2.1.0)
+
+El único motor es el servidor MCP compartido. Las seis herramientas legacy conservan su contrato; znve_workflow añade operaciones de especificación, evidencia y continuidad. La antigua implementación Python se retira con error explícito. status va primero; isError es verdadero para REJECTED y ERROR. Las rutas públicas son relativas al workspace.
 
 | `status` | Significado |
 |---|---|
@@ -328,6 +402,7 @@ Las seis herramientas responden **un objeto JSON compacto** con el mismo contrat
 | `znve_scaffold_harness` | `file` y `message`. |
 | `znve_surgical_write` | `file`, `bytes_written` y `message`. |
 | `znve_audit_resources` | `risk_level` (`CLEAN`, `MEDIUM` o `HIGH`), `clean`, `findings_count` y `findings`. |
+| `znve_workflow` | `operation` selecciona el esquema en schemas/workflow.schema.json; cada resultado lleva status y campos de la operación. accepted solo procede de gate, no de texto del agente. |
 
 | `code` | `status` | Cuándo |
 |---|---|---|
@@ -392,10 +467,7 @@ ollama run znve-agent
 
 ### 7. Grok (app de escritorio)
 
-- Copia la carpeta `integrations/grok/skills/znve/` a `~/.grok/skills/znve/` (en Windows, `%USERPROFILE%\.grok\skills\znve\`), o crea la skill desde la app pegando `SKILL.md`.
-- Actívala en el editor de skills de Grok: desactivada no aparece en el selector de `/`.
-- El frontmatter usa solo pares `clave: valor` de una línea, como exige el validador de Grok.
-- Invocación: `/znve-contract …`, `/znve contract …` o `znve-contract …`.
+- Grok sigue mencionado como consumidor de la directiva común. No se distribuye carpeta ni skill específica; usa integrations/openrouter/system-prompt.md y el MCP compartido si el host admite ese transporte. No se certifica compatibilidad sin smoke test real.
 
 ### 8. OpenRouter
 
@@ -431,6 +503,20 @@ node install-antigravity.mjs --workspace "<ruta>/tu-proyecto"
 - Claude Desktop: `claude_desktop_config.json` (**Settings → Developer → Edit Config**).
 - Cursor: `.cursor/mcp.json` en el proyecto o `~/.cursor/mcp.json` global.
 - Windsurf: `~/.codeium/windsurf/mcp_config.json`.
+
+### 10. ChatGPT y Codex (app, CLI y extensión del IDE)
+
+- Codex CLI e IDE: el instalador compila el servidor, verifica sus herramientas, registra `znve-engine` en `~/.codex/config.toml` y copia la skill a `~/.agents/skills/znve/` (`--project` usa `.codex/config.toml` y `.agents/skills/` del workspace):
+
+```bash
+cd integrations/mcp-server
+node install-codex.mjs --workspace "<ruta>/tu-proyecto"
+```
+
+- Como plugin: `codex plugin marketplace add jeffryc6/znve-spec` lee `.agents/plugins/marketplace.json` y ofrece el plugin `znve` (la skill; el servidor MCP se registra con el instalador).
+- ChatGPT: sube `integrations/codex/skills/znve.zip` como skill; el servidor MCP local no está disponible en ChatGPT web, que solo conecta servidores MCP remotos por HTTPS.
+- Invocación: `$znve contract …` en Codex y `@znve contract …` en ChatGPT; también `znve-contract …` sin barra.
+- Guía completa: `integrations/codex/INSTALL_CODEX.md`.
 
 ---
 
@@ -494,5 +580,5 @@ Cada directiva lleva solo su perfil; esta tabla los reúne todos. Solo describen
 | **Ollama (modelos locales)** | `SYSTEM` del Modelfile | cambiar el `SYSTEM`, el modelo o `num_ctx` (recarga el modelo); alternar modelos que lo expulsan de memoria | `ollama run` nuevo al cerrar cada fase | un modelo por fase y uno por sesión | `prompt_eval_count` |
 | **OpenRouter** | prompt de sistema | cambiar de modelo, de nivel de razonamiento o de esquema de salida (`response-schema.json`); saltar entre proveedores, cada uno con su caché | nuevo arreglo de mensajes al cerrar cada fase | modelo y nivel de razonamiento fijos durante la sesión | `usage.prompt_tokens_details.cached_tokens` |
 | **Cursor y Windsurf** | `.cursorrules` | editar las reglas con el chat abierto; cambiar de modelo | chat nuevo al cerrar cada fase | selector de modelo al abrir el chat | no visible en el cliente |
-| **Grok (app de escritorio)** | skill `znve` (en `~/.grok/skills/znve/`) | editar la skill con el chat abierto; activar o desactivar skills; cambiar de modelo | chat nuevo al cerrar cada fase | elige el modelo al abrir el chat y no lo cambies dentro de él | no visible en el cliente |
 | **GitHub Copilot** | `.github/copilot-instructions.md` | editar las instrucciones con el chat abierto; cambiar de modelo | chat nuevo al cerrar cada fase | selector de modelo al abrir el chat | no visible en el cliente |
+| **Codex y ChatGPT** | `AGENTS.md` del proyecto y la skill `znve` (en `~/.agents/skills/znve/` o `.agents/skills/` del repositorio) | editar `AGENTS.md` o la skill con la sesión abierta; activar o desactivar servidores MCP (`znve-engine`); cambiar de modelo o de nivel de razonamiento | sesión nueva (`/new`) al cerrar cada fase | `/model` al abrir la sesión, o un perfil por fase en `config.toml` | `cached_input_tokens` |
